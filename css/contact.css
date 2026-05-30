@@ -1,0 +1,135 @@
+/* ============================================================
+   CONTACT.CSS
+   ============================================================ */
+
+.coach-about-section { background: var(--black-soft); }
+
+.coach-about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 72px;
+  align-items: center;
+}
+
+.coach-img-placeholder {
+  aspect-ratio: 3/4;
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 3rem;
+}
+.coach-img-placeholder p { font-size: 0.85rem; color: var(--white-muted); }
+
+.coach-about-content .label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+.coach-about-content h2 em { color: var(--gold); font-style: italic; }
+
+.about-infos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 28px;
+  padding: 24px;
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius);
+}
+
+.about-info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.88rem;
+  color: var(--white-muted);
+}
+
+/* ── Contact + FAQ ───────────────────────────────────────── */
+.contact-section { background: var(--black); }
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 72px;
+  align-items: start;
+}
+
+.contact-form-col h2,
+.faq-col h2 { margin-bottom: 8px; }
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ── FAQ accordion ───────────────────────────────────────── */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  margin-top: 32px;
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--black-border);
+}
+
+.faq-btn {
+  width: 100%;
+  text-align: left;
+  padding: 18px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--white);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  gap: 12px;
+  transition: color 0.2s;
+}
+
+.faq-btn:hover { color: var(--gold); }
+
+.faq-btn span {
+  font-size: 1.2rem;
+  color: var(--gold);
+  flex-shrink: 0;
+  transition: transform 0.3s;
+}
+
+.faq-item.open .faq-btn span { transform: rotate(45deg); }
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.faq-item.open .faq-answer { max-height: 300px; padding-bottom: 16px; }
+
+.faq-answer p { font-size: 0.88rem; line-height: 1.7; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .coach-about-grid { grid-template-columns: 1fr; gap: 40px; }
+  .contact-grid     { grid-template-columns: 1fr; gap: 48px; }
+}
+
+@media (max-width: 480px) {
+  .form-row-2 { grid-template-columns: 1fr; }
+}

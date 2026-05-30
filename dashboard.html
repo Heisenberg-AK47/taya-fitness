@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mon espace — Taya Fitness</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/css/global.css" />
+  <link rel="stylesheet" href="/css/navbar.css" />
+  <link rel="stylesheet" href="/css/footer.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
+</head>
+<body>
+  <div id="navbar-placeholder"></div>
+  <main class="dashboard-main">
+    <div class="container">
+
+      <!-- Sidebar -->
+      <aside class="dashboard-sidebar">
+        <div class="sidebar-user" id="sidebar-user">
+          <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+          <div>
+            <strong id="sidebar-name">Chargement...</strong>
+            <small id="sidebar-email"></small>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="#mes-programmes" class="sidebar-link active" data-tab="mes-programmes">🏋️ Mes programmes</a>
+          <a href="#progression"    class="sidebar-link" data-tab="progression">📈 Ma progression</a>
+          <a href="#creneaux"       class="sidebar-link" data-tab="creneaux">📅 Mes créneaux</a>
+          <a href="#profil"         class="sidebar-link" data-tab="profil">👤 Mon profil</a>
+        </nav>
+        <button class="sidebar-logout" id="sidebar-logout">🚪 Déconnexion</button>
+      </aside>
+
+      <!-- Contenu principal -->
+      <div class="dashboard-content">
+
+        <!-- Mes programmes -->
+        <div class="dash-panel active" id="panel-mes-programmes">
+          <div class="dash-panel-header">
+            <h2>Mes programmes</h2>
+            <a href="/programmes" class="btn btn-gold-outline btn-sm">+ Découvrir</a>
+          </div>
+          <div id="mes-programmes-list" class="loader"><div class="spinner"></div></div>
+        </div>
+
+        <!-- Progression -->
+        <div class="dash-panel" id="panel-progression">
+          <div class="dash-panel-header">
+            <h2>Ma progression</h2>
+          </div>
+          <div id="progression-content" class="loader"><div class="spinner"></div></div>
+        </div>
+
+        <!-- Créneaux -->
+        <div class="dash-panel" id="panel-creneaux">
+          <div class="dash-panel-header">
+            <h2>Mes créneaux réservés</h2>
+            <a href="/offres" class="btn btn-gold-outline btn-sm">Réserver</a>
+          </div>
+          <div id="creneaux-content" class="loader"><div class="spinner"></div></div>
+        </div>
+
+        <!-- Profil -->
+        <div class="dash-panel" id="panel-profil">
+          <div class="dash-panel-header">
+            <h2>Mon profil</h2>
+          </div>
+          <form id="profil-form" class="profil-form">
+            <div class="alert alert-success" id="profil-alert"></div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Prénom et nom</label>
+                <input type="text" id="profil-name" placeholder="Ton nom" />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="profil-email" disabled />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </main>
+  <div id="footer-placeholder"></div>
+  <script type="module" src="/js/dashboard.js"></script>
+</body>
+</html>

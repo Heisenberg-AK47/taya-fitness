@@ -1,0 +1,176 @@
+/* ============================================================
+   FOOTER.CSS — Taya Fitness
+   ============================================================ */
+
+.footer {
+  background: var(--black-soft);
+  border-top: 1px solid var(--black-border);
+  padding: 72px 0 0;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr 1fr 1.2fr;
+  gap: 48px;
+  margin-bottom: 56px;
+}
+
+/* ── Colonne marque ─────────────────────────────────────── */
+.footer-brand .footer-logo {
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 16px;
+  display: block;
+}
+
+.footer-brand .footer-logo span {
+  color: var(--gold);
+}
+
+.footer-brand p {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  margin-bottom: 24px;
+  max-width: 280px;
+}
+
+.footer-socials {
+  display: flex;
+  gap: 12px;
+}
+
+.footer-socials a {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius);
+  border: 1px solid var(--black-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white-muted);
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.footer-socials a:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201,168,76,0.08);
+}
+
+/* ── Colonnes liens ─────────────────────────────────────── */
+.footer-col h4 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 20px;
+}
+
+.footer-col ul {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.footer-col ul li a {
+  font-size: 0.9rem;
+  color: var(--white-muted);
+  transition: color 0.2s;
+}
+
+.footer-col ul li a:hover {
+  color: var(--white);
+}
+
+/* ── Colonne contact ────────────────────────────────────── */
+.footer-contact .contact-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.footer-contact .contact-item .icon {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  background: rgba(201,168,76,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.footer-contact .contact-item p {
+  font-size: 0.88rem;
+  color: var(--white-muted);
+  line-height: 1.5;
+}
+
+.footer-contact .contact-item p strong {
+  display: block;
+  color: var(--white);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+/* ── Barre bas ──────────────────────────────────────────── */
+.footer-bottom {
+  border-top: 1px solid var(--black-border);
+  padding: 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.footer-bottom p {
+  font-size: 0.82rem;
+  color: #555;
+}
+
+.footer-bottom p a {
+  color: var(--white-muted);
+  transition: color 0.2s;
+}
+.footer-bottom p a:hover { color: var(--gold); }
+
+.footer-bottom-links {
+  display: flex;
+  gap: 24px;
+}
+
+.footer-bottom-links a {
+  font-size: 0.82rem;
+  color: #555;
+  transition: color 0.2s;
+}
+
+.footer-bottom-links a:hover { color: var(--white-muted); }
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+}

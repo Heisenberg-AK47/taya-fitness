@@ -1,0 +1,255 @@
+/* ============================================================
+   DASHBOARD.JS
+   ============================================================ */
+
+import { initNavbar } from './navbar.js';
+import { initFooter } from './footer.js';
+import { requireAuth, signOut, getProfile, updateProfile } from './auth.js';
+import { supabase } from './supabase.js';
+
+let currentUser = null;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  initNavbar();
+  initFooter();
+
+  currentUser = await requireAuth('/auth?redirect=/dashboard');
+  if (!currentUser) return;
+
+  loadUserInfo();
+  initSidebar();
+  initTab(getDefaultTab());
+  document.getElementById('sidebar-logout')?.addEventListener('click', signOut);
+});
+
+function getDefaultTab() {
+  const hash = window.location.hash.replace('#', '');
+  const param = new URLSearchParams(window.location.search).get('tab');
+  return param || hash || 'mes-programmes';
+}
+
+/* ── Info utilisateur sidebar ────────────────────────────── */
+async function loadUserInfo() {
+  const name  = currentUser.user_metadata?.full_name || currentUser.email || 'Utilisateur';
+  const email = currentUser.email;
+  const init  = name[0].toUpperCase();
+
+  document.getElementById('sidebar-avatar').textContent = init;
+  document.getElementById('sidebar-name').textContent   = name.split(' ')[0];
+  document.getElementById('sidebar-email').textContent  = email;
+
+  // Pré-remplir profil
+  document.getElementById('profil-name').value  = name;
+  document.getElementById('profil-email').value = email;
+}
+
+/* ── Navigation sidebar ──────────────────────────────────── */
+function initSidebar() {
+  document.querySelectorAll('.sidebar-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const tab = link.dataset.tab;
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+      initTab(tab);
+    });
+  });
+}
+
+function initTab(tab) {
+  document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${tab}`)?.classList.add('active');
+  document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
+
+  if (tab === 'mes-programmes') loadMesProgrammes();
+  if (tab === 'progression')    loadProgression();
+  if (tab === 'creneaux')       loadCreneaux();
+  if (tab === 'profil')         initProfilForm();
+}
+
+/* ── Mes programmes ──────────────────────────────────────── */
+async function loadMesProgrammes() {
+  const el = document.getElementById('mes-programmes-list');
+  el.innerHTML = `<div class="loader"><div class="spinner"></div></div>`;
+
+  try {
+    const { data: achats, error } = await supabase
+      .from('achats')
+      .select('*, programmes(id, titre, slug, image_url, nb_modules)')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    if (!achats || achats.length === 0) {
+      el.innerHTML = `
+        <div class="dash-empty">
+          <span>🎯</span>
+          <p>Tu n'as pas encore de programme.</p>
+          <a href="/programmes" class="btn btn-primary">Découvrir les programmes</a>
+        </div>`;
+      return;
+    }
+
+    el.innerHTML = `<div class="mes-programmes-grid">${achats.map(a => achatCard(a)).join('')}</div>`;
+  } catch (err) {
+    console.error(err);
+    el.innerHTML = `<p style="color:var(--white-muted)">Erreur de chargement.</p>`;
+  }
+}
+
+function achatCard(achat) {
+  const prog = achat.programmes;
+  if (!prog) return '';
+  const statusLabel = achat.statut === 'active' ? '✓ Actif' : '⏳ En attente';
+  const statusClass = achat.statut === 'active' ? 'active' : 'pending';
+
+  return `
+  <div class="achat-card">
+    <div class="achat-card-img">
+      ${prog.image_url
+        ? `<img src="${prog.image_url}" alt="${prog.titre}" loading="lazy" />`
+        : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:var(--black-border)">🏋️</div>`
+      }
+    </div>
+    <div class="achat-card-body">
+      <h3>${prog.titre}</h3>
+      <span class="achat-status ${statusClass}">${statusLabel}</span>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-label">
+          <span>Progression</span>
+          <span id="prog-pct-${prog.id}">0%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar-fill" id="prog-bar-${prog.id}" style="width:0%"></div>
+        </div>
+      </div>
+      <a href="/programme-detail?slug=${prog.slug}" class="btn btn-outline btn-sm">Accéder →</a>
+    </div>
+  </div>`;
+}
+
+/* ── Progression ─────────────────────────────────────────── */
+async function loadProgression() {
+  const el = document.getElementById('progression-content');
+  el.innerHTML = `<div class="loader"><div class="spinner"></div></div>`;
+
+  try {
+    const { data: achats } = await supabase
+      .from('achats')
+      .select('*, programmes(id, titre, nb_modules, modules(id))')
+      .eq('user_id', currentUser.id)
+      .eq('statut', 'active');
+
+    if (!achats || achats.length === 0) {
+      el.innerHTML = `<div class="dash-empty"><span>📈</span><p>Commence un programme pour suivre ta progression.</p></div>`;
+      return;
+    }
+
+    const { data: progressions } = await supabase
+      .from('progression')
+      .select('module_id, termine')
+      .eq('user_id', currentUser.id)
+      .eq('termine', true);
+
+    const doneIds = new Set((progressions || []).map(p => p.module_id));
+
+    el.innerHTML = `<div class="progression-list">
+      ${achats.map(a => {
+        const prog    = a.programmes;
+        const modules = prog?.modules || [];
+        const done    = modules.filter(m => doneIds.has(m.id)).length;
+        const total   = modules.length || prog?.nb_modules || 1;
+        const pct     = Math.round((done / total) * 100);
+        return `
+        <div class="progression-item">
+          <h4>${prog?.titre || 'Programme'}</h4>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-label">
+              <span>${done} / ${total} modules terminés</span>
+              <span>${pct}%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-bar-fill" style="width:${pct}%"></div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  } catch (err) {
+    console.error(err);
+    el.innerHTML = `<p style="color:var(--white-muted)">Erreur de chargement.</p>`;
+  }
+}
+
+/* ── Créneaux ────────────────────────────────────────────── */
+async function loadCreneaux() {
+  const el = document.getElementById('creneaux-content');
+  el.innerHTML = `<div class="loader"><div class="spinner"></div></div>`;
+
+  try {
+    const { data: creneaux, error } = await supabase
+      .from('reservations')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .gte('date_heure', new Date().toISOString())
+      .order('date_heure', { ascending: true });
+
+    if (error || !creneaux || creneaux.length === 0) {
+      el.innerHTML = `
+        <div class="dash-empty">
+          <span>📅</span>
+          <p>Aucun créneau réservé.</p>
+          <a href="/offres" class="btn btn-primary">Réserver un créneau</a>
+        </div>`;
+      return;
+    }
+
+    el.innerHTML = `<div class="creneaux-list">
+      ${creneaux.map(c => {
+        const d = new Date(c.date_heure);
+        return `
+        <div class="creneau-item">
+          <div class="creneau-date">
+            <strong>${d.getDate()}</strong>
+            <small>${d.toLocaleString('fr-FR', { month: 'short' })}</small>
+          </div>
+          <div class="creneau-info">
+            <strong>${c.type || 'Visio coaching'}</strong>
+            <small>${d.toLocaleString('fr-FR', { weekday: 'long', hour: '2-digit', minute: '2-digit' })}</small>
+          </div>
+          <span class="achat-status active">Confirmé</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  } catch (err) {
+    el.innerHTML = `<div class="dash-empty"><span>📅</span><p>Aucun créneau réservé.</p></div>`;
+  }
+}
+
+/* ── Profil ──────────────────────────────────────────────── */
+function initProfilForm() {
+  document.getElementById('profil-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('profil-name').value.trim();
+    const btn  = e.target.querySelector('button[type=submit]');
+    const alert = document.getElementById('profil-alert');
+
+    btn.disabled = true;
+    btn.textContent = '...';
+
+    try {
+      await updateProfile(currentUser.id, { full_name: name });
+      alert.textContent = 'Profil mis à jour !';
+      alert.classList.add('show');
+      document.getElementById('sidebar-name').textContent = name.split(' ')[0];
+      document.getElementById('sidebar-avatar').textContent = name[0].toUpperCase();
+      setTimeout(() => alert.classList.remove('show'), 3000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Enregistrer';
+    }
+  });
+}

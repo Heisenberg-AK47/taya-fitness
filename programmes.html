@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Programmes de coaching — Taya Fitness</title>
+  <meta name="description" content="Découvrez tous nos programmes de coaching fitness, musculation, nutrition, grossesse et post-partum. Filtrez par niveau et catégorie." />
+  <link rel="canonical" href="https://www.tayafitness.com/programmes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/css/global.css" />
+  <link rel="stylesheet" href="/css/navbar.css" />
+  <link rel="stylesheet" href="/css/footer.css" />
+  <link rel="stylesheet" href="/css/programmes.css" />
+</head>
+<body>
+  <div id="navbar-placeholder"></div>
+  <main>
+
+    <!-- En-tête page -->
+    <section class="page-hero">
+      <div class="container">
+        <span class="label">Catalogue</span>
+        <h1>Tous les programmes</h1>
+        <p>Chaque programme est conçu pour un objectif précis. Filtre selon ton niveau ou ta situation.</p>
+      </div>
+    </section>
+
+    <!-- Filtres -->
+    <section class="filtres-section">
+      <div class="container">
+        <div class="filtres-bar">
+          <div class="filtres-group">
+            <span class="filtres-label">Catégorie :</span>
+            <div class="filtres-btns" id="filtres-categorie">
+              <button class="filtre-btn active" data-filter="all">Tous</button>
+              <button class="filtre-btn" data-filter="perte-de-poids">Perte de poids</button>
+              <button class="filtre-btn" data-filter="musculation">Musculation</button>
+              <button class="filtre-btn" data-filter="grossesse">Grossesse</button>
+              <button class="filtre-btn" data-filter="post-partum">Post-partum</button>
+              <button class="filtre-btn" data-filter="nutrition">Nutrition</button>
+            </div>
+          </div>
+          <div class="filtres-group">
+            <span class="filtres-label">Niveau :</span>
+            <div class="filtres-btns" id="filtres-niveau">
+              <button class="filtre-btn active" data-filter="all">Tous</button>
+              <button class="filtre-btn" data-filter="debutant">Débutant</button>
+              <button class="filtre-btn" data-filter="intermediaire">Intermédiaire</button>
+              <button class="filtre-btn" data-filter="avance">Avancé</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Grille programmes -->
+    <section class="section">
+      <div class="container">
+        <div id="programmes-count" class="programmes-count"></div>
+        <div id="programmes-grid" class="programmes-grid">
+          <div class="loader"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <div id="footer-placeholder"></div>
+  <script type="module" src="/js/programmes.js"></script>
+</body>
+</html>

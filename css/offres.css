@@ -1,0 +1,219 @@
+/* ============================================================
+   OFFRES.CSS
+   ============================================================ */
+
+/* ── Toggle facturation ──────────────────────────────────── */
+.billing-toggle-section {
+  background: var(--black-soft);
+  padding: 24px 0;
+  border-bottom: 1px solid var(--black-border);
+}
+
+.billing-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.toggle-label {
+  font-size: 0.95rem;
+  color: var(--white-muted);
+  transition: color 0.2s;
+}
+.toggle-label.active { color: var(--white); font-weight: 600; }
+
+.save-badge {
+  display: inline-block;
+  background: rgba(76,175,122,0.15);
+  color: #4caf7a;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 100px;
+  margin-left: 4px;
+}
+
+.toggle-switch { position: relative; width: 44px; height: 24px; cursor: pointer; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-track {
+  position: absolute;
+  inset: 0;
+  background: var(--black-border);
+  border-radius: 100px;
+  transition: background 0.3s;
+}
+.toggle-track::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--white);
+  top: 3px;
+  left: 3px;
+  transition: transform 0.3s;
+}
+.toggle-switch input:checked + .toggle-track { background: var(--gold); }
+.toggle-switch input:checked + .toggle-track::after { transform: translateX(20px); }
+
+/* ── Grille offres ───────────────────────────────────────── */
+.offres-detail-section { background: var(--black); }
+
+.offres-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 48px;
+}
+
+.offre-detail-card {
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius-lg);
+  padding: 36px 28px;
+  position: relative;
+  transition: border-color 0.3s, transform 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.offre-detail-card:hover { border-color: rgba(201,168,76,0.3); }
+
+.offre-detail-card.featured {
+  border-color: var(--gold);
+  transform: scale(1.03);
+  box-shadow: 0 0 50px rgba(201,168,76,0.12);
+}
+
+.offre-detail-card.featured:hover { transform: scale(1.03) translateY(-4px); }
+
+.popular-badge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: var(--black);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 6px 18px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+
+.offre-detail-header { margin-bottom: 28px; }
+
+.offre-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--white-muted);
+  margin-bottom: 12px;
+}
+.offre-name.gold { color: var(--gold); }
+
+.offre-detail-price {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.price-num {
+  font-family: var(--font-title);
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: var(--white);
+  transition: all 0.3s;
+}
+
+.price-per { font-size: 0.9rem; color: var(--white-muted); }
+
+.offre-tagline { font-size: 0.88rem; color: var(--white-muted); }
+
+/* ── Features ────────────────────────────────────────────── */
+.offre-detail-features {
+  list-style: none;
+  flex: 1;
+  margin-bottom: 28px;
+}
+
+.offre-detail-features li {
+  font-size: 0.87rem;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--black-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.offre-detail-features li:first-child { border-top: 1px solid var(--black-border); }
+.feat-yes { color: var(--white-muted); }
+.feat-no  { color: #3a3a3a; }
+
+.offre-detail-footer { margin-top: auto; }
+
+/* ── Note bas ────────────────────────────────────────────── */
+.offres-note-box {
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius);
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.offres-note-box p { font-size: 0.88rem; color: var(--white-muted); }
+.offres-note-box a { color: var(--gold); }
+
+/* ── Tableau comparatif ──────────────────────────────────── */
+.comparatif-section { background: var(--black-soft); }
+
+.comparatif-table-wrap { overflow-x: auto; }
+
+.comparatif-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.comparatif-table th,
+.comparatif-table td {
+  padding: 14px 20px;
+  text-align: center;
+  border-bottom: 1px solid var(--black-border);
+  color: var(--white-muted);
+}
+
+.comparatif-table th:first-child,
+.comparatif-table td:first-child {
+  text-align: left;
+  color: var(--white);
+}
+
+.comparatif-table thead th {
+  background: var(--black-card);
+  color: var(--white);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.comparatif-table .featured-col {
+  background: rgba(201,168,76,0.05);
+  color: var(--white);
+}
+
+.comparatif-table thead .featured-col { color: var(--gold); }
+
+.comparatif-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .offres-detail-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto 48px; }
+  .offre-detail-card.featured { transform: none; }
+}

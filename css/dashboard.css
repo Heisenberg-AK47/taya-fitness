@@ -1,0 +1,259 @@
+/* ============================================================
+   DASHBOARD.CSS
+   ============================================================ */
+
+.dashboard-main {
+  padding-top: calc(var(--nav-height) + 40px);
+  padding-bottom: 80px;
+  min-height: 100vh;
+}
+
+.dashboard-main .container {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────── */
+.dashboard-sidebar {
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  position: sticky;
+  top: calc(var(--nav-height) + 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--black-border);
+  margin-bottom: 8px;
+}
+
+.sidebar-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--black);
+  font-weight: 700;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-user strong { display: block; font-size: 0.9rem; color: var(--white); }
+.sidebar-user small  { font-size: 0.75rem; color: var(--white-muted); }
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  color: var(--white-muted);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.sidebar-link:hover { background: rgba(255,255,255,0.04); color: var(--white); }
+.sidebar-link.active { background: rgba(201,168,76,0.1); color: var(--gold); }
+
+.sidebar-logout {
+  margin-top: 12px;
+  padding: 11px 14px;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  color: var(--white-muted);
+  text-align: left;
+  width: 100%;
+  transition: all 0.2s;
+  border-top: 1px solid var(--black-border);
+  padding-top: 16px;
+  margin-top: 8px;
+  background: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+}
+.sidebar-logout:hover { color: var(--red); }
+
+/* ── Panneaux contenu ────────────────────────────────────── */
+.dash-panel { display: none; }
+.dash-panel.active { display: block; }
+
+.dash-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.dash-panel-header h2 { font-size: 1.6rem; }
+
+/* ── Cartes mes programmes ───────────────────────────────── */
+.mes-programmes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.achat-card {
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.achat-card-img {
+  aspect-ratio: 16/7;
+  background: var(--black-border);
+  overflow: hidden;
+}
+
+.achat-card-img img { width: 100%; height: 100%; object-fit: cover; }
+
+.achat-card-body { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+
+.achat-card-body h3 { font-size: 1rem; }
+
+.achat-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.achat-status.active  { background: rgba(76,175,122,0.1);  color: #4caf7a; }
+.achat-status.pending { background: rgba(201,168,76,0.1);  color: var(--gold); }
+
+/* Barre progression */
+.progress-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.progress-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  color: var(--white-muted);
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--black-border);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 100px;
+  transition: width 0.6s ease;
+}
+
+/* ── Progression ─────────────────────────────────────────── */
+.progression-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.progression-item {
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+}
+
+.progression-item h4 { margin-bottom: 12px; font-size: 1rem; }
+
+/* ── Créneaux ────────────────────────────────────────────── */
+.creneaux-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.creneau-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+}
+
+.creneau-date {
+  min-width: 60px;
+  text-align: center;
+  background: rgba(201,168,76,0.1);
+  border-radius: var(--radius);
+  padding: 10px;
+}
+
+.creneau-date strong { display: block; font-size: 1.4rem; color: var(--gold); font-family: var(--font-title); }
+.creneau-date small  { font-size: 0.72rem; color: var(--white-muted); text-transform: uppercase; }
+
+.creneau-info { flex: 1; }
+.creneau-info strong { display: block; font-size: 0.9rem; color: var(--white); }
+.creneau-info small  { font-size: 0.78rem; color: var(--white-muted); }
+
+/* ── Profil form ─────────────────────────────────────────── */
+.profil-form {
+  max-width: 560px;
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* ── Empty states ────────────────────────────────────────── */
+.dash-empty {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--white-muted);
+}
+.dash-empty span { font-size: 3rem; display: block; margin-bottom: 16px; }
+.dash-empty p    { margin-bottom: 20px; }
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .dashboard-main .container { grid-template-columns: 1fr; }
+  .dashboard-sidebar { position: static; }
+  .sidebar-nav { flex-direction: row; flex-wrap: wrap; }
+}
+
+@media (max-width: 640px) {
+  .mes-programmes-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+}

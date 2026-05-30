@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paiement — Taya Fitness</title>
+  <meta name="robots" content="noindex" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/css/global.css" />
+  <link rel="stylesheet" href="/css/navbar.css" />
+  <link rel="stylesheet" href="/css/footer.css" />
+  <link rel="stylesheet" href="/css/checkout.css" />
+</head>
+<body>
+  <div id="navbar-placeholder"></div>
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="label">Étape finale</span>
+        <h1>Finaliser ma commande</h1>
+      </div>
+    </section>
+    <section class="section">
+      <div class="container">
+        <div class="checkout-grid">
+
+          <!-- Formulaire facturation -->
+          <div class="checkout-form-col">
+            <h3 class="checkout-section-title">Informations de facturation</h3>
+            <form id="checkout-form">
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Prénom</label>
+                  <input type="text" id="billing-firstname" placeholder="Sarah" required />
+                </div>
+                <div class="form-group">
+                  <label>Nom</label>
+                  <input type="text" id="billing-lastname" placeholder="Dupont" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="billing-email" placeholder="ton@email.com" required />
+              </div>
+              <div class="form-group">
+                <label>Téléphone</label>
+                <input type="tel" id="billing-phone" placeholder="06 12 34 56 78" />
+              </div>
+              <div class="form-group">
+                <label>Adresse</label>
+                <input type="text" id="billing-address" placeholder="12 rue de la Paix" />
+              </div>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label>Code postal</label>
+                  <input type="text" id="billing-zip" placeholder="75001" />
+                </div>
+                <div class="form-group">
+                  <label>Ville</label>
+                  <input type="text" id="billing-city" placeholder="Paris" />
+                </div>
+              </div>
+
+              <div class="stripe-coming-soon">
+                <div class="stripe-icon">🔒</div>
+                <div>
+                  <strong>Paiement sécurisé par Stripe</strong>
+                  <small>Intégration Stripe en cours de configuration</small>
+                </div>
+              </div>
+
+              <div class="alert alert-success" id="checkout-alert"></div>
+
+              <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;" id="btn-pay">
+                Confirmer la commande
+              </button>
+              <p style="text-align:center;font-size:0.78rem;color:#555;margin-top:12px;">
+                Sans engagement · Résiliation à tout moment
+              </p>
+            </form>
+          </div>
+
+          <!-- Récap commande -->
+          <div class="checkout-recap-col">
+            <div class="checkout-recap">
+              <h3 class="checkout-section-title">Votre commande</h3>
+              <div id="checkout-items"></div>
+              <div class="recap-total" id="checkout-total"></div>
+              <div class="checkout-guarantees">
+                <div class="checkout-guarantee">✅ Accès immédiat</div>
+                <div class="checkout-guarantee">🔄 Sans engagement</div>
+                <div class="checkout-guarantee">💳 Paiement sécurisé SSL</div>
+                <div class="checkout-guarantee">📱 Application mobile incluse</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+  <div id="footer-placeholder"></div>
+  <script type="module" src="/js/checkout.js"></script>
+</body>
+</html>
