@@ -9,15 +9,16 @@
   right: 0;
   z-index: 1000;
   height: var(--nav-height);
-  background: rgba(10,10,10,0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(13,27,42,0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid var(--black-border);
   transition: background 0.3s ease;
 }
 
 .navbar.scrolled {
-  background: rgba(10,10,10,0.98);
+  background: rgba(13,27,42,0.97);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
 }
 
 .navbar-inner {
@@ -221,7 +222,7 @@
 
 .navbar-dropdown a:hover,
 .navbar-dropdown button:hover {
-  background: rgba(201,168,76,0.08);
+  background: rgba(255,107,74,0.08);
   color: var(--white);
 }
 
