@@ -5,6 +5,7 @@
 import { initNavbar } from './navbar.js';
 import { initFooter } from './footer.js';
 import { supabase } from './supabase.js';
+import { getCurrentUser } from './auth.js';
 import { addToCart, isInCart } from './cart.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -19,9 +20,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadDetail(slug) {
   try {
+    // Récupère le programme (sans modules)
     const { data: prog, error } = await supabase
       .from('programmes')
-      .select('*, modules(*)')
+      .select('*')
       .eq('slug', slug)
       .eq('actif', true)
       .single();
@@ -32,12 +34,31 @@ async function loadDetail(slug) {
     document.title = `${prog.titre} — Taya Fitness`;
     document.querySelector('meta[name="description"]')?.setAttribute('content', prog.description_courte || '');
 
+    // Modules via fonction sécurisée (gère l'accès vidéo)
+    const { data: modules } = await supabase
+      .rpc('get_modules_with_access', { p_programme_id: prog.id });
+
     const reviews = await loadReviews(prog.id);
-    renderDetail(prog, reviews);
+    const user = await getCurrentUser();
+    const hasAccess = await checkAccess(prog.id, user);
+
+    renderDetail(prog, modules || [], reviews, hasAccess);
   } catch (err) {
     console.error(err);
     renderError('Erreur de chargement.');
   }
+}
+
+async function checkAccess(programmeId, user) {
+  if (!user) return false;
+  const { data } = await supabase
+    .from('achats')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('programme_id', programmeId)
+    .eq('statut', 'active')
+    .maybeSingle();
+  return !!data;
 }
 
 async function loadReviews(programmeId) {
@@ -51,9 +72,45 @@ async function loadReviews(programmeId) {
   } catch { return []; }
 }
 
-function renderDetail(p, reviews) {
+function youtubeEmbed(url) {
+  if (!url) return null;
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+  return match ? `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1` : null;
+}
+
+function renderModuleVideo(m, hasAccess) {
+  const embedUrl = youtubeEmbed(m.video_url);
+
+  if (embedUrl) {
+    return `
+      <div class="module-video">
+        <iframe
+          src="${embedUrl}"
+          title="${m.titre}"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          loading="lazy">
+        </iframe>
+        ${m.video_gratuite ? '<span class="video-badge video-badge-free">Aperçu gratuit</span>' : ''}
+      </div>`;
+  }
+
+  if (!hasAccess) {
+    return `
+      <div class="module-locked">
+        <div class="locked-icon">🔒</div>
+        <p>Vidéo réservée aux membres</p>
+        <a href="/offres" class="btn btn-gold-outline btn-sm">Voir les offres</a>
+      </div>`;
+  }
+
+  return '';
+}
+
+function renderDetail(p, modules, reviews, hasAccess) {
   const niveauLabels = { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé' };
-  const modules = (p.modules || []).sort((a, b) => a.ordre - b.ordre);
+  modules = (modules || []).sort((a, b) => a.ordre - b.ordre);
   const avgNote = reviews.length
     ? (reviews.reduce((s, r) => s + r.note, 0) / reviews.length).toFixed(1)
     : null;
@@ -143,17 +200,32 @@ function renderDetail(p, reviews) {
 
         <!-- Modules -->
         <div class="tab-panel" id="tab-programme">
+          ${!hasAccess ? `
+            <div class="modules-access-banner">
+              <span>🔒</span>
+              <div>
+                <strong>Contenu réservé aux membres</strong>
+                <p>Achetez ce programme pour accéder à toutes les vidéos.</p>
+              </div>
+              <a href="/offres" class="btn btn-primary btn-sm">Voir les offres</a>
+            </div>` : ''}
           ${modules.length === 0
             ? '<p style="color:var(--white-muted)">Les modules seront bientôt disponibles.</p>'
             : `<div class="modules-list">
                 ${modules.map(m => `
-                  <div class="module-item">
-                    <div class="module-num">${m.ordre}</div>
-                    <div class="module-info">
-                      <strong>${m.titre}</strong>
-                      <small>${m.description || ''}</small>
+                  <div class="module-item ${m.video_url || !hasAccess ? 'module-has-video' : ''}">
+                    <div class="module-header">
+                      <div class="module-num">${m.ordre}</div>
+                      <div class="module-info">
+                        <strong>${m.titre}</strong>
+                        <small>${m.description || ''}</small>
+                      </div>
+                      <div class="module-meta">
+                        ${m.video_url ? '<span class="module-has-video-icon">▶</span>' : (hasAccess ? '' : '<span class="module-locked-icon">🔒</span>')}
+                        <span class="module-duree">⏱ ${m.duree_minutes || '?'} min</span>
+                      </div>
                     </div>
-                    <span class="module-duree">⏱ ${m.duree_minutes || '?'} min</span>
+                    ${renderModuleVideo(m, hasAccess)}
                   </div>`).join('')}
                </div>`
           }
@@ -200,6 +272,13 @@ function renderDetail(p, reviews) {
     const btn = document.getElementById('btn-cart');
     btn.textContent = '✓ Dans le panier';
     btn.disabled = true;
+  });
+
+  // Expand/collapse vidéo au clic sur un module
+  document.querySelectorAll('.module-item.module-has-video').forEach(item => {
+    item.querySelector('.module-header')?.addEventListener('click', () => {
+      item.classList.toggle('open');
+    });
   });
 
   // Onglets
