@@ -13,8 +13,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   initFooter();
   initScrollAnimations();
   await loadProgrammesVedettes();
+  initBillingToggle();
   initNewsletter();
 });
+
+/* ── Toggle mensuel / annuel ────────────────────────────── */
+function initBillingToggle() {
+  const toggle = document.getElementById('home-toggle-annuel');
+  if (!toggle) return;
+
+  toggle.addEventListener('change', () => {
+    const annuel = toggle.checked;
+    document.getElementById('home-label-mensuel')?.classList.toggle('active', !annuel);
+    document.getElementById('home-label-annuel')?.classList.toggle('active', annuel);
+
+    document.querySelectorAll('.home-price').forEach(el => {
+      const val = annuel ? el.dataset.annuel : el.dataset.mensuel;
+      el.textContent = val + '€';
+    });
+  });
+}
 
 /* ── Animations fade-in au scroll ───────────────────────── */
 function initScrollAnimations() {
