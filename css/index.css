@@ -15,8 +15,8 @@
   position: absolute;
   inset: 0;
   background:
-    url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=1600&q=80&fit=crop')
-    center/cover no-repeat;
+    url('https://esylzsacjkimcqxllhwd.supabase.co/storage/v1/object/public/media/DSCF6531.jpg')
+    center top/cover no-repeat;
 }
 
 .hero-gradient {
