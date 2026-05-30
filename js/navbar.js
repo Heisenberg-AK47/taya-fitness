@@ -13,7 +13,7 @@ function navbarTemplate() {
 
       <!-- Logo -->
       <a href="/" class="navbar-logo">
-        <img src="/assets/logo.svg" alt="Taya Fitness" class="navbar-logo-img" />
+        <img src="/assets/logo-navbar.svg" alt="Taya Fitness" class="navbar-logo-img" />
       </a>
 
       <!-- Liens desktop -->

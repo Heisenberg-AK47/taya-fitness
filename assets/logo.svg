@@ -1,44 +1,47 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 90" fill="none">
   <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Dancing+Script:wght@700&amp;display=swap');
+    </style>
     <linearGradient id="coral" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ff6b4a"/>
-      <stop offset="100%" stop-color="#e5522f"/>
+      <stop offset="0%" stop-color="#ff8c70"/>
+      <stop offset="100%" stop-color="#ff5a2f"/>
     </linearGradient>
     <linearGradient id="coralLight" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#ff8c70"/>
-      <stop offset="100%" stop-color="#ff6b4a"/>
+      <stop offset="0%" stop-color="#ff6b4a"/>
+      <stop offset="100%" stop-color="#ff8c70"/>
     </linearGradient>
   </defs>
 
-  <!-- T -->
-  <rect x="0" y="12" width="58" height="14" rx="3" fill="url(#coral)"/>
-  <rect x="20" y="12" width="18" height="62" rx="3" fill="url(#coral)"/>
-
-  <!-- A -->
-  <polygon points="72,74 94,12 116,74" fill="none" stroke="url(#coral)" stroke-width="13" stroke-linejoin="round"/>
-  <line x1="80" y1="50" x2="108" y2="50" stroke="url(#coral)" stroke-width="11" stroke-linecap="round"/>
-
-  <!-- Y -->
-  <line x1="124" y1="12" x2="145" y2="44" stroke="url(#coral)" stroke-width="13" stroke-linecap="round"/>
-  <line x1="166" y1="12" x2="145" y2="44" stroke="url(#coral)" stroke-width="13" stroke-linecap="round"/>
-  <line x1="145" y1="44" x2="145" y2="74" stroke="url(#coral)" stroke-width="13" stroke-linecap="round"/>
-
-  <!-- A -->
-  <polygon points="178,74 200,12 222,74" fill="none" stroke="url(#coral)" stroke-width="13" stroke-linejoin="round"/>
-  <line x1="186" y1="50" x2="214" y2="50" stroke="url(#coral)" stroke-width="11" stroke-linecap="round"/>
-
-  <!-- "Fitness" en script élégant -->
+  <!-- TAYA — bloc condensé gras -->
   <text
-    x="238"
-    y="68"
-    font-family="Georgia, 'Times New Roman', serif"
-    font-size="28"
-    font-style="italic"
+    x="0" y="72"
+    font-family="'Bebas Neue', 'Arial Black', Impact, sans-serif"
+    font-size="78"
     font-weight="400"
+    letter-spacing="4"
+    fill="url(#coral)">TAYA</text>
+
+  <!-- Fitness — script cursif par-dessus, décalé vers la droite sur le A -->
+  <text
+    x="168" y="58"
+    font-family="'Dancing Script', 'Brush Script MT', cursive"
+    font-size="30"
+    font-weight="700"
     fill="#f0f4f8"
-    opacity="0.92"
+    opacity="0.95"
     letter-spacing="1">Fitness</text>
 
-  <!-- Trait décoratif corail sous Fitness -->
-  <line x1="238" y1="75" x2="318" y2="75" stroke="url(#coralLight)" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <!-- Trait décoratif sous Fitness -->
+  <line x1="168" y1="64" x2="288" y2="64" stroke="url(#coralLight)" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Tagline -->
+  <text
+    x="1" y="84"
+    font-family="'Arial', sans-serif"
+    font-size="9"
+    font-weight="400"
+    letter-spacing="3.5"
+    fill="#f0f4f8"
+    opacity="0.45">COACH SPORTIF · NUTRITIONNISTE</text>
 </svg>
