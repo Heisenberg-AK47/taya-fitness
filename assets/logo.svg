@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" fill="none">
+  <defs>
+    <linearGradient id="coral" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff6b4a"/>
+      <stop offset="100%" stop-color="#e5522f"/>
+    </linearGradient>
+    <linearGradient id="coralLight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff8c70"/>
+      <stop offset="100%" stop-color="#ff6b4a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- T -->
+  <rect x="0" y="12" width="58" height="14" rx="3" fill="url(#coral)"/>
+  <rect x="20" y="12" width="18" height="62" rx="3" fill="url(#coral)"/>
+
+  <!-- A -->
+  <polygon points="72,74 94,12 116,74" fill="none" stroke="url(#coral)" stroke-width="13" stroke-linejoin="round"/>
+  <line x1="80" y1="50" x2="108" y2="50" stroke="url(#coral)" stroke-width="11" stroke-linecap="round"/>
+
+  <!-- Y -->
+  <line x1="124" y1="12" x2="145" y2="44" stroke="url(#coral)" stroke-width="13" stroke-linecap="round"/>
+  <line x1="166" y1="12" x2="145" y2="44" stroke="url(#coral)" stroke-width="13" stroke-linecap="round"/>
+  <line x1="145" y1="44" x2="145" y2="74" stroke="url(#coral)" stroke-width="13" stroke-linecap="round"/>
+
+  <!-- A -->
+  <polygon points="178,74 200,12 222,74" fill="none" stroke="url(#coral)" stroke-width="13" stroke-linejoin="round"/>
+  <line x1="186" y1="50" x2="214" y2="50" stroke="url(#coral)" stroke-width="11" stroke-linecap="round"/>
+
+  <!-- "Fitness" en script élégant -->
+  <text
+    x="238"
+    y="68"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="28"
+    font-style="italic"
+    font-weight="400"
+    fill="#f0f4f8"
+    opacity="0.92"
+    letter-spacing="1">Fitness</text>
+
+  <!-- Trait décoratif corail sous Fitness -->
+  <line x1="238" y1="75" x2="318" y2="75" stroke="url(#coralLight)" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+</svg>

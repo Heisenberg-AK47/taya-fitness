@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="20" fill="#0d1b2a"/>
+  <!-- T bold -->
+  <rect x="8" y="18" width="36" height="10" rx="2" fill="#ff6b4a"/>
+  <rect x="19" y="18" width="14" height="46" rx="2" fill="#ff6b4a"/>
+  <!-- A -->
+  <polygon points="52,64 65,18 78,64" fill="none" stroke="#ff6b4a" stroke-width="9" stroke-linejoin="round"/>
+  <line x1="57" y1="46" x2="73" y2="46" stroke="#ff6b4a" stroke-width="8" stroke-linecap="round"/>
+  <!-- trait fitness -->
+  <text x="10" y="90" font-family="Georgia,serif" font-style="italic" font-size="14" fill="#f0f4f8" opacity="0.75">Fitness</text>
+</svg>
