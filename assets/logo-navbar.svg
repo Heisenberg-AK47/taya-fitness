@@ -1,29 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 52" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 44" fill="none">
   <defs>
     <style>
-      @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Dancing+Script:wght@700&amp;display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Inter:wght@300;600&amp;display=swap');
     </style>
-    <linearGradient id="c" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ff8c70"/>
-      <stop offset="100%" stop-color="#ff5a2f"/>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff7a56"/>
+      <stop offset="100%" stop-color="#e5431e"/>
     </linearGradient>
   </defs>
 
+  <!-- Éclair compact -->
+  <polygon points="6,6 14,6 10,22 18,22 4,38 10,38 14,22 6,22" fill="url(#g)"/>
+
   <!-- TAYA -->
   <text
-    x="0" y="44"
-    font-family="'Bebas Neue', 'Arial Black', Impact, sans-serif"
-    font-size="50"
+    x="24" y="36"
+    font-family="'Bebas Neue', Impact, 'Arial Black', sans-serif"
+    font-size="36"
     font-weight="400"
     letter-spacing="3"
-    fill="url(#c)">TAYA</text>
+    fill="#f0f4f8">TAY<tspan fill="url(#g)">A</tspan></text>
 
-  <!-- Fitness script par-dessus le A -->
+  <!-- FITNESS -->
   <text
-    x="128" y="34"
-    font-family="'Dancing Script', 'Brush Script MT', cursive"
-    font-size="22"
-    font-weight="700"
-    fill="#f0f4f8"
-    opacity="0.9">Fitness</text>
+    x="128" y="22"
+    font-family="'Inter', 'Arial', sans-serif"
+    font-size="10"
+    font-weight="600"
+    letter-spacing="4"
+    fill="rgba(240,244,248,0.7)">FITNESS</text>
+
+  <!-- Trait sous fitness -->
+  <rect x="128" y="26" width="72" height="1" rx="0.5" fill="url(#g)" opacity="0.5"/>
+
+  <text
+    x="128" y="36"
+    font-family="'Inter', 'Arial', sans-serif"
+    font-size="7.5"
+    font-weight="300"
+    letter-spacing="2.5"
+    fill="rgba(240,244,248,0.3)">COACH · NUTRITION</text>
 </svg>

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 140" fill="none">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Inter:wght@300;600&amp;display=swap');
+    </style>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff7a56"/>
+      <stop offset="100%" stop-color="#e5431e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Éclair centré en haut -->
+  <polygon
+    points="106,4 96,4 90,28 98,28 82,56 108,56 102,28 110,28"
+    fill="url(#g)"/>
+
+  <!-- TAYA centré -->
+  <text
+    x="100" y="108"
+    text-anchor="middle"
+    font-family="'Bebas Neue', Impact, 'Arial Black', sans-serif"
+    font-size="64"
+    font-weight="400"
+    letter-spacing="8"
+    fill="#f0f4f8">TAYA</text>
+
+  <!-- Ligne séparatrice -->
+  <rect x="40" y="113" width="120" height="1.5" rx="1" fill="url(#g)" opacity="0.6"/>
+
+  <!-- FITNESS -->
+  <text
+    x="100" y="130"
+    text-anchor="middle"
+    font-family="'Inter', 'Arial', sans-serif"
+    font-size="11"
+    font-weight="600"
+    letter-spacing="7"
+    fill="rgba(240,244,248,0.65)">FITNESS</text>
+</svg>

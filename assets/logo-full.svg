@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 100" fill="none">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Inter:wght@300;600&amp;display=swap');
+    </style>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff7a56"/>
+      <stop offset="100%" stop-color="#e5431e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ── Marque icône ── -->
+  <!-- Losange dynamique décalé -->
+  <polygon points="0,50 26,10 52,50 26,90" fill="url(#g)" opacity="0.15"/>
+  <polygon points="6,50 26,18 46,50 26,82" fill="url(#g)" opacity="0.3"/>
+  <!-- Éclair / slash énergie -->
+  <polygon points="18,22 30,22 22,50 34,50 14,78 22,78 30,50 18,50" fill="url(#g)"/>
+
+  <!-- ── TAYA ── -->
+  <text
+    x="66" y="76"
+    font-family="'Bebas Neue', Impact, 'Arial Black', sans-serif"
+    font-size="72"
+    font-weight="400"
+    letter-spacing="5"
+    fill="#f0f4f8">TAY<tspan fill="url(#g)">A</tspan></text>
+
+  <!-- Ligne séparatrice verticale fine -->
+  <rect x="278" y="14" width="1.5" height="64" rx="1" fill="rgba(255,255,255,0.15)"/>
+
+  <!-- ── FITNESS + tagline ── -->
+  <text
+    x="292" y="52"
+    font-family="'Inter', 'Arial', sans-serif"
+    font-size="18"
+    font-weight="600"
+    letter-spacing="6"
+    fill="#f0f4f8">FITNESS</text>
+
+  <text
+    x="292" y="70"
+    font-family="'Inter', 'Arial', sans-serif"
+    font-size="9"
+    font-weight="300"
+    letter-spacing="3.2"
+    fill="rgba(240,244,248,0.4)">COACH · NUTRITION</text>
+</svg>
