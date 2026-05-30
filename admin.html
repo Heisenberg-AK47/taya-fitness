@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Taya Fitness</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/css/global.css" />
+  <link rel="stylesheet" href="/css/admin.css" />
+</head>
+<body class="admin-body">
+
+  <!-- Sidebar admin -->
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-logo">
+      Taya<span>Admin</span>
+    </div>
+    <nav class="admin-nav">
+      <button class="admin-nav-item active" data-panel="dashboard">📊 Dashboard</button>
+      <button class="admin-nav-item" data-panel="clients">👥 Clients</button>
+      <button class="admin-nav-item" data-panel="programmes">🏋️ Programmes</button>
+      <button class="admin-nav-item" data-panel="reservations">📅 Réservations</button>
+      <button class="admin-nav-item" data-panel="paiements">💳 Paiements</button>
+      <button class="admin-nav-item" data-panel="messages">💬 Messages</button>
+    </nav>
+    <button class="admin-logout" id="admin-logout">🚪 Déconnexion</button>
+  </aside>
+
+  <!-- Contenu principal -->
+  <div class="admin-main">
+
+    <!-- Topbar -->
+    <header class="admin-topbar">
+      <button class="admin-burger" id="admin-burger">☰</button>
+      <h1 class="admin-page-title" id="admin-page-title">Dashboard</h1>
+      <div class="admin-topbar-right">
+        <span id="admin-welcome"></span>
+        <a href="/" target="_blank" class="btn btn-outline btn-sm">Voir le site →</a>
+      </div>
+    </header>
+
+    <!-- Alertes globales -->
+    <div class="alert alert-error"   id="admin-alert-error"   style="margin:20px;display:none;"></div>
+    <div class="alert alert-success" id="admin-alert-success" style="margin:20px;display:none;"></div>
+
+    <!-- ══════ PANEL : DASHBOARD ══════ -->
+    <div class="admin-panel active" id="panel-dashboard">
+      <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-body">
+            <span class="stat-val" id="stat-clients">—</span>
+            <span class="stat-label">Clients actifs</span>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="stat-icon">💳</div>
+          <div class="stat-body">
+            <span class="stat-val" id="stat-revenus">—</span>
+            <span class="stat-label">Revenus ce mois</span>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-body">
+            <span class="stat-val" id="stat-rdv">—</span>
+            <span class="stat-label">RDV cette semaine</span>
+          </div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="stat-icon">📩</div>
+          <div class="stat-body">
+            <span class="stat-val" id="stat-messages">—</span>
+            <span class="stat-label">Messages non lus</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-grid-2">
+        <!-- Prochains RDV -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h3>Prochains créneaux</h3>
+            <button class="btn btn-sm btn-gold-outline" data-panel="reservations">Voir tout</button>
+          </div>
+          <div id="dash-rdv-list" class="admin-list">
+            <div class="loader"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+        <!-- Derniers clients -->
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h3>Derniers inscrits</h3>
+            <button class="btn btn-sm btn-gold-outline" data-panel="clients">Voir tout</button>
+          </div>
+          <div id="dash-clients-list" class="admin-list">
+            <div class="loader"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Derniers messages -->
+      <div class="admin-card" style="margin-top:24px;">
+        <div class="admin-card-header">
+          <h3>Derniers messages de contact</h3>
+          <button class="btn btn-sm btn-gold-outline" data-panel="messages">Voir tout</button>
+        </div>
+        <div id="dash-messages-list" class="admin-list">
+          <div class="loader"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════ PANEL : CLIENTS ══════ -->
+    <div class="admin-panel" id="panel-clients">
+      <div class="admin-card-header" style="margin-bottom:24px;">
+        <h2>Gestion des clients</h2>
+        <input type="search" placeholder="Rechercher un client..." id="search-clients" class="admin-search" />
+      </div>
+      <div class="admin-card">
+        <table class="admin-table" id="clients-table">
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Email</th>
+              <th>Offre</th>
+              <th>Statut</th>
+              <th>Inscrit le</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clients-tbody">
+            <tr><td colspan="6" class="table-loading"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════ PANEL : PROGRAMMES ══════ -->
+    <div class="admin-panel" id="panel-programmes">
+      <div class="admin-card-header" style="margin-bottom:24px;">
+        <h2>Gestion des programmes</h2>
+        <button class="btn btn-primary" id="btn-new-programme">+ Nouveau programme</button>
+      </div>
+
+      <!-- Formulaire création/édition -->
+      <div class="admin-card" id="form-programme-wrap" style="display:none;margin-bottom:24px;">
+        <h3 id="form-programme-title">Nouveau programme</h3>
+        <form id="form-programme" class="admin-form">
+          <div class="admin-form-grid">
+            <div class="form-group">
+              <label>Titre</label>
+              <input type="text" id="prog-titre" placeholder="Nom du programme" required />
+            </div>
+            <div class="form-group">
+              <label>Slug (URL)</label>
+              <input type="text" id="prog-slug" placeholder="mon-programme" required />
+            </div>
+            <div class="form-group">
+              <label>Prix (€/mois)</label>
+              <input type="number" id="prog-prix" placeholder="99" min="0" required />
+            </div>
+            <div class="form-group">
+              <label>Prix promo (optionnel)</label>
+              <input type="number" id="prog-prix-promo" placeholder="79" min="0" />
+            </div>
+            <div class="form-group">
+              <label>Catégorie</label>
+              <select id="prog-categorie">
+                <option value="musculation">Musculation</option>
+                <option value="perte-de-poids">Perte de poids</option>
+                <option value="grossesse">Grossesse</option>
+                <option value="post-partum">Post-partum</option>
+                <option value="nutrition">Nutrition</option>
+                <option value="cardio">Cardio</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Niveau</label>
+              <select id="prog-niveau">
+                <option value="debutant">Débutant</option>
+                <option value="intermediaire">Intermédiaire</option>
+                <option value="avance">Avancé</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Durée (heures)</label>
+              <input type="number" id="prog-duree" placeholder="12" min="1" />
+            </div>
+            <div class="form-group">
+              <label>Nb de modules</label>
+              <input type="number" id="prog-modules" placeholder="8" min="1" />
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:4px;">
+            <label>URL de l'image</label>
+            <input type="url" id="prog-image" placeholder="https://..." />
+          </div>
+          <div class="form-group">
+            <label>Description courte</label>
+            <input type="text" id="prog-desc-courte" placeholder="Résumé en une phrase" />
+          </div>
+          <div class="form-group">
+            <label>Description complète</label>
+            <textarea id="prog-desc" rows="5" placeholder="Description détaillée du programme..."></textarea>
+          </div>
+          <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
+            <input type="checkbox" id="prog-actif" checked />
+            <label for="prog-actif" style="color:var(--white);">Programme actif (visible sur le site)</label>
+          </div>
+          <div style="display:flex;gap:12px;margin-top:8px;">
+            <button type="submit" class="btn btn-primary" id="btn-save-programme">Enregistrer</button>
+            <button type="button" class="btn btn-outline" id="btn-cancel-programme">Annuler</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="admin-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Programme</th>
+              <th>Catégorie</th>
+              <th>Niveau</th>
+              <th>Prix</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="programmes-tbody">
+            <tr><td colspan="6" class="table-loading"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════ PANEL : RÉSERVATIONS ══════ -->
+    <div class="admin-panel" id="panel-reservations">
+      <div class="admin-card-header" style="margin-bottom:24px;">
+        <h2>Créneaux & Réservations</h2>
+        <div style="display:flex;gap:10px;">
+          <select id="filter-resa-statut" class="admin-select">
+            <option value="all">Tous les statuts</option>
+            <option value="en_attente">En attente</option>
+            <option value="confirme">Confirmé</option>
+            <option value="annule">Annulé</option>
+          </select>
+        </div>
+      </div>
+      <div class="admin-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Type</th>
+              <th>Date & Heure</th>
+              <th>Durée</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="reservations-tbody">
+            <tr><td colspan="6" class="table-loading"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════ PANEL : PAIEMENTS ══════ -->
+    <div class="admin-panel" id="panel-paiements">
+      <div class="admin-card-header" style="margin-bottom:24px;">
+        <h2>Paiements & Facturation</h2>
+        <div style="display:flex;gap:10px;">
+          <select id="filter-statut" class="admin-select">
+            <option value="all">Tous</option>
+            <option value="active">Actif</option>
+            <option value="pending">En attente</option>
+            <option value="cancelled">Annulé</option>
+          </select>
+        </div>
+      </div>
+      <!-- KPIs revenus -->
+      <div class="revenus-kpis" id="revenus-kpis">
+        <div class="kpi-card">
+          <span class="kpi-val" id="kpi-mois">—</span>
+          <span class="kpi-label">Ce mois</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-val" id="kpi-annee">—</span>
+          <span class="kpi-label">Cette année</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-val" id="kpi-abonnes">—</span>
+          <span class="kpi-label">Abonnés actifs</span>
+        </div>
+      </div>
+      <div class="admin-card">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Programme</th>
+              <th>Montant</th>
+              <th>Statut</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="paiements-tbody">
+            <tr><td colspan="6" class="table-loading"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════ PANEL : MESSAGES ══════ -->
+    <div class="admin-panel" id="panel-messages">
+      <div class="admin-card-header" style="margin-bottom:24px;">
+        <h2>Messages de contact</h2>
+      </div>
+      <div id="messages-list" class="messages-list">
+        <div class="loader"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal confirmation action -->
+  <div class="modal-overlay" id="admin-modal" style="display:none;">
+    <div class="modal admin-confirm-modal">
+      <h3 id="modal-title">Confirmer</h3>
+      <p id="modal-body"></p>
+      <div style="display:flex;gap:12px;justify-content:center;margin-top:24px;">
+        <button class="btn btn-primary" id="modal-confirm-btn">Confirmer</button>
+        <button class="btn btn-outline"  id="modal-cancel-btn">Annuler</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/js/admin.js"></script>
+</body>
+</html>

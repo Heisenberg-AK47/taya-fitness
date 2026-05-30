@@ -74,6 +74,13 @@
   gap: 16px;
 }
 
+/* ── Form utilitaires ────────────────────────────────────── */
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
 /* ── FAQ accordion ───────────────────────────────────────── */
 .faq-list {
   display: flex;

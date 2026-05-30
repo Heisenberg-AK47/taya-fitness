@@ -7,7 +7,9 @@
     { "source": "/checkout",         "destination": "/checkout.html" },
     { "source": "/auth",             "destination": "/auth.html" },
     { "source": "/dashboard",        "destination": "/dashboard.html" },
-    { "source": "/contact",          "destination": "/contact.html" }
+    { "source": "/contact",          "destination": "/contact.html" },
+    { "source": "/reservation",      "destination": "/reservation.html" },
+    { "source": "/admin",            "destination": "/admin.html" }
   ],
   "cleanUrls": true,
   "trailingSlash": false,

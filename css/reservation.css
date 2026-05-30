@@ -1,0 +1,308 @@
+/* ============================================================
+   RESERVATION.CSS
+   ============================================================ */
+
+.res-hero {
+  text-align: center;
+}
+
+.res-hero .label {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.res-hero h1 { margin-bottom: 16px; }
+.res-hero p  { color: var(--white-muted); max-width: 520px; margin: 0 auto; }
+
+/* ── Layout ──────────────────────────────────────────────── */
+.reservation-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+/* ── Étapes ──────────────────────────────────────────────── */
+.resa-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--black);
+  font-size: 0.78rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.resa-step h3 { font-size: 1rem; margin: 0; }
+
+/* ── Type de séance ──────────────────────────────────────── */
+.type-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.type-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--black-card);
+  border: 1.5px solid var(--black-border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.type-card:hover { border-color: rgba(201,168,76,0.4); }
+
+.type-card.active {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.06);
+}
+
+.type-icon { font-size: 1.5rem; flex-shrink: 0; }
+
+.type-card > div:nth-child(2) { flex: 1; }
+.type-card strong { display: block; font-size: 0.9rem; color: var(--white); }
+.type-card small  { font-size: 0.78rem; color: var(--white-muted); }
+
+.type-check {
+  color: var(--gold);
+  font-weight: 700;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.type-card.active .type-check { opacity: 1; }
+
+/* ── Durée ───────────────────────────────────────────────── */
+.duree-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.duree-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--black-border);
+  background: var(--black-card);
+  color: var(--white-muted);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-body);
+}
+
+.duree-btn:hover  { border-color: var(--gold); color: var(--white); }
+.duree-btn.active { border-color: var(--gold); background: rgba(201,168,76,0.08); color: var(--gold); }
+
+/* ── Résumé ──────────────────────────────────────────────── */
+.resa-summary {
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+}
+
+.resa-summary h4 { font-size: 0.9rem; margin-bottom: 16px; color: var(--white-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--black-border);
+  font-size: 0.88rem;
+}
+
+.summary-line span { color: var(--white-muted); }
+.summary-line strong { color: var(--white); }
+
+/* ── Calendrier ──────────────────────────────────────────── */
+.calendrier {
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+#cal-month-label {
+  font-family: var(--font-title);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--white);
+  text-transform: capitalize;
+}
+
+.cal-nav {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius);
+  border: 1px solid var(--black-border);
+  background: transparent;
+  color: var(--white-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+}
+
+.cal-nav:hover { border-color: var(--gold); color: var(--gold); }
+
+.cal-days-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.cal-days-header span {
+  text-align: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--white-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 0;
+}
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1.5px solid transparent;
+  color: var(--white-muted);
+}
+
+.cal-day:hover:not(.disabled):not(.empty) {
+  background: rgba(201,168,76,0.1);
+  color: var(--white);
+}
+
+.cal-day.today { border-color: var(--black-border); color: var(--white); }
+
+.cal-day.selected {
+  background: var(--gold);
+  color: var(--black);
+  font-weight: 700;
+  border-color: var(--gold);
+}
+
+.cal-day.disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+.cal-day.empty { cursor: default; }
+
+/* ── Créneaux horaires ───────────────────────────────────── */
+.creneaux-horaires {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.creneau-heure {
+  padding: 12px 8px;
+  text-align: center;
+  border-radius: var(--radius);
+  border: 1.5px solid var(--black-border);
+  background: var(--black-card);
+  font-size: 0.88rem;
+  color: var(--white-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--font-body);
+}
+
+.creneau-heure:hover   { border-color: var(--gold); color: var(--white); }
+.creneau-heure.selected { background: var(--gold); border-color: var(--gold); color: var(--black); font-weight: 700; }
+.creneau-heure.indispo { opacity: 0.2; cursor: not-allowed; }
+
+/* ── Modal confirmation ──────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 24px;
+}
+
+.modal {
+  background: var(--black-card);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  animation: fadeUp 0.3s ease;
+}
+
+.modal-icon { font-size: 3rem; margin-bottom: 16px; }
+.modal h3 { margin-bottom: 12px; }
+.modal p  { margin-bottom: 20px; }
+
+.modal-recap {
+  background: var(--black-soft);
+  border-radius: var(--radius);
+  padding: 16px;
+  font-size: 0.85rem;
+  color: var(--white-muted);
+  line-height: 1.8;
+  text-align: left;
+  margin-bottom: 4px;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .reservation-grid { grid-template-columns: 1fr; }
+  .creneaux-horaires { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .creneaux-horaires { grid-template-columns: repeat(2, 1fr); }
+}
