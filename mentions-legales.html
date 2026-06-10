@@ -165,6 +165,10 @@
 
   </main>
   <div id="footer-placeholder"></div>
-  <script type="module" src="/js/legal.js"></script>
+  <script type="module">
+import { initNavbar } from "/js/navbar.js";
+import { initFooter } from "/js/footer.js";
+document.addEventListener("DOMContentLoaded", () => { initNavbar(); initFooter(); });
+</script>
 </body>
 </html>
