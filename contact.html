@@ -18,7 +18,6 @@
   <div id="navbar-placeholder"></div>
   <main>
 
-    <!-- Hero -->
     <section class="page-hero">
       <div class="container">
         <span class="label">À propos & Contact</span>
@@ -27,15 +26,15 @@
       </div>
     </section>
 
-    <!-- Coach section -->
     <section class="section coach-about-section">
       <div class="container">
         <div class="coach-about-grid">
           <div class="coach-about-img">
-            <div class="coach-img-placeholder">
-              <span>📸</span>
-              <p>Photo de Sarah</p>
-            </div>
+            <img
+              src="https://esylzsacjkimcqxllhwd.supabase.co/storage/v1/object/public/media/0092EC2C-A13C-4E04-B5C1-AD404A8B42D1_1_105_c.jpeg"
+              alt="Sarah — Coach Taya Fitness"
+              style="width:100%;height:100%;object-fit:cover;object-position:center top;border-radius:var(--radius-lg);border:1px solid var(--black-border);"
+            />
           </div>
           <div class="coach-about-content">
             <span class="label">Votre coach</span>
@@ -43,43 +42,26 @@
             <div class="gold-divider" style="margin: 20px 0;"></div>
             <p>À 44 ans, mère de 3 enfants, j'ai choisi de faire du sport ma passion et ma vocation. Certifiée coach sportive et nutritionniste, j'accompagne mes clients depuis plus de 8 ans en région parisienne.</p>
             <p style="margin-top:12px;">Ma spécialité ? Accompagner les femmes et les hommes dans les moments clés de leur vie : grossesse, post-partum, ménopause, reprise après une blessure. Une approche holistique corps + nutrition + mental.</p>
-            <p style="margin-top:12px;">Je travaille en présentiel à Fitness Park La Défense et en ligne via mon application. Chaque programme est unique, pensé pour toi.</p>
+            <p style="margin-top:12px;">Je travaille en présentiel à Fitness Park La Défense et à Fitness Park Saint-Denis Stade de France, et en ligne via mon application. Chaque programme est unique, pensé pour toi.</p>
             <div class="about-infos">
-              <div class="about-info-item">
-                <span>📍</span>
-                <span>Région parisienne · Île-de-France</span>
-              </div>
-              <div class="about-info-item">
-                <span>📞</span>
-                <span>07 49 07 17 81</span>
-              </div>
-              <div class="about-info-item">
-                <span>📧</span>
-                <span>contact@tayafitness.com</span>
-              </div>
-              <div class="about-info-item">
-                <span>💰</span>
-                <span>Crédit d'impôt 50% — service à la personne</span>
-              </div>
+              <div class="about-info-item"><span>📍</span><span>Région parisienne · Île-de-France</span></div>
+              <div class="about-info-item"><span>📞</span><span>07 49 07 17 81</span></div>
+              <div class="about-info-item"><span>📧</span><span>contact@tayafitness.com</span></div>
+              <div class="about-info-item"><span>💰</span><span>Crédit d'impôt 50% — service à la personne</span></div>
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Contact + FAQ -->
     <section class="section contact-section">
       <div class="container">
         <div class="contact-grid">
-
-          <!-- Formulaire -->
           <div class="contact-form-col">
             <h2>Envoyer un message</h2>
             <p style="margin-bottom:32px;">Décris ton objectif, ton niveau, et Sarah te répondra avec une proposition personnalisée.</p>
-
             <div class="alert alert-success" id="contact-alert"></div>
             <div class="alert alert-error"   id="contact-error"></div>
-
             <form id="contact-form">
               <div class="form-row-2">
                 <div class="form-group">
@@ -116,50 +98,31 @@
               <button type="submit" class="btn btn-primary" id="btn-contact">Envoyer le message</button>
             </form>
           </div>
-
-          <!-- FAQ -->
           <div class="faq-col">
             <h2>Questions fréquentes</h2>
             <div class="faq-list" id="faq-list">
-
               <div class="faq-item">
                 <button class="faq-btn">Comment se passe le coaching en ligne ? <span>+</span></button>
-                <div class="faq-answer">
-                  <p>Après ton inscription, tu accèdes à l'application mobile. Sarah te crée un programme sur mesure sous 48h. Tu peux échanger via messagerie et réserver des visios selon ton offre.</p>
-                </div>
+                <div class="faq-answer"><p>Après ton inscription, tu accèdes à l'application mobile. Sarah te crée un programme sur mesure sous 48h. Tu peux échanger via messagerie et réserver des visios selon ton offre.</p></div>
               </div>
-
               <div class="faq-item">
                 <button class="faq-btn">Puis-je changer d'offre en cours de route ? <span>+</span></button>
-                <div class="faq-answer">
-                  <p>Oui, tu peux upgrader ou downgrader ton offre à tout moment depuis ton espace. Le changement prend effet au prochain cycle de facturation.</p>
-                </div>
+                <div class="faq-answer"><p>Oui, tu peux upgrader ou downgrader ton offre à tout moment depuis ton espace. Le changement prend effet au prochain cycle de facturation.</p></div>
               </div>
-
               <div class="faq-item">
                 <button class="faq-btn">Le crédit d'impôt, comment ça marche ? <span>+</span></button>
-                <div class="faq-answer">
-                  <p>Les séances de coaching Fitness Park La Défense sont éligibles au crédit d'impôt service à la personne : tu récupères 50% du montant sur tes impôts. Sarah te fournit toutes les attestations nécessaires.</p>
-                </div>
+                <div class="faq-answer"><p>Les séances de coaching Fitness Park La Défense sont éligibles au crédit d'impôt service à la personne : tu récupères 50% du montant sur tes impôts. Sarah te fournit toutes les attestations nécessaires.</p></div>
               </div>
-
               <div class="faq-item">
                 <button class="faq-btn">Puis-je faire du coaching pendant ma grossesse ? <span>+</span></button>
-                <div class="faq-answer">
-                  <p>Oui ! Sarah est spécialisée en coaching prénatal. Les programmes sont adaptés à chaque trimestre, en toute sécurité, après validation médicale.</p>
-                </div>
+                <div class="faq-answer"><p>Oui ! Sarah est spécialisée en coaching prénatal. Les programmes sont adaptés à chaque trimestre, en toute sécurité, après validation médicale.</p></div>
               </div>
-
               <div class="faq-item">
                 <button class="faq-btn">Y a-t-il un engagement minimum ? <span>+</span></button>
-                <div class="faq-answer">
-                  <p>Non. Les abonnements sont sans engagement. Tu peux résilier à tout moment depuis ton espace, sans frais.</p>
-                </div>
+                <div class="faq-answer"><p>Non. Les abonnements sont sans engagement. Tu peux résilier à tout moment depuis ton espace, sans frais.</p></div>
               </div>
-
             </div>
           </div>
-
         </div>
       </div>
     </section>
