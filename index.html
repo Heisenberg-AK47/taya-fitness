@@ -4,41 +4,55 @@
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- SEO -->
   <title>Taya Fitness — Coaching Sportif & Nutrition | Sarah, Coach Paris</title>
   <meta name="description" content="Transforme ton corps et ton esprit avec Sarah, coach sportive certifiée en région parisienne. Programmes sur mesure, nutrition, suivi personnalisé. 3 offres d'abonnement adaptées à tous les niveaux." />
   <meta name="keywords" content="coach sportif paris, coaching fitness, programme sur mesure, nutrition coach, perte de poids, musculation, grossesse fitness, post-partum" />
   <link rel="canonical" href="https://www.tayafitness.com/" />
-
-  <!-- Open Graph -->
   <meta property="og:title" content="Taya Fitness — Coaching Sportif & Nutrition" />
   <meta property="og:description" content="Programmes sur mesure, nutrition, suivi personnalisé. Coach certifiée en région parisienne." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.tayafitness.com" />
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-  <!-- CSS -->
   <link rel="stylesheet" href="/css/global.css" />
   <link rel="stylesheet" href="/css/navbar.css" />
   <link rel="stylesheet" href="/css/footer.css" />
   <link rel="stylesheet" href="/css/index.css" />
+  <style>
+    .hero-bg video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: 0;
+    }
+    .hero-bg .hero-gradient {
+      z-index: 1;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+    }
+  </style>
 </head>
 <body>
-
-  <!-- Navbar injectée par JS -->
   <div id="navbar-placeholder"></div>
-
   <main>
 
-    <!-- ══════════════════════════════════════════
-         HERO
-    ══════════════════════════════════════════ -->
+    <!-- HERO -->
     <section class="hero">
       <div class="hero-bg">
+        <video
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+        >
+          <source src="https://esylzsacjkimcqxllhwd.supabase.co/storage/v1/object/public/media/Videos/Video%20site%20web.mov" type="video/mp4" />
+        </video>
         <div class="hero-gradient"></div>
       </div>
       <div class="container">
@@ -80,9 +94,7 @@
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════
-         POURQUOI NOUS CHOISIR
-    ══════════════════════════════════════════ -->
+    <!-- POURQUOI NOUS CHOISIR -->
     <section class="section why-section">
       <div class="container">
         <div class="section-header fade-in">
@@ -126,9 +138,7 @@
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════
-         PROGRAMMES VEDETTES
-    ══════════════════════════════════════════ -->
+    <!-- PROGRAMMES VEDETTES -->
     <section class="section programmes-section">
       <div class="container">
         <div class="section-header fade-in">
@@ -138,7 +148,6 @@
           <p>Des programmes pensés pour tous les niveaux et toutes les situations de vie.</p>
         </div>
         <div id="programmes-grid" class="grid-3">
-          <!-- Injecté par JS depuis Supabase -->
           <div class="loader"><div class="spinner"></div></div>
         </div>
         <div class="section-footer fade-in">
@@ -147,9 +156,7 @@
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════
-         OFFRES / ABONNEMENTS
-    ══════════════════════════════════════════ -->
+    <!-- OFFRES -->
     <section class="section offres-section">
       <div class="container">
         <div class="section-header fade-in">
@@ -158,8 +165,6 @@
           <div class="gold-divider"></div>
           <p>Trois formules pour accompagner chaque étape de ta transformation.</p>
         </div>
-
-        <!-- Toggle mensuel / annuel -->
         <div class="billing-toggle fade-in">
           <span class="toggle-label active" id="home-label-mensuel">Mensuel</span>
           <label class="toggle-switch">
@@ -168,10 +173,7 @@
           </label>
           <span class="toggle-label" id="home-label-annuel">Annuel <span class="save-badge">-20%</span></span>
         </div>
-
         <div class="offres-grid">
-
-          <!-- Starter -->
           <div class="offre-card fade-in">
             <div class="offre-header">
               <span class="offre-badge">Starter</span>
@@ -192,8 +194,6 @@
             </ul>
             <a href="/offres#starter" class="btn btn-gold-outline" style="width:100%; justify-content:center;">Commencer</a>
           </div>
-
-          <!-- Performance — mise en avant -->
           <div class="offre-card featured fade-in">
             <div class="offre-popular">Le plus choisi</div>
             <div class="offre-header">
@@ -215,8 +215,6 @@
             </ul>
             <a href="/offres#performance" class="btn btn-primary" style="width:100%; justify-content:center;">Choisir Performance</a>
           </div>
-
-          <!-- Premium VIP -->
           <div class="offre-card fade-in">
             <div class="offre-header">
               <span class="offre-badge gold">Premium VIP</span>
@@ -237,7 +235,6 @@
             </ul>
             <a href="/offres#vip" class="btn btn-gold-outline" style="width:100%; justify-content:center;">Choisir VIP</a>
           </div>
-
         </div>
         <p class="offres-note fade-in">
           💳 Paiement sécurisé · Sans engagement · Crédit d'impôt 50% éligible pour les séances à Fitness Park La Défense
@@ -245,9 +242,7 @@
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════
-         COACH — À PROPOS
-    ══════════════════════════════════════════ -->
+    <!-- COACH -->
     <section class="section coach-section">
       <div class="container">
         <div class="coach-grid">
@@ -281,9 +276,7 @@
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════
-         TÉMOIGNAGES
-    ══════════════════════════════════════════ -->
+    <!-- TÉMOIGNAGES -->
     <section class="section temoignages-section">
       <div class="container">
         <div class="section-header fade-in">
@@ -329,9 +322,7 @@
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════
-         GALERIE PHOTOS
-    ══════════════════════════════════════════ -->
+    <!-- GALERIE -->
     <section class="section gallery-section">
       <div class="container">
         <div class="section-header fade-in">
@@ -371,9 +362,7 @@
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════
-         NEWSLETTER
-    ══════════════════════════════════════════ -->
+    <!-- NEWSLETTER -->
     <section class="section newsletter-section">
       <div class="container">
         <div class="newsletter-box fade-in">
@@ -392,10 +381,7 @@
     </section>
 
   </main>
-
-  <!-- Footer injecté par JS -->
   <div id="footer-placeholder"></div>
-
   <script type="module" src="/js/index.js"></script>
 </body>
 </html>
