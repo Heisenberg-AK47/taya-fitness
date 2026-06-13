@@ -16,12 +16,17 @@
     }
   }
   </script>
-  <style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: 'Inter', sans-serif; }</style>
+  <style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: 'Inter', sans-serif; }
+  .yt-modal { position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:1000; }
+  .yt-modal iframe { width:min(90vw,900px);height:min(50vw,500px);border:none;border-radius:12px; }
+  .prog-card:hover { transform:translateY(-3px);transition:transform 0.2s; }
+  .exo-card:hover { transform:translateY(-2px);transition:transform 0.2s;cursor:pointer; }
+  </style>
 </head>
 <body>
   <div id="root"></div>
   <script type="module">
-    import { useState, useEffect } from 'react';
+    import { useState, useEffect, useMemo } from 'react';
     import { createRoot } from 'react-dom/client';
     import { createClient } from '@supabase/supabase-js';
     import { createElement as h } from 'react';
@@ -31,17 +36,124 @@
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzeWx6c2FjamtpbWNxeGxsaHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDE3MzEsImV4cCI6MjA5NTY3NzczMX0.Q06O-EywobZl0KigJcBnzCA81rXxcOluo4FupcNbr0w'
     );
 
-    const C = { bg:'#0d1b2a',card:'#16273a',soft:'#122033',gold:'#ff6b4a',white:'#f0f4f8',muted:'rgba(220,232,244,0.55)',border:'rgba(255,255,255,0.07)',green:'#3ecf8e',red:'#ff4d6a',blue:'#4d9fff' };
+    const C = { bg:'#0d1b2a',card:'#16273a',soft:'#122033',gold:'#ff6b4a',white:'#f0f4f8',muted:'rgba(220,232,244,0.55)',border:'rgba(255,255,255,0.07)',green:'#3ecf8e',red:'#ff4d6a',blue:'#4d9fff',purple:'#b48cff' };
     const btn = {background:`linear-gradient(135deg,${C.gold},#e5432f)`,color:'#fff',border:'none',borderRadius:10,padding:'12px 24px',fontWeight:600,cursor:'pointer',fontSize:14};
     const inp = {background:'rgba(255,255,255,0.05)',border:`1px solid ${C.border}`,borderRadius:10,color:C.white,padding:'12px 16px',fontSize:14,width:'100%',outline:'none'};
     const card = {background:C.card,border:`1px solid ${C.border}`,borderRadius:16,padding:24};
     const th = {padding:'12px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.muted,borderBottom:`1px solid ${C.border}`};
     const td = {padding:'14px 16px',fontSize:14,color:C.white,borderBottom:`1px solid ${C.border}`};
-    const badge = (c) => ({background:`${c}22`,color:c,fontSize:12,fontWeight:600,padding:'4px 10px',borderRadius:100,display:'inline-block'});
+    const badge = (c) => ({background:`${c}22`,color:c,fontSize:11,fontWeight:600,padding:'3px 8px',borderRadius:100,display:'inline-block',marginRight:4});
+
+    // ── Azeoo clients data (52 clients réels) ───────────────────────────────
+    const AZEOO_CLIENTS = [
+      {nom:"marilyne melendi",email:"marilynemelendi7@gmail.com",app:"Apple",groupe:"—",objectif:"Sculpt Your Body",niveau:"Advanced"},
+      {nom:"sieu-ly thai",email:"sieuly.thai@gmail.com",app:"Apple",groupe:"—",objectif:"Lose Weight",niveau:"Beginner"},
+      {nom:"Stive Emakoua",email:"stiviesa@hotmail.com",app:"Apple",groupe:"—",objectif:"Get Fit",niveau:"Beginner"},
+      {nom:"Christelle Akué",email:"crisafina92@hotmail.com",app:"Android",groupe:"Musculation",objectif:"Lose Weight",niveau:"Intermediate"},
+      {nom:"Khadidja Azrou",email:"meriemappel@icloud.com",app:"Apple",groupe:"Musculation",objectif:"Build Muscle",niveau:"Advanced"},
+      {nom:"Berile Yombe",email:"berile.yombe@gmail.com",app:"Apple",groupe:"Musculation",objectif:"Sculpt Your Body",niveau:"Intermediate"},
+      {nom:"suky biheng",email:"suky.biheng@gmail.com",app:"Apple",groupe:"Musculation",objectif:"Lose Weight",niveau:"Advanced"},
+      {nom:"areski ouanes",email:"areskiouanes@gmail.com",app:"Apple",groupe:"Musculation",objectif:"Lose Weight",niveau:"Intermediate"},
+      {nom:"Matthieu Barbé",email:"mat.barbe@orange.fr",app:"Android",groupe:"Musculation",objectif:"Sculpt Your Body",niveau:"Beginner"},
+      {nom:"Mael Colin",email:"maeloocolinoo@gmail.com",app:"Apple",groupe:"Musculation",objectif:"Lose Weight",niveau:"Intermediate"},
+      {nom:"Joy L",email:"schocolat22@yahoo.fr",app:"Android",groupe:"Musculation",objectif:"Lose Weight",niveau:"Beginner"},
+      {nom:"Fayçal Belhamza",email:"fafanew75@gmail.com",app:"—",groupe:"Musculation",objectif:"—",niveau:"—"},
+      {nom:"Agathe BADEAU",email:"agxthebadeau@gmail.com",app:"Apple",groupe:"Musculation",objectif:"Lose Weight",niveau:"Intermediate"},
+      {nom:"Nacer Aouni",email:"naceraouni.na@gmail.com",app:"Android",groupe:"Musculation",objectif:"Lose Weight",niveau:"Beginner"},
+      {nom:"Niang fafa",email:"fn828939@gmail.com",app:"Apple",groupe:"Musculation",objectif:"Sculpt Your Body",niveau:"Advanced"},
+      {nom:"Aissatou Henriketa",email:"aimeeanliette@gmail.com",app:"Android",groupe:"Musculation",objectif:"Lose Weight",niveau:"Intermediate"},
+      {nom:"Olivia Andrieu",email:"chakox@yahoo.fr",app:"Apple",groupe:"Musculation",objectif:"Lose Weight",niveau:"Beginner"},
+      {nom:"Larbi Boudjeraba",email:"larbi.boudjeraba@plainecommune.fr",app:"Apple",groupe:"Musculation",objectif:"Get Fit",niveau:"Intermediate"},
+      {nom:"Idele Nsanda",email:"nsandaidele@gmail.com",app:"Apple",groupe:"Musculation",objectif:"Lose Weight",niveau:"Beginner"},
+      {nom:"Amel Sebouai",email:"yliesrayann@hotmail.fr",app:"Apple",groupe:"Musculation",objectif:"Lose Weight",niveau:"Intermediate"},
+      {nom:"Joëlle Renaud",email:"renaudcommeau@gmail.com",app:"Android",groupe:"Musculation",objectif:"Get Fit",niveau:"Beginner"},
+      {nom:"Kb BEZZAOUIA",email:"kmar321@gmail.com",app:"Android",groupe:"Musculation",objectif:"Lose Weight",niveau:"Beginner"},
+      {nom:"Hind Chetoui",email:"hind.chetoui@gmail.com",app:"Android",groupe:"Musculation",objectif:"Build Muscle",niveau:"Beginner"},
+      {nom:"kokou AZANLEDJI",email:"akokou2000@yahoo.fr",app:"Apple",groupe:"Musculation",objectif:"Sculpt Your Body",niveau:"Beginner"},
+      {nom:"Edwige Dim",email:"vigea24@wanadoo.fr",app:"Apple",groupe:"Musculation",objectif:"Get Fit",niveau:"Intermediate"},
+      {nom:"alyssa letellier",email:"Alyssaletellier@icloud.com",app:"Apple",groupe:"Musculation",objectif:"Get Fit",niveau:"Beginner"},
+      {nom:"Jennifer NUNES GIL",email:"jennifer.gng@hotmail.com",app:"Apple",groupe:"Musculation",objectif:"Lose Weight",niveau:"Intermediate"},
+      {nom:"Benoît Varichon",email:"ben.networkmarketing@gmail.com",app:"Android",groupe:"Musculation",objectif:"Lose Weight",niveau:"Intermediate"},
+      {nom:"Marguerite elong",email:"elmaguy1781@yahoo.fr",app:"Android",groupe:"Musculation",objectif:"Sculpt Your Body",niveau:"Beginner"},
+      {nom:"Yannick Lawson",email:"kanwyn@hotmail.com",app:"Android",groupe:"Musculation",objectif:"Build Muscle",niveau:"Intermediate"},
+      {nom:"Maxwell Azandegbe",email:"azandegbemahouna@gmail.com",app:"Android",groupe:"Musculation",objectif:"Get Fit",niveau:"Beginner"},
+      {nom:"Davies DAVIES",email:"angelinedavies92110@gmail.com",app:"—",groupe:"Musculation",objectif:"—",niveau:"—"},
+      {nom:"taida benkyou",email:"taidabenkyou@gmail.com",app:"—",groupe:"Musculation",objectif:"Build Muscle",niveau:"Beginner"},
+      {nom:"dael ahiakpor",email:"dael.ahiakpor1@icloud.com",app:"Apple",groupe:"test",objectif:"Build Muscle",niveau:"Beginner"},
+      {nom:"Audrey Jean",email:"morena972@hotmail.fr",app:"Android",groupe:"Musculation",objectif:"Get Fit",niveau:"Advanced"},
+      {nom:"Manon Morin",email:"manon.morin1999@gmail.com",app:"Android",groupe:"Musculation",objectif:"Sculpt Your Body",niveau:"Advanced"},
+      {nom:"Ablamba Manca Bouillot",email:"sophieaokily@gmail.com",app:"Apple",groupe:"Musculation",objectif:"Build Muscle",niveau:"Advanced"},
+      {nom:"Amal Guerroudj",email:"guerroudjamal@gmail.com",app:"—",groupe:"Musculation",objectif:"—",niveau:"—"},
+      {nom:"madane dosso",email:"dosso4900@gmail.com",app:"Apple",groupe:"Musculation",objectif:"Sculpt Your Body",niveau:"Beginner"},
+      {nom:"Rosette Akayi",email:"rosette.akayi@gmail.com",app:"Apple",groupe:"Musculation",objectif:"Lose Weight",niveau:"Intermediate"},
+      {nom:"Stella Fumey",email:"stella.fumey@gmail.com",app:"Android",groupe:"Musculation",objectif:"Sculpt Your Body",niveau:"Intermediate"},
+      {nom:"Lamine keita",email:"lamine.leo@gmail.com",app:"Android",groupe:"Musculation",objectif:"Lose Weight",niveau:"Beginner"},
+      {nom:"Maïda Campbell",email:"maidac21@gmail.com",app:"Android",groupe:"Musculation",objectif:"Sculpt Your Body",niveau:"Intermediate"},
+      {nom:"Sylvie Fumey",email:"sohannfg@hotmail.com",app:"Apple",groupe:"Musculation",objectif:"Get Fit",niveau:"Beginner"},
+      {nom:"Remi KOFFI",email:"remikoffi@gmail.com",app:"Android",groupe:"Musculation",objectif:"Sculpt Your Body",niveau:"Beginner"},
+      {nom:"Syan Ahiakpor",email:"sanchoplace2@gmail.com",app:"Apple",groupe:"test",objectif:"Build Muscle",niveau:"Beginner"},
+      {nom:"Greg Boudan",email:"boudan.gregory@orange.fr",app:"Android",groupe:"Musculation",objectif:"Lose Weight",niveau:"Intermediate"},
+      {nom:"Grégory Boudan",email:"cotcotprod@hotmail.fr",app:"Android",groupe:"Musculation",objectif:"—",niveau:"—"},
+      {nom:"sarah fumey",email:"fumeysarah@yahoo.fr",app:"Android/Apple",groupe:"test",objectif:"Sculpt Your Body",niveau:"Intermediate"},
+      {nom:"Luc Test",email:"luctaya@yopmail.com",app:"Apple",groupe:"test",objectif:"Get Fit",niveau:"Advanced"},
+      {nom:"serge paulmier",email:"contact@sergepaulmier.com",app:"Apple",groupe:"Musculation",objectif:"Get Fit",niveau:"Advanced"},
+      {nom:"Test Apple",email:"apple.tayafitness@yopmail.com",app:"Android",groupe:"—",objectif:"Get Fit",niveau:"Beginner"},
+    ];
+
+    // ── Programmes from Azeoo ────────────────────────────────────────────────
+    const PROGRAMMES = [
+      {nom:"The legend is on its way...",duree:"8 semaines",prix:"€19.95",objectif:"Sculpt Your Body",niveau:"",img:"https://cdn.azeoo.com/programs/large/sans-titre-65-5eaee7a9d27e0.jpg"},
+      {nom:"PERTE DE POIDS & PRISE DE MASSE",duree:"8 semaines",prix:"Perso",objectif:"Build Muscle",niveau:"Beginner",img:"https://cdn.azeoo.com/programs/large/img-0246-698ee5b4e6c63.jpg"},
+      {nom:"Ready for the IFBB Bikini!",duree:"8 semaines",prix:"€19.95",objectif:"Sculpt Your Body",niveau:"Intermediate",img:"https://cdn.azeoo.com/programs/large/img-1179-699c55b61b7e5.jpg"},
+      {nom:"Get stronger",duree:"12 semaines",prix:"€19.95",objectif:"Build Muscle",niveau:"Intermediate",img:"https://cdn.azeoo.com/programs/large/img-1232-690085f6175a1.jpg"},
+      {nom:"Thighs / abs / glutes",duree:"12 semaines",prix:"€19.95",objectif:"Sculpt Your Body",niveau:"Beginner",img:"https://cdn.azeoo.com/programs/large/sans-titre-53-5eaedb9e31e4a.jpg"},
+      {nom:"ANDROPAUSE : Sculpter le corps après 40 ans",duree:"12 semaines",prix:"€19.95",objectif:"Sculpt Your Body",niveau:"Intermediate",img:"https://cdn.azeoo.com/programs/large/img-2265-68e63ae92ca83.jpg"},
+      {nom:"POST-PARTUM 4ème TRIMESTRE",duree:"12 semaines",prix:"€19.95",objectif:"Build Muscle",niveau:"",img:"https://cdn.azeoo.com/programs/large/img-1057-692b96f9d1f73.jpg"},
+      {nom:"POST-PARTUM 3ème TRIMESTRE",duree:"12 semaines",prix:"€19.95",objectif:"Build Muscle",niveau:"",img:"https://cdn.azeoo.com/programs/large/img-1057-692b96f9d1f73.jpg"},
+      {nom:"GROSSESSE : 1er Trimestre / SALLE",duree:"12 semaines",prix:"€19.95",objectif:"Get Fit",niveau:"",img:"https://cdn.azeoo.com/programs/large/img-1057-692b96f9d1f73.jpg"},
+      {nom:"GROSSESSE : 2ème Trimestre / SALLE",duree:"12 semaines",prix:"€19.95",objectif:"Get Fit",niveau:"",img:"https://cdn.azeoo.com/programs/large/img-1057-692b96f9d1f73.jpg"},
+      {nom:"GROSSESSE : 3ème Trimestre / SALLE",duree:"12 semaines",prix:"€19.95",objectif:"Get Fit",niveau:"",img:"https://cdn.azeoo.com/programs/large/img-1057-692b96f9d1f73.jpg"},
+      {nom:"Get a more athletic physique",duree:"12 semaines",prix:"€19.95",objectif:"Lose Weight",niveau:"Beginner",img:"https://cdn.azeoo.com/programs/large/sans-titre-65-5eaee7a9d27e0.jpg"},
+      {nom:"4 week slimming challenge",duree:"12 semaines",prix:"€19.95",objectif:"Lose Weight",niveau:"Beginner",img:"https://cdn.azeoo.com/programs/large/sans-titre-53-5eaedb9e31e4a.jpg"},
+      {nom:"Full Body Kilos Killer !",duree:"12 semaines",prix:"€19.95",objectif:"Lose Weight",niveau:"",img:"https://cdn.azeoo.com/programs/large/img-1232-690085f6175a1.jpg"},
+      {nom:"MAUX DE DOS : MUSCLE-LE !",duree:"12 semaines",prix:"€19.95",objectif:"Get Fit",niveau:"",img:"https://cdn.azeoo.com/programs/large/img-1232-690085f6175a1.jpg"},
+    ];
+
+    // ── Exercise library (Azeoo — 1104 exercices, extrait représentatif) ─────
+    const EXERCISES = [
+      {nom:"3-Way Banded Cha Cha",muscles:["Glutes","Hamstrings"],type:"Bodyweight",img:"https://cdn.azeoo.com/exercises/small-wide/761-3-way-banded-cha-cha-64fec32f08509.jpg",ytId:"OuUeJTmYyhc"},
+      {nom:"Ab Crunch Machine",muscles:["Abs"],type:"Machine",img:"https://cdn.azeoo.com/exercises/small-wide/ab-crunch-machine-5f0e5334f4215.jpg",ytId:null},
+      {nom:"Ab Wheel on Knees",muscles:["Abs"],type:"Bodyweight",img:"https://cdn.azeoo.com/exercises/small-wide/684-roue-abdominale-sur-genoux-64fed4654aceb.jpg",ytId:null},
+      {nom:"Abdominals Stretch",muscles:["Abs"],type:"Stretching",img:"https://cdn.azeoo.com/exercises/small-wide/371-abdominals-stretch-variation-650bf65d22427.jpg",ytId:null},
+      {nom:"Active Hip Flexion",muscles:["Quads"],type:"Bodyweight",img:"https://cdn.azeoo.com/exercises/small-wide/374-alternating-cobra-curtsy-squat-650bf8f900f1d.jpg",ytId:null},
+      {nom:"Adductor Roll",muscles:["Adductors"],type:"Stretching",img:"https://cdn.azeoo.com/exercises/small-wide/372-agility-dots-650bf865b5cfc.jpg",ytId:null},
+      {nom:"Alternating Cobra Curtsy Squat",muscles:["Glutes","Quads"],type:"Bodyweight",img:"https://cdn.azeoo.com/exercises/small-wide/374-alternating-cobra-curtsy-squat-650bf8f900f1d.jpg",ytId:null},
+      {nom:"American Dumbbell Swing",muscles:["Glutes","Hamstrings"],type:"Bodybuilding",img:"https://cdn.azeoo.com/exercises/small-wide/376-american-dumbbell-swing-650bf9b85e994.jpg",ytId:null},
+      {nom:"Arnold Dumbbell Press",muscles:["Shoulders","Triceps"],type:"Bodybuilding",img:"https://cdn.azeoo.com/exercises/small-wide/arnold-dumbbell-press-5f0e538de7cca.jpg",ytId:null},
+      {nom:"Assisted Ab Wheel",muscles:["Abs"],type:"Bodyweight",img:"https://cdn.azeoo.com/exercises/small-wide/617-assisted-ab-wheel-6501710982503.jpg",ytId:null},
+      {nom:"Assisted Bulgarian Split Squat",muscles:["Quads","Glutes"],type:"Bodybuilding",img:"https://cdn.azeoo.com/exercises/small-wide/378-assisted-bulgarian-split-squat-650bfa8aa2531.jpg",ytId:null},
+      {nom:"Barbell Squat",muscles:["Quads","Glutes"],type:"Bodybuilding",img:"https://cdn.azeoo.com/exercises/small-wide/barbell-squat-5f0e54621392c.jpg",ytId:null},
+      {nom:"Band Assisted Pancake",muscles:["Hamstrings","Adductors"],type:"Stretching",img:"https://cdn.azeoo.com/exercises/small-wide/833-band-assisted-pancake-64f86ea8bb75c.jpg",ytId:null},
+      {nom:"Band Bayesian Hammer Curl",muscles:["Biceps"],type:"Bodybuilding",img:"https://cdn.azeoo.com/exercises/small-wide/726-band-bayesian-hammer-curl-64fad1f8befbd.jpg",ytId:null},
+      {nom:"Band Chest Fly",muscles:["Chest"],type:"Bodybuilding",img:"https://cdn.azeoo.com/exercises/small-wide/756-band-chest-fly-64fec1171601a.jpg",ytId:null},
+      {nom:"Band Face Pull",muscles:["Shoulders","Traps"],type:"Bodybuilding",img:"https://cdn.azeoo.com/exercises/small-wide/735-band-face-pull-64fad6fc5728a.jpg",ytId:null},
+      {nom:"Band Front Raise",muscles:["Shoulders"],type:"Bodybuilding",img:"https://cdn.azeoo.com/exercises/small-wide/736-band-front-raise-64fad7a91e59d.jpg",ytId:null},
+      {nom:"Band Glute Kickback",muscles:["Glutes"],type:"Bodyweight",img:"https://cdn.azeoo.com/exercises/small-wide/810-band-glute-kickback-64f04fbd07f44.jpg",ytId:null},
+      {nom:"Band Hip Abduction",muscles:["Glutes","Adductors"],type:"Bodyweight",img:"https://cdn.azeoo.com/exercises/small-wide/731-band-hip-abduction-65002fd69248b.jpg",ytId:null},
+      {nom:"Band Lateral Raise",muscles:["Shoulders"],type:"Bodybuilding",img:"https://cdn.azeoo.com/exercises/small-wide/737-band-lateral-raise-6500311e8a706.jpg",ytId:null},
+      {nom:"Band Military Press",muscles:["Shoulders","Triceps"],type:"Bodybuilding",img:"https://cdn.azeoo.com/exercises/small-wide/745-band-military-press-6500318f62558.jpg",ytId:null},
+      {nom:"Band Overhead Squat",muscles:["Quads","Glutes"],type:"Bodybuilding",img:"https://cdn.azeoo.com/exercises/small-wide/742-band-overhead-squat-650032c3b9e1e.jpg",ytId:null},
+      {nom:"Band Pullthrough",muscles:["Glutes","Hamstrings"],type:"Bodyweight",img:"https://cdn.azeoo.com/exercises/small-wide/724-band-pullthrough-64fad172c22da.jpg",ytId:null},
+      {nom:"Band Squat",muscles:["Quads","Glutes"],type:"Bodybuilding",img:"https://cdn.azeoo.com/exercises/small-wide/730-band-squat-64fad40d6f18c.jpg",ytId:null},
+    ];
+
+    const ALL_MUSCLES = [...new Set(EXERCISES.flatMap(e => e.muscles))].sort();
 
     const TABS = [
       {id:'dashboard',icon:'📊',label:'Dashboard'},
-      {id:'clients',icon:'👥',label:'Clients'},
+      {id:'clients',icon:'👥',label:'Clients Azeoo'},
+      {id:'programmes',icon:'🏋️',label:'Programmes'},
+      {id:'exercices',icon:'▶️',label:'Exercices'},
       {id:'abonnements',icon:'💳',label:'Abonnements'},
       {id:'revenus',icon:'💰',label:'Revenus'},
       {id:'emails',icon:'📧',label:'Campagnes mail'},
@@ -84,10 +196,10 @@
               h('span',{style:{color:C.white}},'Taya'),
               h('span',{style:{color:C.gold}},'CRM')
             ),
-            h('p',{style:{color:C.muted,marginTop:8,fontSize:14}},'Espace de gestion — Sarah Paulmier')
+            h('p',{style:{color:C.muted,marginTop:8,fontSize:14}},'Espace de gestion — Sarah Fumey')
           ),
           h('div',{style:card},
-            h('p',{style:{color:C.muted,fontSize:14,marginBottom:24,textAlign:'center'}},'Connecte-toi avec ton compte'),
+            h('p',{style:{color:C.muted,fontSize:14,marginBottom:24,textAlign:'center'}},'Connecte-toi avec ton compte Google'),
             err && h('div',{style:{background:`${C.red}22`,color:C.red,padding:'10px 14px',borderRadius:8,marginBottom:16,fontSize:13}},err),
             h('form',{onSubmit:loginEmail},
               h('div',{style:{marginBottom:16}},
@@ -104,11 +216,11 @@
         )
       );
 
-      const pages = {dashboard:Dashboard,clients:Clients,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches};
+      const pages = {dashboard:Dashboard,clients:ClientsAzeoo,programmes:Programmes,exercices:Exercices,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches};
       const Page = pages[tab] || Dashboard;
 
       return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',fontFamily:'Inter,sans-serif'}},
-        h('div',{style:{width:220,background:C.soft,borderRight:`1px solid ${C.border}`,display:'flex',flexDirection:'column',minHeight:'100vh',flexShrink:0}},
+        h('div',{style:{width:230,background:C.soft,borderRight:`1px solid ${C.border}`,display:'flex',flexDirection:'column',minHeight:'100vh',flexShrink:0}},
           h('div',{style:{padding:'28px 20px 20px',borderBottom:`1px solid ${C.border}`}},
             h('div',{style:{fontSize:22,fontWeight:800}},
               h('span',{style:{color:C.white}},'Taya'),
@@ -116,7 +228,7 @@
             ),
             h('div',{style:{fontSize:12,color:C.muted,marginTop:4}},user.email)
           ),
-          h('nav',{style:{flex:1,padding:'12px 10px'}},
+          h('nav',{style:{flex:1,padding:'12px 10px',overflowY:'auto'}},
             ...TABS.map(t => h('button',{key:t.id,onClick:()=>setTab(t.id),style:{width:'100%',display:'flex',alignItems:'center',gap:10,padding:'11px 12px',borderRadius:10,border:'none',background:tab===t.id?`rgba(255,107,74,0.12)`:'transparent',color:tab===t.id?C.gold:C.muted,fontWeight:tab===t.id?600:400,fontSize:14,cursor:'pointer',textAlign:'left',marginBottom:2}},
               h('span',null,t.icon), t.label
             ))
@@ -131,6 +243,7 @@
       );
     }
 
+    // ── Dashboard ─────────────────────────────────────────────────────────────
     function Dashboard() {
       const [stats,setStats] = useState({clients:0,actifs:0,revenus:0,newsletter:0});
       const [recent,setRecent] = useState([]);
@@ -150,69 +263,251 @@
         }
         load();
       },[]);
-      const stats_cards=[
-        {label:'Clients total',value:stats.clients,color:C.blue},
-        {label:'Abonnés actifs',value:stats.actifs,color:C.green},
-        {label:'MRR',value:`${stats.revenus}€`,color:C.gold},
-        {label:'Newsletter',value:stats.newsletter,color:'#b48cff'},
-      ];
+
+      const goalColors = {'Lose Weight':C.blue,'Build Muscle':C.green,'Sculpt Your Body':C.gold,'Get Fit':C.purple};
+      const goalCounts = AZEOO_CLIENTS.reduce((acc,c)=>{if(c.objectif!=='—'){acc[c.objectif]=(acc[c.objectif]||0)+1;}return acc;},{});
+
       return h('div',null,
         h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:8,color:C.white}},'Dashboard'),
-        h('p',{style:{color:C.muted,fontSize:14,marginBottom:32}},'Vue d\'ensemble de ton activité'),
-        h('div',{style:{display:'flex',gap:16,marginBottom:32}},
-          ...stats_cards.map(s=>h('div',{key:s.label,style:{background:C.soft,border:`1px solid ${C.border}`,borderRadius:12,padding:'20px 24px',flex:1}},
-            h('div',{style:{fontSize:28,fontWeight:800,color:s.color}},s.value),
-            h('div',{style:{fontSize:13,color:C.muted,marginTop:4}},s.label)
+        h('p',{style:{color:C.muted,fontSize:14,marginBottom:32}},'Vue d\'ensemble · Azeoo + CRM Taya Fitness'),
+        // Stats row 1
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,marginBottom:24}},
+          ...[
+            {label:'Clients Azeoo',value:AZEOO_CLIENTS.length,color:C.blue,icon:'👥'},
+            {label:'Programmes',value:PROGRAMMES.length,color:C.gold,icon:'🏋️'},
+            {label:'Exercices',value:'1 104',color:C.green,icon:'▶️'},
+            {label:'Abonnés CRM actifs',value:stats.actifs,color:C.purple,icon:'💳'},
+          ].map(s=>h('div',{key:s.label,style:{background:C.soft,border:`1px solid ${C.border}`,borderRadius:12,padding:'20px 24px'}},
+            h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}},
+              h('div',null,
+                h('div',{style:{fontSize:26,fontWeight:800,color:s.color}},s.value),
+                h('div',{style:{fontSize:12,color:C.muted,marginTop:4}},s.label)
+              ),
+              h('div',{style:{fontSize:24}},s.icon)
+            )
           ))
         ),
-        h('div',{style:card},
-          h('h3',{style:{fontSize:16,fontWeight:600,marginBottom:20,color:C.white}},'Derniers clients'),
-          h('table',{style:{width:'100%',borderCollapse:'collapse'}},
-            h('thead',null,h('tr',null,h('th',{style:th},'Nom'),h('th',{style:th},'Email'),h('th',{style:th},'Date'))),
-            h('tbody',null,...(recent.length?recent:[{full_name:'—',email:'—',created_at:null}]).map((c,i)=>
-              h('tr',{key:i},
-                h('td',{style:td},c.full_name||'—'),
-                h('td',{style:{...td,color:C.muted}},c.email||'—'),
-                h('td',{style:{...td,color:C.muted}},c.created_at?new Date(c.created_at).toLocaleDateString('fr-FR'):'—')
+        // Goals breakdown
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,marginBottom:24}},
+          h('div',{style:card},
+            h('h3',{style:{fontSize:15,fontWeight:600,marginBottom:20,color:C.white}},'Répartition objectifs clients'),
+            ...Object.entries(goalCounts).map(([obj,n])=>h('div',{key:obj,style:{marginBottom:12}},
+              h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:5}},
+                h('span',{style:{fontSize:13,color:C.white}},obj),
+                h('span',{style:{fontSize:13,color:C.muted}},`${n} clients`)
+              ),
+              h('div',{style:{background:C.border,borderRadius:100,height:5}},
+                h('div',{style:{background:goalColors[obj]||C.muted,borderRadius:100,height:5,width:`${n/AZEOO_CLIENTS.length*100}%`}})
               )
             ))
+          ),
+          h('div',{style:card},
+            h('h3',{style:{fontSize:15,fontWeight:600,marginBottom:16,color:C.white}},'Derniers clients inscrits'),
+            ...(recent.length?recent:[]).map((c,i)=>h('div',{key:i,style:{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:`1px solid ${C.border}`,fontSize:13}},
+              h('span',{style:{color:C.white}},c.full_name||'—'),
+              h('span',{style:{color:C.muted}},c.created_at?new Date(c.created_at).toLocaleDateString('fr-FR'):'—')
+            )),
+            recent.length===0&&h('p',{style:{color:C.muted,fontSize:13}},'Aucune donnée')
           )
+        ),
+        // Revenue stats
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16}},
+          ...[
+            {label:'MRR',value:`${stats.revenus}€`,color:C.green},
+            {label:'ARR projeté',value:`${stats.revenus*12}€`,color:C.blue},
+            {label:'Newsletter',value:stats.newsletter,color:C.purple},
+          ].map(s=>h('div',{key:s.label,style:{background:C.soft,border:`1px solid ${C.border}`,borderRadius:12,padding:'18px 22px'}},
+            h('div',{style:{fontSize:22,fontWeight:800,color:s.color}},s.value),
+            h('div',{style:{fontSize:12,color:C.muted,marginTop:4}},s.label)
+          ))
         )
       );
     }
 
-    function Clients() {
-      const [clients,setClients]=useState([]);
-      const [search,setSearch]=useState('');
-      const [loading,setLoading]=useState(true);
-      useEffect(()=>{
-        sb.from('profiles').select('*,abonnements(plan,statut)').order('created_at',{ascending:false})
-          .then(({data})=>{setClients(data||[]);setLoading(false);});
-      },[]);
-      const filtered=clients.filter(c=>(c.full_name||'').toLowerCase().includes(search.toLowerCase())||(c.email||'').toLowerCase().includes(search.toLowerCase()));
-      const pc={starter:C.blue,performance:C.gold,vip:'#b48cff'};
+    // ── Clients Azeoo ─────────────────────────────────────────────────────────
+    function ClientsAzeoo() {
+      const [search,setSearch] = useState('');
+      const [filterObj,setFilterObj] = useState('');
+      const [filterGrp,setFilterGrp] = useState('');
+      const goalColors = {'Lose Weight':C.blue,'Build Muscle':C.green,'Sculpt Your Body':C.gold,'Get Fit':C.purple};
+      const niveauColors = {'Advanced':C.green,'Intermediate':C.gold,'Beginner':C.blue,'—':C.muted};
+      const filtered = AZEOO_CLIENTS.filter(c=>{
+        const s = search.toLowerCase();
+        return (!s || c.nom.toLowerCase().includes(s) || c.email.toLowerCase().includes(s))
+          && (!filterObj || c.objectif===filterObj)
+          && (!filterGrp || c.groupe===filterGrp);
+      });
+      const groupes = [...new Set(AZEOO_CLIENTS.map(c=>c.groupe))].sort();
+      const objectifs = [...new Set(AZEOO_CLIENTS.map(c=>c.objectif).filter(o=>o!=='—'))].sort();
+
       return h('div',null,
-        h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:24,color:C.white}},'Clients'),
-        h('input',{style:{...inp,marginBottom:20},placeholder:'🔍 Rechercher...',value:search,onChange:e=>setSearch(e.target.value)}),
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:24}},
+          h('div',null,
+            h('h1',{style:{fontSize:24,fontWeight:700,color:C.white}},'Clients Azeoo'),
+            h('p',{style:{color:C.muted,fontSize:14,marginTop:4}},`${AZEOO_CLIENTS.length} clients · importés depuis tayafitness.azeoo.com`)
+          ),
+          h('div',{style:{fontSize:12,color:C.muted,background:`${C.blue}22`,padding:'6px 12px',borderRadius:8}},`✅ Sync. le ${new Date().toLocaleDateString('fr-FR')}`)
+        ),
+        // Filters
+        h('div',{style:{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}},
+          h('input',{style:{...inp,width:240},placeholder:'🔍 Rechercher...',value:search,onChange:e=>setSearch(e.target.value)}),
+          h('select',{style:{...inp,width:180},value:filterObj,onChange:e=>setFilterObj(e.target.value)},
+            h('option',{value:''},'Tous objectifs'),
+            ...objectifs.map(o=>h('option',{key:o,value:o},o))
+          ),
+          h('select',{style:{...inp,width:160},value:filterGrp,onChange:e=>setFilterGrp(e.target.value)},
+            h('option',{value:''},'Tous groupes'),
+            ...groupes.map(g=>h('option',{key:g,value:g},g))
+          )
+        ),
+        // Stats row
+        h('div',{style:{display:'flex',gap:10,marginBottom:20,flexWrap:'wrap'}},
+          ...Object.entries({'Lose Weight':C.blue,'Build Muscle':C.green,'Sculpt Your Body':C.gold,'Get Fit':C.purple}).map(([obj,color])=>{
+            const n=AZEOO_CLIENTS.filter(c=>c.objectif===obj).length;
+            return h('div',{key:obj,style:{background:`${color}15`,border:`1px solid ${color}33`,borderRadius:8,padding:'8px 14px',fontSize:12}},
+              h('span',{style:{color}},'● '),
+              h('span',{style:{color:C.white,fontWeight:600}},obj),
+              h('span',{style:{color:C.muted,marginLeft:6}},n)
+            );
+          })
+        ),
+        // Table
         h('div',{style:card},
-          loading?h('p',{style:{color:C.muted}},'Chargement...'):
           h('table',{style:{width:'100%',borderCollapse:'collapse'}},
-            h('thead',null,h('tr',null,...['Nom','Email','Plan','Statut','Date'].map(l=>h('th',{key:l,style:th},l)))),
-            h('tbody',null,...(filtered.length?filtered:[]).map((c,i)=>{
-              const abo=c.abonnements?.[0];
-              return h('tr',{key:i},
-                h('td',{style:td},c.full_name||'Sans nom'),
-                h('td',{style:{...td,color:C.muted}},c.email||'—'),
-                h('td',{style:td},abo?h('span',{style:badge(pc[abo.plan]||C.muted)},abo.plan):'—'),
-                h('td',{style:td},abo?h('span',{style:badge(abo.statut==='active'?C.green:C.red)},abo.statut==='active'?'Actif':'Inactif'):'—'),
-                h('td',{style:{...td,color:C.muted}},c.created_at?new Date(c.created_at).toLocaleDateString('fr-FR'):'—')
-              );
-            }))
+            h('thead',null,h('tr',null,
+              ...['Client','Email','App','Groupe','Objectif','Niveau'].map(l=>h('th',{key:l,style:th},l))
+            )),
+            h('tbody',null,...filtered.map((c,i)=>h('tr',{key:i,style:{background:i%2?'rgba(255,255,255,0.01)':'transparent'}},
+              h('td',{style:td},h('div',{style:{fontWeight:500}},c.nom)),
+              h('td',{style:{...td,color:C.muted,fontSize:12}},c.email),
+              h('td',{style:{...td,fontSize:12}},
+                c.app.includes('Apple') && h('span',{style:{marginRight:4}},'🍎'),
+                c.app.includes('Android') && h('span',null,'🤖')
+              ),
+              h('td',{style:td},c.groupe!=='—'?h('span',{style:badge(C.purple)},c.groupe):'—'),
+              h('td',{style:td},c.objectif!=='—'?h('span',{style:badge(goalColors[c.objectif]||C.muted)},c.objectif):'—'),
+              h('td',{style:td},c.niveau!=='—'?h('span',{style:badge(niveauColors[c.niveau]||C.muted)},c.niveau):'—')
+            )))
           )
         )
       );
     }
 
+    // ── Programmes ────────────────────────────────────────────────────────────
+    function Programmes() {
+      const [filter,setFilter] = useState('');
+      const goalColors = {'Lose Weight':C.blue,'Build Muscle':C.green,'Sculpt Your Body':C.gold,'Get Fit':C.purple};
+      const filtered = filter ? PROGRAMMES.filter(p=>p.objectif.includes(filter)) : PROGRAMMES;
+
+      return h('div',null,
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}},
+          h('div',null,
+            h('h1',{style:{fontSize:24,fontWeight:700,color:C.white}},'Programmes'),
+            h('p',{style:{color:C.muted,fontSize:14,marginTop:4}},`${PROGRAMMES.length} programmes · importés depuis Azeoo Taya Fitness`)
+          ),
+          h('a',{href:'https://tayafitness.azeoo.com/programs',target:'_blank',style:{...btn,textDecoration:'none',fontSize:13,padding:'10px 18px'}},'Gérer sur Azeoo →')
+        ),
+        // Filter buttons
+        h('div',{style:{display:'flex',gap:8,marginBottom:24,flexWrap:'wrap'}},
+          ...[['','Tous',C.white],['Sculpt Your Body','Sculpt',C.gold],['Lose Weight','Lose Weight',C.blue],['Build Muscle','Build Muscle',C.green],['Get Fit','Get Fit',C.purple]].map(([val,label,color])=>
+            h('button',{key:val,onClick:()=>setFilter(val),style:{background:'transparent',color:filter===val?color:C.muted,border:`1px solid ${filter===val?color:C.border}`,borderRadius:8,padding:'7px 14px',fontSize:12,cursor:'pointer',fontWeight:filter===val?600:400}},label)
+          )
+        ),
+        // Cards grid
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:20}},
+          ...filtered.map((prog,i)=>h('div',{key:i,className:'prog-card',style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:'hidden',transition:'transform 0.2s'}},
+            h('div',{style:{position:'relative',paddingBottom:'56%',overflow:'hidden',background:C.soft}},
+              h('img',{src:prog.img,alt:prog.nom,style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'},onError:e=>{e.target.style.display='none'}})
+            ),
+            h('div',{style:{padding:16}},
+              h('div',{style:{fontSize:13,fontWeight:700,color:C.white,marginBottom:8,lineHeight:1.3}},prog.nom),
+              h('div',{style:{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}},
+                h('span',{style:badge(goalColors[prog.objectif]||C.muted)},prog.objectif),
+                prog.niveau && h('span',{style:badge(C.muted)},prog.niveau)
+              ),
+              h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
+                h('span',{style:{fontSize:12,color:C.muted}},`⏱ ${prog.duree}`),
+                h('span',{style:{fontSize:14,fontWeight:700,color:C.gold}},prog.prix)
+              )
+            )
+          ))
+        )
+      );
+    }
+
+    // ── Exercices ─────────────────────────────────────────────────────────────
+    function Exercices() {
+      const [search,setSearch] = useState('');
+      const [muscle,setMuscle] = useState('');
+      const [type,setType] = useState('');
+      const [ytModal,setYtModal] = useState(null);
+
+      const types = [...new Set(EXERCISES.map(e=>e.type))].sort();
+      const filtered = EXERCISES.filter(e=>{
+        const s=search.toLowerCase();
+        return (!s||e.nom.toLowerCase().includes(s))
+          && (!muscle||e.muscles.includes(muscle))
+          && (!type||e.type===type);
+      });
+
+      const typeColors = {Bodybuilding:C.gold,Bodyweight:C.green,Stretching:C.blue,Machine:C.purple,Cardio:C.red};
+
+      return h('div',null,
+        ytModal && h('div',{className:'yt-modal',onClick:()=>setYtModal(null)},
+          h('div',{style:{textAlign:'center'},onClick:e=>e.stopPropagation()},
+            h('div',{style:{color:C.white,marginBottom:12,fontSize:16,fontWeight:600}},ytModal.nom),
+            h('iframe',{src:`https://www.youtube.com/embed/${ytModal.ytId}?autoplay=1`,allow:'autoplay; encrypted-media',allowFullScreen:true}),
+            h('button',{onClick:()=>setYtModal(null),style:{marginTop:16,background:C.card,color:C.muted,border:`1px solid ${C.border}`,borderRadius:8,padding:'8px 20px',cursor:'pointer'}},'Fermer')
+          )
+        ),
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}},
+          h('div',null,
+            h('h1',{style:{fontSize:24,fontWeight:700,color:C.white}},'Bibliothèque d\'Exercices'),
+            h('p',{style:{color:C.muted,fontSize:14,marginTop:4}},'1 104 exercices · Source Azeoo · Vidéos YouTube intégrées')
+          ),
+          h('a',{href:'https://tayafitness.azeoo.com/exercises',target:'_blank',style:{...btn,textDecoration:'none',fontSize:13,padding:'10px 18px'}},'Voir tout sur Azeoo →')
+        ),
+        // Filters
+        h('div',{style:{display:'flex',gap:12,marginBottom:24,flexWrap:'wrap'}},
+          h('input',{style:{...inp,width:240},placeholder:'🔍 Rechercher un exercice...',value:search,onChange:e=>setSearch(e.target.value)}),
+          h('select',{style:{...inp,width:180},value:muscle,onChange:e=>setMuscle(e.target.value)},
+            h('option',{value:''},'Tous muscles'),
+            ...ALL_MUSCLES.map(m=>h('option',{key:m,value:m},m))
+          ),
+          h('select',{style:{...inp,width:160},value:type,onChange:e=>setType(e.target.value)},
+            h('option',{value:''},'Tous types'),
+            ...types.map(t=>h('option',{key:t,value:t},t))
+          )
+        ),
+        h('p',{style:{color:C.muted,fontSize:13,marginBottom:16}},`${filtered.length} exercice(s) affichés · Cliquez sur ▶ pour visionner la vidéo`),
+        // Cards grid
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))',gap:16}},
+          ...filtered.map((exo,i)=>h('div',{key:i,className:'exo-card',style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,overflow:'hidden',transition:'transform 0.2s'},
+            onClick:()=>exo.ytId && setYtModal(exo)},
+            h('div',{style:{position:'relative',paddingBottom:'60%',background:C.soft}},
+              h('img',{src:exo.img,alt:exo.nom,style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'},onError:e=>{e.target.style.background=C.soft;e.target.style.display='none'}}),
+              exo.ytId && h('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.3)'}},
+                h('div',{style:{width:44,height:44,background:'rgba(255,0,0,0.9)',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:16}},
+                  h('span',{style:{marginLeft:3}},'▶')
+                )
+              ),
+              !exo.ytId && h('a',{href:`https://www.youtube.com/results?search_query=AZEOO+${encodeURIComponent(exo.nom)}`,target:'_blank',
+                onClick:e=>e.stopPropagation(),
+                style:{position:'absolute',bottom:8,right:8,background:'rgba(255,0,0,0.85)',color:'#fff',borderRadius:6,padding:'4px 8px',fontSize:10,textDecoration:'none',fontWeight:600}},'YT ↗')
+            ),
+            h('div',{style:{padding:12}},
+              h('div',{style:{fontSize:12,fontWeight:600,color:C.white,marginBottom:8,lineHeight:1.3}},exo.nom),
+              h('div',{style:{display:'flex',gap:4,flexWrap:'wrap'}},
+                h('span',{style:badge(typeColors[exo.type]||C.muted)},exo.type),
+                ...exo.muscles.slice(0,2).map(m=>h('span',{key:m,style:badge(C.muted)},m))
+              )
+            )
+          ))
+        )
+      );
+    }
+
+    // ── Abonnements ──────────────────────────────────────────────────────────
     function Abonnements() {
       const [abos,setAbos]=useState([]);
       const [filter,setFilter]=useState('all');
@@ -248,6 +543,7 @@
       );
     }
 
+    // ── Revenus ──────────────────────────────────────────────────────────────
     function Revenus() {
       const [abos,setAbos]=useState([]);
       const [loading,setLoading]=useState(true);
@@ -288,6 +584,7 @@
       );
     }
 
+    // ── Emails ───────────────────────────────────────────────────────────────
     function Emails() {
       const [subs,setSubs]=useState([]);
       const [subject,setSubject]=useState('');
@@ -337,6 +634,7 @@
       );
     }
 
+    // ── Tâches ───────────────────────────────────────────────────────────────
     function Taches() {
       const [taches,setTaches]=useState([]);
       const [titre,setTitre]=useState('');
