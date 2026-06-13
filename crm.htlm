@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Taya CRM</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18",
+      "react/": "https://esm.sh/react@18/",
+      "react-dom": "https://esm.sh/react-dom@18",
+      "react-dom/client": "https://esm.sh/react-dom@18/client",
+      "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
+    }
+  }
+  </script>
+  <style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module">
+    import { useState, useEffect } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import { createClient } from '@supabase/supabase-js';
+    import { createElement as h } from 'react';
+
+    const sb = createClient(
+      'https://esylzsacjkimcqxllhwd.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzeWx6c2FjamtpbWNxeGxsaHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDE3MzEsImV4cCI6MjA5NTY3NzczMX0.3BZsEh6IaFqKHsW9MX3mhxWbvSHEcAqKhyOrJFZGAoA'
+    );
+
+    const ADMIN = 'contact@tayafitness.com';
+    const C = { bg:'#0d1b2a',card:'#16273a',soft:'#122033',gold:'#ff6b4a',white:'#f0f4f8',muted:'rgba(220,232,244,0.55)',border:'rgba(255,255,255,0.07)',green:'#3ecf8e',red:'#ff4d6a',blue:'#4d9fff' };
+    const btn = {background:`linear-gradient(135deg,${C.gold},#e5432f)`,color:'#fff',border:'none',borderRadius:10,padding:'12px 24px',fontWeight:600,cursor:'pointer',fontSize:14};
+    const inp = {background:'rgba(255,255,255,0.05)',border:`1px solid ${C.border}`,borderRadius:10,color:C.white,padding:'12px 16px',fontSize:14,width:'100%',outline:'none'};
+    const card = {background:C.card,border:`1px solid ${C.border}`,borderRadius:16,padding:24};
+    const th = {padding:'12px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.muted,borderBottom:`1px solid ${C.border}`};
+    const td = {padding:'14px 16px',fontSize:14,color:C.white,borderBottom:`1px solid ${C.border}`};
+    const badge = (c) => ({background:`${c}22`,color:c,fontSize:12,fontWeight:600,padding:'4px 10px',borderRadius:100,display:'inline-block'});
+
+    const TABS = [
+      {id:'dashboard',icon:'📊',label:'Dashboard'},
+      {id:'clients',icon:'👥',label:'Clients'},
+      {id:'abonnements',icon:'💳',label:'Abonnements'},
+      {id:'revenus',icon:'💰',label:'Revenus'},
+      {id:'emails',icon:'📧',label:'Campagnes mail'},
+      {id:'taches',icon:'✅',label:'Tâches'},
+    ];
+
+    function App() {
+      const [user, setUser] = useState(null);
+      const [tab, setTab] = useState('dashboard');
+      const [loading, setLoading] = useState(true);
+      const [loginLoading, setLoginLoading] = useState(false);
+      const [err, setErr] = useState('');
+
+      useEffect(() => {
+        sb.auth.getSession().then(({data:{session}}) => {
+          if (session?.user) setUser(session.user);
+          setLoading(false);
+        });
+        const {data:{subscription}} = sb.auth.onAuthStateChange((_,session) => {
+          setUser(session?.user || null);
+        });
+        return () => subscription.unsubscribe();
+      }, []);
+
+      async function loginGoogle() {
+        setLoginLoading(true); setErr('');
+        const {error} = await sb.auth.signInWithOAuth({
+          provider:'google',
+          options:{redirectTo: window.location.href}
+        });
+        if (error) { setErr('Erreur de connexion.'); setLoginLoading(false); }
+      }
+
+      if (loading) return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',color:C.muted}},'Chargement...');
+
+      if (!user) return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'Inter,sans-serif'}},
+        h('div',{style:{width:400}},
+          h('div',{style:{textAlign:'center',marginBottom:40}},
+            h('div',{style:{fontSize:32,fontWeight:800,letterSpacing:-1}},
+              h('span',{style:{color:C.white}},'Taya'),
+              h('span',{style:{color:C.gold}},'CRM')
+            ),
+            h('p',{style:{color:C.muted,marginTop:8,fontSize:14}},'Espace de gestion — Sarah Paulmier')
+          ),
+          h('div',{style:card},
+            h('p',{style:{color:C.muted,fontSize:14,marginBottom:24,textAlign:'center'}},'Connecte-toi avec ton compte Google'),
+            err && h('div',{style:{background:`${C.red}22`,color:C.red,padding:'10px 14px',borderRadius:8,marginBottom:16,fontSize:13}},err),
+            h('form',{onSubmit:loginEmail},
+              h('div',{style:{marginBottom:16}},
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:8}},'Email'),
+                h('input',{style:inp,type:'email',value:email,onChange:e=>setEmail(e.target.value),required:true})
+              ),
+              h('div',{style:{marginBottom:24}},
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:8}},'Mot de passe'),
+                h('input',{style:inp,type:'password',value:pass,onChange:e=>setPass(e.target.value),placeholder:'••••••••',required:true})
+              ),
+              h('button',{style:{...btn,width:'100%',padding:14},disabled:loading},loading?'Connexion...':'Se connecter')
+            )
+          )
+        )
+      );
+
+      const pages = {dashboard:Dashboard,clients:Clients,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches};
+      const Page = pages[tab] || Dashboard;
+
+      return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',fontFamily:'Inter,sans-serif'}},
+        // Sidebar
+        h('div',{style:{width:220,background:C.soft,borderRight:`1px solid ${C.border}`,display:'flex',flexDirection:'column',minHeight:'100vh',flexShrink:0}},
+          h('div',{style:{padding:'28px 20px 20px',borderBottom:`1px solid ${C.border}`}},
+            h('div',{style:{fontSize:22,fontWeight:800}},
+              h('span',{style:{color:C.white}},'Taya'),
+              h('span',{style:{color:C.gold}},'CRM')
+            ),
+            h('div',{style:{fontSize:12,color:C.muted,marginTop:4}},user.email)
+          ),
+          h('nav',{style:{flex:1,padding:'12px 10px'}},
+            ...TABS.map(t => h('button',{key:t.id,onClick:()=>setTab(t.id),style:{width:'100%',display:'flex',alignItems:'center',gap:10,padding:'11px 12px',borderRadius:10,border:'none',background:tab===t.id?`rgba(255,107,74,0.12)`:'transparent',color:tab===t.id?C.gold:C.muted,fontWeight:tab===t.id?600:400,fontSize:14,cursor:'pointer',textAlign:'left',marginBottom:2}},
+              h('span',null,t.icon), t.label
+            ))
+          ),
+          h('div',{style:{padding:'16px 10px',borderTop:`1px solid ${C.border}`}},
+            h('button',{onClick:()=>sb.auth.signOut(),style:{width:'100%',background:'transparent',color:C.muted,border:`1px solid ${C.border}`,borderRadius:10,padding:'10px',fontSize:13,cursor:'pointer'}},'Déconnexion')
+          )
+        ),
+        // Main
+        h('main',{style:{flex:1,padding:40,overflowY:'auto',maxHeight:'100vh',color:C.white}},
+          h(Page,null)
+        )
+      );
+    }
+
+    function Dashboard() {
+      const [stats,setStats] = useState({clients:0,actifs:0,revenus:0,newsletter:0});
+      const [recent,setRecent] = useState([]);
+      useEffect(()=>{
+        async function load(){
+          const [{count:cl},{count:ac},{count:nl},{data:ab},{data:rc}] = await Promise.all([
+            sb.from('profiles').select('*',{count:'exact',head:true}),
+            sb.from('abonnements').select('*',{count:'exact',head:true}).eq('statut','active'),
+            sb.from('newsletter').select('*',{count:'exact',head:true}),
+            sb.from('abonnements').select('plan').eq('statut','active'),
+            sb.from('profiles').select('full_name,email,created_at').order('created_at',{ascending:false}).limit(5),
+          ]);
+          const prix={starter:49,performance:99,vip:199};
+          const mrr=(ab||[]).reduce((s,a)=>s+(prix[a.plan]||0),0);
+          setStats({clients:cl||0,actifs:ac||0,revenus:mrr,newsletter:nl||0});
+          setRecent(rc||[]);
+        }
+        load();
+      },[]);
+      const stats_cards=[
+        {label:'Clients total',value:stats.clients,color:C.blue},
+        {label:'Abonnés actifs',value:stats.actifs,color:C.green},
+        {label:'MRR',value:`${stats.revenus}€`,color:C.gold},
+        {label:'Newsletter',value:stats.newsletter,color:'#b48cff'},
+      ];
+      return h('div',null,
+        h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:8,color:C.white}},'Dashboard'),
+        h('p',{style:{color:C.muted,fontSize:14,marginBottom:32}},'Vue d\'ensemble de ton activité'),
+        h('div',{style:{display:'flex',gap:16,marginBottom:32}},
+          ...stats_cards.map(s=>h('div',{key:s.label,style:{background:C.soft,border:`1px solid ${C.border}`,borderRadius:12,padding:'20px 24px',flex:1}},
+            h('div',{style:{fontSize:28,fontWeight:800,color:s.color}},s.value),
+            h('div',{style:{fontSize:13,color:C.muted,marginTop:4}},s.label)
+          ))
+        ),
+        h('div',{style:card},
+          h('h3',{style:{fontSize:16,fontWeight:600,marginBottom:20,color:C.white}},'Derniers clients'),
+          h('table',{style:{width:'100%',borderCollapse:'collapse'}},
+            h('thead',null,h('tr',null,h('th',{style:th},'Nom'),h('th',{style:th},'Email'),h('th',{style:th},'Date'))),
+            h('tbody',null,...(recent.length?recent:[{full_name:'—',email:'—',created_at:null}]).map((c,i)=>
+              h('tr',{key:i},
+                h('td',{style:td},c.full_name||'—'),
+                h('td',{style:{...td,color:C.muted}},c.email||'—'),
+                h('td',{style:{...td,color:C.muted}},c.created_at?new Date(c.created_at).toLocaleDateString('fr-FR'):'—')
+              )
+            ))
+          )
+        )
+      );
+    }
+
+    function Clients() {
+      const [clients,setClients]=useState([]);
+      const [search,setSearch]=useState('');
+      const [loading,setLoading]=useState(true);
+      useEffect(()=>{
+        sb.from('profiles').select('*,abonnements(plan,statut)').order('created_at',{ascending:false})
+          .then(({data})=>{setClients(data||[]);setLoading(false);});
+      },[]);
+      const filtered=clients.filter(c=>(c.full_name||'').toLowerCase().includes(search.toLowerCase())||(c.email||'').toLowerCase().includes(search.toLowerCase()));
+      const pc={starter:C.blue,performance:C.gold,vip:'#b48cff'};
+      return h('div',null,
+        h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:24,color:C.white}},'Clients'),
+        h('input',{style:{...inp,marginBottom:20},placeholder:'🔍 Rechercher...',value:search,onChange:e=>setSearch(e.target.value)}),
+        h('div',{style:card},
+          loading?h('p',{style:{color:C.muted}},'Chargement...'):
+          h('table',{style:{width:'100%',borderCollapse:'collapse'}},
+            h('thead',null,h('tr',null,...['Nom','Email','Plan','Statut','Date'].map(l=>h('th',{key:l,style:th},l)))),
+            h('tbody',null,...(filtered.length?filtered:[]).map((c,i)=>{
+              const abo=c.abonnements?.[0];
+              return h('tr',{key:i},
+                h('td',{style:td},c.full_name||'Sans nom'),
+                h('td',{style:{...td,color:C.muted}},c.email||'—'),
+                h('td',{style:td},abo?h('span',{style:badge(pc[abo.plan]||C.muted)},abo.plan):'—'),
+                h('td',{style:td},abo?h('span',{style:badge(abo.statut==='active'?C.green:C.red)},abo.statut==='active'?'Actif':'Inactif'):'—'),
+                h('td',{style:{...td,color:C.muted}},c.created_at?new Date(c.created_at).toLocaleDateString('fr-FR'):'—')
+              );
+            }))
+          )
+        )
+      );
+    }
+
+    function Abonnements() {
+      const [abos,setAbos]=useState([]);
+      const [filter,setFilter]=useState('all');
+      const [loading,setLoading]=useState(true);
+      useEffect(()=>{
+        sb.from('abonnements').select('*,profiles(full_name,email)').order('created_at',{ascending:false})
+          .then(({data})=>{setAbos(data||[]);setLoading(false);});
+      },[]);
+      const filtered=abos.filter(a=>filter==='all'||a.statut===filter);
+      const pc={starter:C.blue,performance:C.gold,vip:'#b48cff'};
+      const counts={all:abos.length,active:abos.filter(a=>a.statut==='active').length,cancelled:abos.filter(a=>a.statut==='cancelled').length,past_due:abos.filter(a=>a.statut==='past_due').length};
+      return h('div',null,
+        h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:24,color:C.white}},'Abonnements'),
+        h('div',{style:{display:'flex',gap:10,marginBottom:24}},
+          ...['all','active','past_due','cancelled'].map((v,_,a)=>{
+            const labels={all:'Tous',active:'Actifs',past_due:'En retard',cancelled:'Annulés'};
+            const colors={all:C.white,active:C.green,past_due:C.gold,cancelled:C.red};
+            return h('button',{key:v,onClick:()=>setFilter(v),style:{background:'transparent',color:filter===v?colors[v]:C.muted,border:`1px solid ${filter===v?colors[v]:C.border}`,borderRadius:10,padding:'8px 16px',fontSize:13,cursor:'pointer'}},`${labels[v]} (${counts[v]||0})`);
+          })
+        ),
+        h('div',{style:card},
+          loading?h('p',{style:{color:C.muted}},'Chargement...'):
+          h('table',{style:{width:'100%',borderCollapse:'collapse'}},
+            h('thead',null,h('tr',null,...['Client','Plan','Statut','Renouvellement'].map(l=>h('th',{key:l,style:th},l)))),
+            h('tbody',null,...filtered.map((a,i)=>h('tr',{key:i},
+              h('td',{style:td},h('div',null,a.profiles?.full_name||'—',h('div',{style:{fontSize:12,color:C.muted}},a.profiles?.email||''))),
+              h('td',{style:td},h('span',{style:badge(pc[a.plan]||C.muted)},a.plan)),
+              h('td',{style:td},h('span',{style:badge(a.statut==='active'?C.green:a.statut==='past_due'?C.gold:C.red)},a.statut)),
+              h('td',{style:{...td,color:C.muted}},a.current_period_end?new Date(a.current_period_end).toLocaleDateString('fr-FR'):'—')
+            )))
+          )
+        )
+      );
+    }
+
+    function Revenus() {
+      const [abos,setAbos]=useState([]);
+      const [loading,setLoading]=useState(true);
+      useEffect(()=>{
+        sb.from('abonnements').select('plan,statut').eq('statut','active')
+          .then(({data})=>{setAbos(data||[]);setLoading(false);});
+      },[]);
+      const px={starter:49,performance:99,vip:199};
+      const mrr=abos.reduce((s,a)=>s+(px[a.plan]||0),0);
+      const cnt={starter:0,performance:0,vip:0};
+      abos.forEach(a=>{if(cnt[a.plan]!==undefined)cnt[a.plan]++;});
+      return h('div',null,
+        h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:24,color:C.white}},'Revenus'),
+        loading?h('p',{style:{color:C.muted}},'Chargement...'):h('div',null,
+          h('div',{style:{display:'flex',gap:16,marginBottom:32}},
+            ...[
+              {label:'MRR mensuel',value:`${mrr}€`,color:C.green},
+              {label:'ARR annuel projeté',value:`${mrr*12}€`,color:C.blue},
+              {label:'Abonnés actifs',value:abos.length,color:C.gold},
+            ].map(s=>h('div',{key:s.label,style:{background:C.soft,border:`1px solid ${C.border}`,borderRadius:12,padding:'20px 24px',flex:1}},
+              h('div',{style:{fontSize:28,fontWeight:800,color:s.color}},s.value),
+              h('div',{style:{fontSize:13,color:C.muted,marginTop:4}},s.label)
+            ))
+          ),
+          h('div',{style:card},
+            h('h3',{style:{fontSize:16,fontWeight:600,marginBottom:20,color:C.white}},'Répartition par plan'),
+            ...['starter','performance','vip'].map(plan=>h('div',{key:plan,style:{marginBottom:16}},
+              h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:6}},
+                h('span',{style:{fontSize:14,textTransform:'capitalize',color:C.white}},plan),
+                h('span',{style:{fontSize:14,color:C.muted}},`${cnt[plan]} × ${px[plan]}€ = `,h('strong',{style:{color:C.gold}},`${cnt[plan]*px[plan]}€/mois`))
+              ),
+              h('div',{style:{background:C.border,borderRadius:100,height:6}},
+                h('div',{style:{background:C.gold,borderRadius:100,height:6,width:mrr>0?`${cnt[plan]*px[plan]/mrr*100}%`:'0%'}})
+              )
+            ))
+          )
+        )
+      );
+    }
+
+    function Emails() {
+      const [subs,setSubs]=useState([]);
+      const [subject,setSubject]=useState('');
+      const [body,setBody]=useState('');
+      const [sending,setSending]=useState(false);
+      const [msg,setMsg]=useState('');
+      useEffect(()=>{
+        sb.from('newsletter').select('email,created_at').order('created_at',{ascending:false}).then(({data})=>setSubs(data||[]));
+      },[]);
+      async function send(e){
+        e.preventDefault();setSending(true);
+        await sb.from('email_log').insert({subject,body,recipients:subs.length,statut:'sent',created_at:new Date().toISOString()});
+        setMsg(`Campagne "${subject}" enregistrée — ${subs.length} destinataires`);
+        setSubject('');setBody('');setSending(false);
+        setTimeout(()=>setMsg(''),5000);
+      }
+      return h('div',null,
+        h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:8,color:C.white}},'Campagnes mail'),
+        h('p',{style:{color:C.muted,fontSize:14,marginBottom:24}},`${subs.length} abonnés à la newsletter`),
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24}},
+          h('div',{style:card},
+            h('h3',{style:{fontSize:16,fontWeight:600,marginBottom:20,color:C.white}},'Nouvelle campagne'),
+            h('form',{onSubmit:send},
+              h('div',{style:{marginBottom:16}},
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.18em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Objet'),
+                h('input',{style:inp,value:subject,onChange:e=>setSubject(e.target.value),placeholder:'Ex: Nouveaux programmes 🔥',required:true})
+              ),
+              h('div',{style:{marginBottom:16}},
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.18em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Message'),
+                h('textarea',{style:{...inp,resize:'vertical'},rows:8,value:body,onChange:e=>setBody(e.target.value),placeholder:'Bonjour,\n\nÉcris ton message ici...',required:true})
+              ),
+              msg&&h('div',{style:{color:C.green,fontSize:13,marginBottom:12}},msg),
+              h('button',{style:btn,disabled:sending||subs.length===0},sending?'Envoi...':'Envoyer la campagne')
+            )
+          ),
+          h('div',{style:card},
+            h('h3',{style:{fontSize:16,fontWeight:600,marginBottom:16,color:C.white}},'Abonnés récents'),
+            h('div',{style:{maxHeight:400,overflowY:'auto'}},
+              ...subs.slice(0,30).map((s,i)=>h('div',{key:i,style:{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:`1px solid ${C.border}`,fontSize:13}},
+                h('span',{style:{color:C.white}},s.email),
+                h('span',{style:{color:C.muted}},new Date(s.created_at).toLocaleDateString('fr-FR'))
+              )),
+              subs.length===0&&h('p',{style:{color:C.muted,fontSize:14}},'Aucun abonné.')
+            )
+          )
+        )
+      );
+    }
+
+    function Taches() {
+      const [taches,setTaches]=useState([]);
+      const [titre,setTitre]=useState('');
+      const [prio,setPrio]=useState('normale');
+      useEffect(()=>{load();}, []);
+      async function load(){const {data}=await sb.from('taches').select('*').order('created_at',{ascending:false});setTaches(data||[]);}
+      async function add(e){e.preventDefault();if(!titre.trim())return;await sb.from('taches').insert({titre,statut:'todo',priorite:prio});setTitre('');load();}
+      async function toggle(id,done){await sb.from('taches').update({statut:done?'todo':'done'}).eq('id',id);load();}
+      async function del(id){await sb.from('taches').delete().eq('id',id);load();}
+      const pc={haute:C.red,normale:C.gold,basse:C.blue};
+      const todo=taches.filter(t=>t.statut!=='done');
+      const done=taches.filter(t=>t.statut==='done');
+      return h('div',null,
+        h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:24,color:C.white}},'Tâches'),
+        h('div',{style:{...card,marginBottom:24}},
+          h('form',{onSubmit:add,style:{display:'flex',gap:12}},
+            h('input',{style:{...inp,flex:1},value:titre,onChange:e=>setTitre(e.target.value),placeholder:'Nouvelle tâche...'}),
+            h('select',{style:{...inp,width:140},value:prio,onChange:e=>setPrio(e.target.value)},
+              h('option',{value:'haute'},'🔴 Haute'),
+              h('option',{value:'normale'},'🟡 Normale'),
+              h('option',{value:'basse'},'🔵 Basse')
+            ),
+            h('button',{style:btn},'Ajouter')
+          )
+        ),
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24}},
+          h('div',{style:card},
+            h('h3',{style:{fontSize:15,fontWeight:600,marginBottom:16,color:C.white}},`À faire (${todo.length})`),
+            todo.length===0?h('p',{style:{color:C.muted,fontSize:14}},'Tout est fait 🎉'):
+            todo.map((t,i)=>h('div',{key:i,style:{display:'flex',alignItems:'center',gap:12,padding:'12px 0',borderBottom:`1px solid ${C.border}`}},
+              h('button',{onClick:()=>toggle(t.id,false),style:{width:20,height:20,borderRadius:4,border:`2px solid ${C.border}`,background:'transparent',cursor:'pointer',flexShrink:0}}),
+              h('span',{style:{flex:1,fontSize:14,color:C.white}},t.titre),
+              h('span',{style:badge(pc[t.priorite]||C.muted)},t.priorite),
+              h('button',{onClick:()=>del(t.id),style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:16}},'✕')
+            ))
+          ),
+          h('div',{style:card},
+            h('h3',{style:{fontSize:15,fontWeight:600,marginBottom:16,color:C.white}},`Terminées (${done.length})`),
+            done.length===0?h('p',{style:{color:C.muted,fontSize:14}},'Aucune tâche terminée.'):
+            done.map((t,i)=>h('div',{key:i,style:{display:'flex',alignItems:'center',gap:12,padding:'12px 0',borderBottom:`1px solid ${C.border}`}},
+              h('button',{onClick:()=>toggle(t.id,true),style:{width:20,height:20,borderRadius:4,border:'none',background:C.green,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,color:'#fff'}},'✓'),
+              h('span',{style:{flex:1,fontSize:14,textDecoration:'line-through',color:C.muted}},t.titre),
+              h('button',{onClick:()=>del(t.id),style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:16}},'✕')
+            ))
+          )
+        )
+      );
+    }
+
+    createRoot(document.getElementById('root')).render(h(App));
+  </script>
+</body>
+</html>
