@@ -376,6 +376,11 @@
       const [selWeek,setSelWeek] = useState(1);
       const [progExos,setProgExos] = useState([]);
       const [loadingExos,setLoadingExos] = useState(false);
+      // Workouts (séances nommées par jour)
+      const [workouts,setWorkouts] = useState([]); // [{id,programme_id,week_number,day_number,name}]
+      const [selectedDay,setSelectedDay] = useState(null); // {week,day} or null
+      const [editWorkoutName,setEditWorkoutName] = useState(false);
+      const [workoutNameDraft,setWorkoutNameDraft] = useState('');
       // Programme CRUD
       const EP = {titre:'',description:'',description_courte:'',image_url:'',prix:'',prix_promo:'',categorie:'musculation',niveau:'debutant',duree_heures:12,actif:true};
       const [createOpen,setCreateOpen] = useState(false);
@@ -426,21 +431,56 @@
         setSaving(false);setTimeout(()=>setMsg(''),4000);
       }
 
-      // ── Exercise CRUD ──
-      async function loadProgExos(id){
+      // ── Exercise & Workout CRUD ──
+      async function loadProgData(id){
         setLoadingExos(true);
-        const {data}=await sb.from('programme_exercises')
-          .select('*, exercise:exercises(id,name,youtube_id,image_filename,tags)')
-          .eq('programme_id',id).order('week_number').order('day_number').order('order_index');
-        setProgExos(data||[]);setLoadingExos(false);
+        const [{data:exData},{data:wData}] = await Promise.all([
+          sb.from('programme_exercises').select('*, exercise:exercises(id,name,youtube_id,image_filename,tags)')
+            .eq('programme_id',id).order('week_number').order('day_number').order('order_index'),
+          sb.from('programme_workouts').select('*').eq('programme_id',id).order('week_number').order('day_number')
+        ]);
+        setProgExos(exData||[]);
+        setWorkouts(wData||[]);
+        setLoadingExos(false);
       }
-      function handleSelectProg(p){setSelectedProg(p);setSelWeek(1);loadProgExos(p.id);setMsg('');}
-      async function openAddExo(wk){
+      function handleSelectProg(p){setSelectedProg(p);setSelWeek(1);setSelectedDay(null);loadProgData(p.id);setMsg('');}
+
+      // Créer ou mettre à jour le nom d'une séance
+      async function saveWorkoutName(week,day,name){
+        setSaving(true);
+        const existing = workouts.find(w=>w.week_number===week&&w.day_number===day);
+        if(existing){
+          const{data,error}=await sb.from('programme_workouts').update({name}).eq('id',existing.id).select().single();
+          if(!error&&data) setWorkouts(prev=>prev.map(w=>w.id===data.id?data:w));
+          else setMsg('❌ '+(error?.message||'Erreur'));
+        } else {
+          const{data,error}=await sb.from('programme_workouts').insert({programme_id:selectedProg.id,week_number:week,day_number:day,name}).select().single();
+          if(!error&&data) setWorkouts(prev=>[...prev,data]);
+          else setMsg('❌ '+(error?.message||'Erreur'));
+        }
+        setSaving(false);setEditWorkoutName(false);setTimeout(()=>setMsg(''),4000);
+      }
+
+      // Supprimer tous les exos d'un jour
+      async function deleteWorkoutDay(week,day){
+        if(!confirm(`Supprimer toute la séance Semaine ${week} / Séance ${day} ?`))return;
+        setSaving(true);
+        const ids=progExos.filter(e=>e.week_number===week&&e.day_number===day).map(e=>e.id);
+        if(ids.length) await sb.from('programme_exercises').delete().in('id',ids);
+        const wo=workouts.find(w=>w.week_number===week&&w.day_number===day);
+        if(wo) await sb.from('programme_workouts').delete().eq('id',wo.id);
+        setProgExos(prev=>prev.filter(e=>!(e.week_number===week&&e.day_number===day)));
+        setWorkouts(prev=>prev.filter(w=>!(w.week_number===week&&w.day_number===day)));
+        setSelectedDay(null);setSaving(false);
+      }
+
+      async function openAddExo(wk,dk){
         const w = wk!==undefined?wk:selWeek;
+        const d = dk!==undefined?dk:(selectedDay?.day||1);
         if(!allExos.length){const{data}=await sb.from('exercises').select('id,name,tags').order('name').limit(2000);setAllExos(data||[]);}
-        const wExos=progExos.filter(e=>(e.week_number||1)===w);
+        const wdExos=progExos.filter(e=>(e.week_number||1)===w&&(e.day_number||1)===d);
         setAddExoOpen(true);setExoSearch('');
-        setAForm({exercise_id:'',week_number:w,day_number:1,order_index:wExos.length+1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''});
+        setAForm({exercise_id:'',week_number:w,day_number:d,order_index:wdExos.length+1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''});
       }
       async function handleAddExo(){
         if(!aForm.exercise_id){setMsg('❌ Sélectionnez un exercice');return;}
@@ -450,7 +490,9 @@
           .select('*, exercise:exercises(id,name,youtube_id,image_filename,tags)').single();
         if(!error&&data){
           setProgExos(prev=>[...prev,data].sort((a,b)=>(a.week_number-b.week_number)||((a.day_number||0)-(b.day_number||0))||(a.order_index-b.order_index)));
-          setSelWeek(aForm.week_number);setAddExoOpen(false);setMsg('✅ Exercice ajouté');
+          setSelWeek(aForm.week_number);
+          setSelectedDay({week:aForm.week_number,day:aForm.day_number});
+          setAddExoOpen(false);setMsg('✅ Exercice ajouté');
         }else setMsg('❌ '+(error?.message||'Erreur'));
         setSaving(false);setTimeout(()=>setMsg(''),4000);
       }
@@ -501,7 +543,7 @@
       // ── Add Exercise Modal (shared) ──
       const AddExoModal=()=>h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
         h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:560}},
-          h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:16}},`Ajouter un exercice — Semaine ${aForm.week_number}`),
+          h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:16}},`Ajouter un exercice — Sem. ${aForm.week_number} / Jour ${aForm.day_number}`),
           h('input',{placeholder:'Rechercher un exercice...',value:exoSearch,onChange:e=>setExoSearch(e.target.value),style:{...inp,marginBottom:8}}),
           h('div',{style:{maxHeight:180,overflowY:'auto',marginBottom:12,border:`1px solid ${C.border}`,borderRadius:10}},
             filtExos.length===0?h('div',{style:{padding:20,textAlign:'center',color:C.muted,fontSize:13}},'Aucun résultat')
@@ -541,12 +583,116 @@
 
       // ── DETAIL VIEW ──
       if (selectedProg) {
-        const weeks=[...new Set(progExos.map(e=>e.week_number||1))].sort((a,b)=>a-b);
-        if(!weeks.length)weeks.push(1);
-        const weekExos=progExos.filter(e=>(e.week_number||1)===selWeek);
-        const byDay={};
-        weekExos.forEach(pe=>{const d=pe.day_number||1;if(!byDay[d])byDay[d]=[];byDay[d].push(pe);});
+        const allWeeks=[...new Set(progExos.map(e=>e.week_number||1))].sort((a,b)=>a-b);
+        // Also include weeks from workouts table
+        workouts.forEach(w=>{if(!allWeeks.includes(w.week_number))allWeeks.push(w.week_number);});
+        allWeeks.sort((a,b)=>a-b);
+        if(!allWeeks.length)allWeeks.push(1);
+        const weeks=allWeeks;
 
+        const DAYS_FR=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+
+        // Workout detail panel (when a day is selected)
+        if(selectedDay){
+          const {week:sw,day:sd}=selectedDay;
+          const dayExos=progExos.filter(e=>(e.week_number||1)===sw&&(e.day_number||1)===sd).sort((a,b)=>a.order_index-b.order_index);
+          const workout=workouts.find(w=>w.week_number===sw&&w.day_number===sd);
+          const woName=workout?.name||`Séance ${sd}`;
+          const totalSets=dayExos.reduce((s,e)=>s+(e.sets||0),0);
+
+          return h('div',null,
+            // Top nav
+            h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:18,flexWrap:'wrap'}},
+              h('button',{onClick:()=>setSelectedDay(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'← Séances'),
+              h('div',{style:{fontSize:13,color:C.muted}},`${selectedProg.titre} · Semaine ${sw}`),
+              h('div',{style:{flex:1}}),
+              isAdmin&&h('button',{onClick:()=>{setAddExoOpen(true);setExoSearch('');if(!allExos.length)sb.from('exercises').select('id,name,tags').order('name').limit(2000).then(({data})=>setAllExos(data||[]));setAForm({exercise_id:'',week_number:sw,day_number:sd,order_index:dayExos.length+1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''});},style:{...btn,fontSize:13,padding:'9px 18px'}},'+ Exercice'),
+              isAdmin&&h('button',{onClick:()=>deleteWorkoutDay(sw,sd),style:{background:'transparent',border:`1px solid ${C.red}33`,color:C.red,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'🗑 Séance')
+            ),
+            msg&&h('div',{style:{background:msg.startsWith('✅')?`${C.green}22`:`${C.red}22`,color:msg.startsWith('✅')?C.green:C.red,padding:'10px 16px',borderRadius:8,marginBottom:14,fontSize:13}},msg),
+            // Workout header card
+            h('div',{style:{...card,marginBottom:18,display:'flex',alignItems:'center',gap:16}},
+              h('div',{style:{width:46,height:46,borderRadius:12,background:`${C.gold}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,fontWeight:800,color:C.gold,flexShrink:0}},sd),
+              h('div',{style:{flex:1}},
+                editWorkoutName
+                  ? h('div',{style:{display:'flex',gap:8,alignItems:'center'}},
+                      h('input',{value:workoutNameDraft,onChange:e=>setWorkoutNameDraft(e.target.value),onKeyDown:e=>{if(e.key==='Enter')saveWorkoutName(sw,sd,workoutNameDraft);if(e.key==='Escape')setEditWorkoutName(false);},autoFocus:true,style:{...inp,fontSize:16,fontWeight:700,padding:'6px 12px',flex:1}}),
+                      h('button',{onClick:()=>saveWorkoutName(sw,sd,workoutNameDraft),disabled:saving,style:{...btn,padding:'6px 14px',fontSize:13}},saving?'...':'✓'),
+                      h('button',{onClick:()=>setEditWorkoutName(false),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'6px 12px',cursor:'pointer',fontSize:13}},'✕')
+                    )
+                  : h('div',{style:{display:'flex',alignItems:'center',gap:8}},
+                      h('div',{style:{fontSize:18,fontWeight:700,color:C.white}},woName),
+                      isAdmin&&h('button',{onClick:()=>{setWorkoutNameDraft(woName);setEditWorkoutName(true);},style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:13,padding:'2px 6px'}},'✏️')
+                    )
+              ),
+              h('div',{style:{display:'flex',gap:20,marginLeft:'auto'}},
+                h('div',{style:{textAlign:'center'}},h('div',{style:{fontSize:20,fontWeight:800,color:C.white}},dayExos.length),h('div',{style:{fontSize:10,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em'}},'Exercices')),
+                h('div',{style:{textAlign:'center'}},h('div',{style:{fontSize:20,fontWeight:800,color:C.gold}},totalSets),h('div',{style:{fontSize:10,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em'}},'Séries'))
+              )
+            ),
+            // Exercises list
+            loadingExos?h('div',{style:{color:C.muted,textAlign:'center',padding:60}},'Chargement...'):
+            dayExos.length===0
+              ?h('div',{style:{...card,textAlign:'center',padding:48,color:C.muted}},
+                  h('div',{style:{fontSize:36,marginBottom:12}},'💪'),
+                  h('div',{style:{fontWeight:600,color:C.white,marginBottom:8}}),'Aucun exercice pour cette séance',
+                  isAdmin&&h('button',{onClick:()=>{setAddExoOpen(true);setExoSearch('');if(!allExos.length)sb.from('exercises').select('id,name,tags').order('name').limit(2000).then(({data})=>setAllExos(data||[]));setAForm({exercise_id:'',week_number:sw,day_number:sd,order_index:1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''});},style:{...btn,marginTop:12,fontSize:13}},'+ Ajouter un exercice')
+                )
+              :h('div',{style:{display:'flex',flexDirection:'column',gap:10}},
+                ...dayExos.map((pe,idx)=>
+                  h('div',{key:pe.id,style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,display:'flex',alignItems:'stretch',overflow:'hidden'}},
+                    // Order badge
+                    h('div',{style:{width:36,flexShrink:0,background:C.soft,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:C.muted}},(idx+1)),
+                    // Thumbnail
+                    h('div',{style:{width:80,flexShrink:0,background:C.soft,position:'relative'}},
+                      pe.exercise?.image_filename
+                        ?h('img',{src:'https://cdn.azeoo.com/exercises/small-wide/'+pe.exercise.image_filename,style:{width:'100%',height:'100%',objectFit:'cover',display:'block',minHeight:68},onError:e=>{e.target.style.display='none'}})
+                        :h('div',{style:{width:'100%',height:68,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}},'💪')
+                    ),
+                    // Content
+                    h('div',{style:{flex:1,padding:'10px 14px',display:'flex',alignItems:'center',gap:10}},
+                      h('div',{style:{flex:1}},
+                        h('div',{style:{fontSize:14,fontWeight:600,color:C.white,marginBottom:7}},pe.exercise?.name||'—'),
+                        h('div',{style:{display:'flex',gap:14,flexWrap:'wrap',alignItems:'center'}},
+                          pe.sets&&h('div',{style:{textAlign:'center'}},
+                            h('div',{style:{fontSize:20,fontWeight:800,color:C.gold,lineHeight:1}},pe.sets),
+                            h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Séries')),
+                          (pe.sets&&pe.reps)&&h('div',{style:{color:C.muted,fontSize:16,alignSelf:'center',paddingBottom:4}},'×'),
+                          pe.reps&&h('div',{style:{textAlign:'center'}},
+                            h('div',{style:{fontSize:20,fontWeight:800,color:C.white,lineHeight:1}},pe.reps),
+                            h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Reps')),
+                          pe.charge&&h('div',{style:{textAlign:'center',borderLeft:`1px solid ${C.border}`,paddingLeft:12}},
+                            h('div',{style:{fontSize:15,fontWeight:700,color:C.blue,lineHeight:1}},pe.charge),
+                            h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Charge')),
+                          pe.rest_seconds&&h('div',{style:{textAlign:'center'}},
+                            h('div',{style:{fontSize:15,fontWeight:600,color:C.muted,lineHeight:1}},pe.rest_seconds>=60?`${Math.floor(pe.rest_seconds/60)}min${pe.rest_seconds%60?` ${pe.rest_seconds%60}s`:''}`:pe.rest_seconds+'s'),
+                            h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Repos'))
+                        ),
+                        pe.notes&&h('div',{style:{fontSize:11,color:C.muted,marginTop:6,fontStyle:'italic',borderTop:`1px solid ${C.border}`,paddingTop:5}},pe.notes)
+                      ),
+                      pe.exercise?.youtube_id&&h('a',{href:'https://www.youtube.com/watch?v='+pe.exercise.youtube_id,target:'_blank',
+                        style:{width:34,height:34,borderRadius:'50%',background:`${C.red}22`,display:'flex',alignItems:'center',justifyContent:'center',color:C.red,textDecoration:'none',fontSize:12,flexShrink:0}},'▶'),
+                      isAdmin&&h('button',{onClick:()=>handleRemoveExo(pe.id),style:{width:30,height:30,borderRadius:8,background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:12,flexShrink:0}},'🗑')
+                    )
+                  )
+                )
+              ),
+            addExoOpen&&h(AddExoModal,null),
+            editProg&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
+              h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:540}},
+                h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:14}},'Modifier le programme'),
+                ...pFields(editProg,setEditProg),
+                h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end',marginTop:10}},
+                  h('button',{onClick:()=>setEditProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 18px',cursor:'pointer'}},'Annuler'),
+                  h('button',{onClick:handleEditProg,disabled:saving,style:{...btn,opacity:saving?0.5:1}},saving?'Sauvegarde...':'Enregistrer')
+                )
+              )
+            ),
+            delProg&&h(DelProgModal,null)
+          );
+        }
+
+        // ── WEEKLY GRID VIEW (Azeoo style) ──
         return h('div',null,
           // Image header
           h('div',{style:{position:'relative',borderRadius:20,overflow:'hidden',marginBottom:18,height:160}},
@@ -568,79 +714,84 @@
               )
             )
           ),
-          // Nav
+          // Nav bar
           h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:16,flexWrap:'wrap'}},
             h('button',{onClick:()=>setSelectedProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'← Retour'),
             h('div',{style:{flex:1}}),
             isAdmin&&h('button',{onClick:()=>setEditProg({...selectedProg}),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'✏️ Éditer'),
-            isAdmin&&h('button',{onClick:()=>setDelProg(selectedProg),style:{background:'transparent',border:`1px solid ${C.red}33`,color:C.red,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'🗑'),
-            isAdmin&&h('button',{onClick:()=>openAddExo(),style:{...btn,fontSize:13,padding:'9px 18px'}},'+ Exercice')
+            isAdmin&&h('button',{onClick:()=>setDelProg(selectedProg),style:{background:'transparent',border:`1px solid ${C.red}33`,color:C.red,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'🗑')
           ),
           msg&&h('div',{style:{background:msg.startsWith('✅')?`${C.green}22`:`${C.red}22`,color:msg.startsWith('✅')?C.green:C.red,padding:'10px 16px',borderRadius:8,marginBottom:14,fontSize:13}},msg),
-          // Week tabs
-          h('div',{style:{display:'flex',gap:6,marginBottom:18,overflowX:'auto',paddingBottom:2}},
+          // Stats row
+          h('div',{style:{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}},
+            h('div',{style:{...card,flex:1,minWidth:120,padding:16,textAlign:'center'}},
+              h('div',{style:{fontSize:22,fontWeight:800,color:C.white}},progExos.length),
+              h('div',{style:{fontSize:11,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:4}},'Exercices')
+            ),
+            h('div',{style:{...card,flex:1,minWidth:120,padding:16,textAlign:'center'}},
+              h('div',{style:{fontSize:22,fontWeight:800,color:C.gold}},weeks.length),
+              h('div',{style:{fontSize:11,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:4}},'Semaines')
+            ),
+            h('div',{style:{...card,flex:1,minWidth:120,padding:16,textAlign:'center'}},
+              h('div',{style:{fontSize:22,fontWeight:800,color:C.green}},progExos.reduce((s,e)=>s+(e.sets||0),0)),
+              h('div',{style:{fontSize:11,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:4}},'Séries totales')
+            )
+          ),
+          // Week selector + Add week
+          h('div',{style:{display:'flex',gap:6,marginBottom:16,overflowX:'auto',paddingBottom:2,alignItems:'center'}},
+            h('div',{style:{fontSize:13,color:C.muted,fontWeight:600,marginRight:4,whiteSpace:'nowrap',flexShrink:0}},'Semaine :'),
             ...weeks.map(w=>h('button',{key:w,onClick:()=>setSelWeek(w),
               style:{background:selWeek===w?C.gold:'transparent',color:selWeek===w?'#000':C.muted,border:`1px solid ${selWeek===w?C.gold:C.border}`,
-                borderRadius:8,padding:'8px 20px',cursor:'pointer',fontSize:13,fontWeight:selWeek===w?700:400,whiteSpace:'nowrap',flexShrink:0}},
-              `Semaine ${w}`)),
-            isAdmin&&h('button',{onClick:()=>{const nw=weeks.length?Math.max(...weeks)+1:1;setSelWeek(nw);openAddExo(nw);},
-              style:{background:'transparent',border:`1px dashed ${C.border}`,color:C.muted,borderRadius:8,padding:'8px 14px',cursor:'pointer',fontSize:12,whiteSpace:'nowrap',flexShrink:0}},'+ Semaine')
+                borderRadius:8,padding:'7px 18px',cursor:'pointer',fontSize:13,fontWeight:selWeek===w?700:400,whiteSpace:'nowrap',flexShrink:0}},`${w}`)),
+            isAdmin&&h('button',{onClick:()=>{const nw=weeks.length?Math.max(...weeks)+1:1;setSelWeek(nw);},
+              style:{background:'transparent',border:`1px dashed ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 12px',cursor:'pointer',fontSize:12,whiteSpace:'nowrap',flexShrink:0}},'+ Semaine')
           ),
-          // Exercises
+          // 7-day grid (Azeoo style)
           loadingExos?h('div',{style:{color:C.muted,textAlign:'center',padding:60}},'Chargement...'):
-          weekExos.length===0?
-            h('div',{style:{...card,textAlign:'center',padding:40,color:C.muted}},
-              h('div',{style:{fontSize:32,marginBottom:10}},'📋'),
-              h('div',{style:{fontWeight:600,color:C.white,marginBottom:6}},`Aucun exercice — Semaine ${selWeek}`),
-              isAdmin&&h('button',{onClick:()=>openAddExo(),style:{...btn,marginTop:10,fontSize:13}},'+ Ajouter un exercice')
-            ):
-          h('div',{style:{display:'flex',flexDirection:'column',gap:20}},
-            ...Object.keys(byDay).sort((a,b)=>Number(a)-Number(b)).map(day=>
-              h('div',{key:day},
-                h('div',{style:{display:'flex',alignItems:'center',gap:10,marginBottom:10}},
-                  h('div',{style:{width:34,height:34,borderRadius:10,background:`${C.gold}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700,color:C.gold,flexShrink:0}},day),
-                  h('div',{style:{fontSize:14,fontWeight:700,color:C.white}},`Séance ${day}`),
-                  h('div',{style:{fontSize:12,color:C.muted}},`· ${byDay[day].length} exercice${byDay[day].length>1?'s':''}`)
-                ),
-                h('div',{style:{display:'flex',flexDirection:'column',gap:8}},
-                  ...byDay[day].map((pe,idx)=>
-                    h('div',{key:pe.id,style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,display:'flex',alignItems:'stretch',overflow:'hidden'}},
-                      // Thumbnail
-                      h('div',{style:{width:90,flexShrink:0,background:C.soft,position:'relative',minHeight:70}},
-                        pe.exercise?.image_filename
-                          ?h('img',{src:'https://cdn.azeoo.com/exercises/small-wide/'+pe.exercise.image_filename,style:{width:'100%',height:'100%',objectFit:'cover',display:'block'},onError:e=>{e.target.style.display='none'}})
-                          :h('div',{style:{width:'100%',height:70,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}},'💪')
-                      ),
-                      // Content
-                      h('div',{style:{flex:1,padding:'12px 16px',display:'flex',alignItems:'center',gap:12}},
-                        h('div',{style:{flex:1}},
-                          h('div',{style:{fontSize:14,fontWeight:600,color:C.white,marginBottom:8}},pe.exercise?.name||'—'),
-                          // Stats row
-                          h('div',{style:{display:'flex',gap:16,flexWrap:'wrap',alignItems:'center'}},
-                            pe.sets&&h('div',{style:{textAlign:'center'}},
-                              h('div',{style:{fontSize:20,fontWeight:800,color:C.gold,lineHeight:1}},pe.sets),
-                              h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Séries')),
-                            (pe.sets&&pe.reps)&&h('div',{style:{color:C.muted,fontSize:16,alignSelf:'center',marginBottom:4}},'×'),
-                            pe.reps&&h('div',{style:{textAlign:'center'}},
-                              h('div',{style:{fontSize:20,fontWeight:800,color:C.white,lineHeight:1}},pe.reps),
-                              h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Reps')),
-                            pe.charge&&h('div',{style:{textAlign:'center',borderLeft:`1px solid ${C.border}`,paddingLeft:12}},
-                              h('div',{style:{fontSize:16,fontWeight:700,color:C.blue,lineHeight:1}},pe.charge),
-                              h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Charge')),
-                            pe.rest_seconds&&h('div',{style:{textAlign:'center'}},
-                              h('div',{style:{fontSize:16,fontWeight:600,color:C.muted,lineHeight:1}},`${pe.rest_seconds}s`),
-                              h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Repos'))
-                          ),
-                          pe.notes&&h('div',{style:{fontSize:11,color:C.muted,marginTop:7,fontStyle:'italic',borderTop:`1px solid ${C.border}`,paddingTop:6}},pe.notes)
-                        ),
-                        pe.exercise?.youtube_id&&h('a',{href:'https://www.youtube.com/watch?v='+pe.exercise.youtube_id,target:'_blank',
-                          style:{width:36,height:36,borderRadius:'50%',background:`${C.red}22`,display:'flex',alignItems:'center',justifyContent:'center',color:C.red,textDecoration:'none',fontSize:13,flexShrink:0}},'▶'),
-                        isAdmin&&h('button',{onClick:()=>handleRemoveExo(pe.id),style:{width:32,height:32,borderRadius:8,background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:13,flexShrink:0}},'🗑')
-                      )
-                    )
-                  )
-                )
-              )
+          h('div',null,
+            // Column headers
+            h('div',{style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:8,marginBottom:8}},
+              ...DAYS_FR.map((d,i)=>h('div',{key:i,style:{textAlign:'center',fontSize:11,fontWeight:700,color:C.muted,textTransform:'uppercase',letterSpacing:'0.1em',padding:'4px 0'}},d))
+            ),
+            // Day cells
+            h('div',{style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:8}},
+              ...[1,2,3,4,5,6,7].map(dayNum=>{
+                const dayExos=progExos.filter(e=>(e.week_number||1)===selWeek&&(e.day_number||1)===dayNum);
+                const workout=workouts.find(w=>w.week_number===selWeek&&w.day_number===dayNum);
+                const hasContent=dayExos.length>0||workout;
+                const totalSets=dayExos.reduce((s,e)=>s+(e.sets||0),0);
+                const woName=workout?.name||null;
+                return h('div',{key:dayNum,
+                  style:{background:hasContent?C.card:C.soft,border:`1px solid ${hasContent?C.border:'transparent'}`,borderRadius:12,padding:10,minHeight:120,display:'flex',flexDirection:'column',gap:6,
+                    cursor:hasContent?'pointer':'default',transition:'all 0.15s'},
+                  onClick:hasContent?()=>setSelectedDay({week:selWeek,day:dayNum}):undefined,
+                  onMouseEnter:hasContent?e=>{e.currentTarget.style.borderColor=C.gold;}:undefined,
+                  onMouseLeave:hasContent?e=>{e.currentTarget.style.borderColor=C.border;}:undefined
+                },
+                  // Day number badge
+                  h('div',{style:{width:28,height:28,borderRadius:8,background:hasContent?`${C.gold}22`:C.soft,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:hasContent?C.gold:C.muted,marginBottom:2,border:`1px solid ${hasContent?`${C.gold}44`:'transparent'}`}},dayNum),
+                  // Workout name
+                  woName?h('div',{style:{fontSize:11,fontWeight:700,color:C.white,lineHeight:1.3,marginBottom:2}},woName):null,
+                  // Stats
+                  hasContent&&h('div',{style:{fontSize:10,color:C.muted,lineHeight:1.8}},
+                    dayExos.length>0&&h('div',null,`${dayExos.length} exercice${dayExos.length>1?'s':''}`),
+                    totalSets>0&&h('div',null,`${totalSets} séries`)
+                  ),
+                  // Exercise thumbnails preview (max 3)
+                  dayExos.length>0&&h('div',{style:{display:'flex',gap:3,marginTop:'auto',flexWrap:'wrap'}},
+                    ...dayExos.slice(0,3).map(pe=>pe.exercise?.image_filename
+                      ?h('img',{key:pe.id,src:'https://cdn.azeoo.com/exercises/small-wide/'+pe.exercise.image_filename,
+                          style:{width:28,height:28,borderRadius:5,objectFit:'cover',opacity:0.8},onError:e=>{e.target.style.display='none'}})
+                      :h('div',{key:pe.id,style:{width:28,height:28,borderRadius:5,background:C.soft,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11}},'💪')
+                    ),
+                    dayExos.length>3&&h('div',{style:{width:28,height:28,borderRadius:5,background:`${C.gold}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,color:C.gold,fontWeight:700}},`+${dayExos.length-3}`)
+                  ),
+                  // Add button (admin, empty cells)
+                  !hasContent&&isAdmin&&h('button',{onClick:e=>{e.stopPropagation();setSelectedDay({week:selWeek,day:dayNum});setAddExoOpen(true);setExoSearch('');if(!allExos.length)sb.from('exercises').select('id,name,tags').order('name').limit(2000).then(({data})=>setAllExos(data||[]));setAForm({exercise_id:'',week_number:selWeek,day_number:dayNum,order_index:1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''}); },
+                    style:{width:'100%',marginTop:'auto',background:'transparent',border:`1px dashed ${C.border}`,color:C.muted,borderRadius:8,padding:'5px 0',cursor:'pointer',fontSize:11,display:'flex',alignItems:'center',justifyContent:'center',gap:4}
+                  },'+ Ajouter')
+                );
+              })
             )
           ),
           addExoOpen&&h(AddExoModal,null),
