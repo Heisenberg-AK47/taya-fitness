@@ -365,43 +365,373 @@
 
     // ── Programmes ────────────────────────────────────────────────────────────
     function Programmes() {
+      const [progs,setProgs] = useState([]);
+      const [loading,setLoading] = useState(true);
+      const [isAdmin,setIsAdmin] = useState(false);
       const [filter,setFilter] = useState('');
-      const goalColors = {'Lose Weight':C.blue,'Build Muscle':C.green,'Sculpt Your Body':C.gold,'Get Fit':C.purple};
-      const filtered = filter ? PROGRAMMES.filter(p=>p.objectif.includes(filter)) : PROGRAMMES;
+      const [msg,setMsg] = useState('');
+      const [saving,setSaving] = useState(false);
+      // Detail view
+      const [selectedProg,setSelectedProg] = useState(null);
+      const [selWeek,setSelWeek] = useState(1);
+      const [progExos,setProgExos] = useState([]);
+      const [loadingExos,setLoadingExos] = useState(false);
+      // Programme CRUD
+      const EP = {titre:'',description:'',description_courte:'',image_url:'',prix:'',prix_promo:'',categorie:'musculation',niveau:'debutant',duree_heures:12,actif:true};
+      const [createOpen,setCreateOpen] = useState(false);
+      const [editProg,setEditProg] = useState(null);
+      const [delProg,setDelProg] = useState(null);
+      const [pForm,setPForm] = useState(EP);
+      // Exercise CRUD
+      const [addExoOpen,setAddExoOpen] = useState(false);
+      const [allExos,setAllExos] = useState([]);
+      const [exoSearch,setExoSearch] = useState('');
+      const [aForm,setAForm] = useState({exercise_id:'',week_number:1,day_number:1,order_index:1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''});
 
+      const catColors = {musculation:C.green,'perte-de-poids':C.blue,'post-partum':C.purple,'force':C.gold};
+      const catLabels = {musculation:'Musculation','perte-de-poids':'Perte de poids','post-partum':'Post-Partum','force':'Force'};
+      const niveauLabels = {debutant:'Débutant',intermediaire:'Intermédiaire',avance:'Avancé'};
+      const filtExos = useMemo(()=>allExos.filter(e=>!exoSearch||e.name.toLowerCase().includes(exoSearch.toLowerCase())),[allExos,exoSearch]);
+
+      useEffect(()=>{
+        sb.auth.getSession().then(({data:{session}})=>{if(session?.user)setIsAdmin(ADMIN_EMAILS.includes(session.user.email));});
+        sb.from('programmes').select('*').order('created_at').then(({data})=>{setProgs(data||[]);setLoading(false);});
+      },[]);
+
+      // ── Programme CRUD ──
+      async function handleCreate() {
+        setSaving(true);
+        const slug = pForm.titre.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+        const {data,error} = await sb.from('programmes')
+          .insert({...pForm,slug,prix:parseFloat(pForm.prix)||0,prix_promo:pForm.prix_promo?parseFloat(pForm.prix_promo):null,duree_heures:parseInt(pForm.duree_heures)||0})
+          .select().single();
+        if (!error&&data){setProgs(p=>[...p,data]);setCreateOpen(false);setPForm(EP);setMsg('✅ Programme créé');}
+        else setMsg('❌ '+(error?.message||'Erreur'));
+        setSaving(false);setTimeout(()=>setMsg(''),4000);
+      }
+      async function handleEditProg() {
+        setSaving(true);
+        const {data,error} = await sb.from('programmes')
+          .update({...editProg,prix:parseFloat(editProg.prix)||0,prix_promo:editProg.prix_promo?parseFloat(editProg.prix_promo):null,duree_heures:parseInt(editProg.duree_heures)||0})
+          .eq('id',editProg.id).select().single();
+        if (!error&&data){setProgs(p=>p.map(x=>x.id===data.id?data:x));if(selectedProg?.id===data.id)setSelectedProg(data);setEditProg(null);setMsg('✅ Programme mis à jour');}
+        else setMsg('❌ '+(error?.message||'Erreur'));
+        setSaving(false);setTimeout(()=>setMsg(''),4000);
+      }
+      async function handleDeleteProg() {
+        setSaving(true);
+        const {error} = await sb.from('programmes').delete().eq('id',delProg.id);
+        if (!error){setProgs(p=>p.filter(x=>x.id!==delProg.id));if(selectedProg?.id===delProg.id)setSelectedProg(null);setDelProg(null);setMsg('✅ Supprimé');}
+        else setMsg('❌ '+(error?.message||'Erreur'));
+        setSaving(false);setTimeout(()=>setMsg(''),4000);
+      }
+
+      // ── Exercise CRUD ──
+      async function loadProgExos(id){
+        setLoadingExos(true);
+        const {data}=await sb.from('programme_exercises')
+          .select('*, exercise:exercises(id,name,youtube_id,image_filename,tags)')
+          .eq('programme_id',id).order('week_number').order('day_number').order('order_index');
+        setProgExos(data||[]);setLoadingExos(false);
+      }
+      function handleSelectProg(p){setSelectedProg(p);setSelWeek(1);loadProgExos(p.id);setMsg('');}
+      async function openAddExo(wk){
+        const w = wk!==undefined?wk:selWeek;
+        if(!allExos.length){const{data}=await sb.from('exercises').select('id,name,tags').order('name').limit(2000);setAllExos(data||[]);}
+        const wExos=progExos.filter(e=>(e.week_number||1)===w);
+        setAddExoOpen(true);setExoSearch('');
+        setAForm({exercise_id:'',week_number:w,day_number:1,order_index:wExos.length+1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''});
+      }
+      async function handleAddExo(){
+        if(!aForm.exercise_id){setMsg('❌ Sélectionnez un exercice');return;}
+        setSaving(true);
+        const{data,error}=await sb.from('programme_exercises')
+          .insert({...aForm,programme_id:selectedProg.id})
+          .select('*, exercise:exercises(id,name,youtube_id,image_filename,tags)').single();
+        if(!error&&data){
+          setProgExos(prev=>[...prev,data].sort((a,b)=>(a.week_number-b.week_number)||((a.day_number||0)-(b.day_number||0))||(a.order_index-b.order_index)));
+          setSelWeek(aForm.week_number);setAddExoOpen(false);setMsg('✅ Exercice ajouté');
+        }else setMsg('❌ '+(error?.message||'Erreur'));
+        setSaving(false);setTimeout(()=>setMsg(''),4000);
+      }
+      async function handleRemoveExo(peId){
+        if(!confirm('Retirer cet exercice du programme ?'))return;
+        const{error}=await sb.from('programme_exercises').delete().eq('id',peId);
+        if(!error)setProgExos(prev=>prev.filter(e=>e.id!==peId));
+        else setMsg('❌ '+(error?.message||'Erreur'));
+        setTimeout(()=>setMsg(''),4000);
+      }
+
+      // ── Shared prog form fields ──
+      function pFields(data,set){
+        const fi=(label,field,type='text',extra={})=>{
+          const val=data[field]??'';
+          const onChange=e=>set(p=>({...p,[field]:type==='number'?Number(e.target.value)||0:e.target.value}));
+          if(type==='select')return h('div',{key:field,style:{marginBottom:10}},
+            h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3,textTransform:'uppercase',letterSpacing:'0.08em'}},label),
+            h('select',{value:val,onChange,style:inp},...(extra.opts||[]).map(([v,l])=>h('option',{key:v,value:v},l))));
+          if(type==='textarea')return h('div',{key:field,style:{marginBottom:10}},
+            h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3,textTransform:'uppercase',letterSpacing:'0.08em'}},label),
+            h('textarea',{value:val,onChange,placeholder:extra.ph||'',style:{...inp,height:68,resize:'vertical'}}));
+          return h('div',{key:field,style:{marginBottom:10}},
+            h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3,textTransform:'uppercase',letterSpacing:'0.08em'}},label),
+            h('input',{type,value:val,onChange,placeholder:extra.ph||'',style:inp}));
+        };
+        return [
+          fi('Titre','titre','text',{ph:'Ex: Transformation Corps & Mental'}),
+          fi('Description courte','description_courte','text',{ph:'Résumé en une phrase'}),
+          fi('Description complète','description','textarea',{ph:'Description du programme...'}),
+          fi('URL image','image_url','text',{ph:'https://...'}),
+          h('div',{key:'row1',style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:0}},
+            fi('Prix (€)','prix','number',{ph:'99'}),
+            fi('Prix promo (€)','prix_promo','number',{ph:'(optionnel)'})
+          ),
+          h('div',{key:'row2',style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:0}},
+            fi('Catégorie','categorie','select',{opts:[['musculation','Musculation'],['perte-de-poids','Perte de poids'],['post-partum','Post-Partum'],['force','Force']]}),
+            fi('Niveau','niveau','select',{opts:[['debutant','Débutant'],['intermediaire','Intermédiaire'],['avance','Avancé']]}),
+            fi('Durée (h)','duree_heures','number',{ph:'12'})
+          ),
+        ];
+      }
+
+      // ── Modal helper ──
+      const Modal=(children)=>h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
+        h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:540}},children));
+
+      // ── Add Exercise Modal (shared) ──
+      const AddExoModal=()=>h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
+        h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:560}},
+          h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:16}},`Ajouter un exercice — Semaine ${aForm.week_number}`),
+          h('input',{placeholder:'Rechercher un exercice...',value:exoSearch,onChange:e=>setExoSearch(e.target.value),style:{...inp,marginBottom:8}}),
+          h('div',{style:{maxHeight:180,overflowY:'auto',marginBottom:12,border:`1px solid ${C.border}`,borderRadius:10}},
+            filtExos.length===0?h('div',{style:{padding:20,textAlign:'center',color:C.muted,fontSize:13}},'Aucun résultat')
+            :filtExos.slice(0,60).map(e=>h('div',{key:e.id,onClick:()=>setAForm(f=>({...f,exercise_id:e.id})),
+              style:{padding:'9px 14px',cursor:'pointer',fontSize:13,background:aForm.exercise_id===e.id?`${C.gold}22`:C.soft,color:aForm.exercise_id===e.id?C.gold:C.white,borderBottom:`1px solid ${C.border}`}},e.name))
+          ),
+          h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:8}},
+            ...[['Semaine','week_number','number'],['Séance','day_number','number'],['Ordre','order_index','number']].map(([l,f,t])=>
+              h('div',{key:f},h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3}},l),
+                h('input',{type:t,min:0,value:aForm[f],onChange:e=>setAForm(g=>({...g,[f]:parseInt(e.target.value)||0})),style:{...inp,padding:'8px 10px'}})))
+          ),
+          h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8,marginBottom:10}},
+            ...[['Séries','sets','number'],['Reps','reps','number'],['Repos s','rest_seconds','number'],['Charge','charge','text']].map(([l,f,t])=>
+              h('div',{key:f},h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3}},l),
+                h('input',{type:t,min:t==='number'?0:undefined,value:aForm[f],onChange:e=>setAForm(g=>({...g,[f]:t==='number'?(parseInt(e.target.value)||0):e.target.value})),placeholder:f==='charge'?'20kg':'',style:{...inp,padding:'8px 8px'}})))
+          ),
+          h('textarea',{placeholder:'Notes...',value:aForm.notes,onChange:e=>setAForm(f=>({...f,notes:e.target.value})),style:{...inp,height:48,resize:'vertical',marginBottom:12}}),
+          h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end'}},
+            h('button',{onClick:()=>setAddExoOpen(false),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 18px',cursor:'pointer'}},'Annuler'),
+            h('button',{onClick:handleAddExo,disabled:saving||!aForm.exercise_id,style:{...btn,opacity:saving||!aForm.exercise_id?0.5:1}},saving?'Ajout...':'Ajouter')
+          )
+        )
+      );
+
+      // ── Delete confirm modal ──
+      const DelProgModal=()=>h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:16}},
+        h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,maxWidth:380,textAlign:'center'}},
+          h('div',{style:{fontSize:32,marginBottom:12}},'⚠️'),
+          h('div',{style:{fontSize:15,fontWeight:700,color:C.white,marginBottom:8}},'Supprimer ce programme ?'),
+          h('div',{style:{fontSize:13,color:C.muted,marginBottom:20}},`"${delProg?.titre}" et tous ses exercices liés seront supprimés.`),
+          h('div',{style:{display:'flex',gap:10,justifyContent:'center'}},
+            h('button',{onClick:()=>setDelProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 20px',cursor:'pointer'}},'Annuler'),
+            h('button',{onClick:handleDeleteProg,disabled:saving,style:{...btn,background:`linear-gradient(135deg,${C.red},#c0392b)`,opacity:saving?0.5:1}},saving?'Suppression...':'Supprimer')
+          )
+        )
+      );
+
+      // ── DETAIL VIEW ──
+      if (selectedProg) {
+        const weeks=[...new Set(progExos.map(e=>e.week_number||1))].sort((a,b)=>a-b);
+        if(!weeks.length)weeks.push(1);
+        const weekExos=progExos.filter(e=>(e.week_number||1)===selWeek);
+        const byDay={};
+        weekExos.forEach(pe=>{const d=pe.day_number||1;if(!byDay[d])byDay[d]=[];byDay[d].push(pe);});
+
+        return h('div',null,
+          // Image header
+          h('div',{style:{position:'relative',borderRadius:20,overflow:'hidden',marginBottom:18,height:160}},
+            h('div',{style:{position:'absolute',inset:0,background:C.soft}}),
+            selectedProg.image_url&&h('img',{src:selectedProg.image_url,style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'},onError:e=>{e.target.style.display='none'}}),
+            h('div',{style:{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(13,27,42,0.95) 0%,rgba(13,27,42,0.15) 100%)'}}),
+            h('div',{style:{position:'absolute',bottom:16,left:20,right:20,display:'flex',alignItems:'flex-end',justifyContent:'space-between'}},
+              h('div',null,
+                h('div',{style:{fontSize:20,fontWeight:800,color:C.white}},selectedProg.titre),
+                h('div',{style:{display:'flex',gap:6,marginTop:6,flexWrap:'wrap'}},
+                  h('span',{style:badge(catColors[selectedProg.categorie]||C.muted)},catLabels[selectedProg.categorie]||selectedProg.categorie),
+                  h('span',{style:badge(C.muted)},niveauLabels[selectedProg.niveau]||selectedProg.niveau),
+                  h('span',{style:badge(C.muted)},`${selectedProg.duree_heures}h`)
+                )
+              ),
+              h('div',{style:{textAlign:'right'}},
+                h('div',{style:{fontSize:22,fontWeight:800,color:C.gold}},`${selectedProg.prix_promo||selectedProg.prix}€`),
+                selectedProg.prix_promo&&h('div',{style:{fontSize:12,color:C.muted,textDecoration:'line-through'}},`${selectedProg.prix}€`)
+              )
+            )
+          ),
+          // Nav
+          h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:16,flexWrap:'wrap'}},
+            h('button',{onClick:()=>setSelectedProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'← Retour'),
+            h('div',{style:{flex:1}}),
+            isAdmin&&h('button',{onClick:()=>setEditProg({...selectedProg}),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'✏️ Éditer'),
+            isAdmin&&h('button',{onClick:()=>setDelProg(selectedProg),style:{background:'transparent',border:`1px solid ${C.red}33`,color:C.red,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'🗑'),
+            isAdmin&&h('button',{onClick:()=>openAddExo(),style:{...btn,fontSize:13,padding:'9px 18px'}},'+ Exercice')
+          ),
+          msg&&h('div',{style:{background:msg.startsWith('✅')?`${C.green}22`:`${C.red}22`,color:msg.startsWith('✅')?C.green:C.red,padding:'10px 16px',borderRadius:8,marginBottom:14,fontSize:13}},msg),
+          // Week tabs
+          h('div',{style:{display:'flex',gap:6,marginBottom:18,overflowX:'auto',paddingBottom:2}},
+            ...weeks.map(w=>h('button',{key:w,onClick:()=>setSelWeek(w),
+              style:{background:selWeek===w?C.gold:'transparent',color:selWeek===w?'#000':C.muted,border:`1px solid ${selWeek===w?C.gold:C.border}`,
+                borderRadius:8,padding:'8px 20px',cursor:'pointer',fontSize:13,fontWeight:selWeek===w?700:400,whiteSpace:'nowrap',flexShrink:0}},
+              `Semaine ${w}`)),
+            isAdmin&&h('button',{onClick:()=>{const nw=weeks.length?Math.max(...weeks)+1:1;setSelWeek(nw);openAddExo(nw);},
+              style:{background:'transparent',border:`1px dashed ${C.border}`,color:C.muted,borderRadius:8,padding:'8px 14px',cursor:'pointer',fontSize:12,whiteSpace:'nowrap',flexShrink:0}},'+ Semaine')
+          ),
+          // Exercises
+          loadingExos?h('div',{style:{color:C.muted,textAlign:'center',padding:60}},'Chargement...'):
+          weekExos.length===0?
+            h('div',{style:{...card,textAlign:'center',padding:40,color:C.muted}},
+              h('div',{style:{fontSize:32,marginBottom:10}},'📋'),
+              h('div',{style:{fontWeight:600,color:C.white,marginBottom:6}},`Aucun exercice — Semaine ${selWeek}`),
+              isAdmin&&h('button',{onClick:()=>openAddExo(),style:{...btn,marginTop:10,fontSize:13}},'+ Ajouter un exercice')
+            ):
+          h('div',{style:{display:'flex',flexDirection:'column',gap:20}},
+            ...Object.keys(byDay).sort((a,b)=>Number(a)-Number(b)).map(day=>
+              h('div',{key:day},
+                h('div',{style:{display:'flex',alignItems:'center',gap:10,marginBottom:10}},
+                  h('div',{style:{width:34,height:34,borderRadius:10,background:`${C.gold}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700,color:C.gold,flexShrink:0}},day),
+                  h('div',{style:{fontSize:14,fontWeight:700,color:C.white}},`Séance ${day}`),
+                  h('div',{style:{fontSize:12,color:C.muted}},`· ${byDay[day].length} exercice${byDay[day].length>1?'s':''}`)
+                ),
+                h('div',{style:{display:'flex',flexDirection:'column',gap:8}},
+                  ...byDay[day].map((pe,idx)=>
+                    h('div',{key:pe.id,style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,display:'flex',alignItems:'stretch',overflow:'hidden'}},
+                      // Thumbnail
+                      h('div',{style:{width:90,flexShrink:0,background:C.soft,position:'relative',minHeight:70}},
+                        pe.exercise?.image_filename
+                          ?h('img',{src:'https://cdn.azeoo.com/exercises/small-wide/'+pe.exercise.image_filename,style:{width:'100%',height:'100%',objectFit:'cover',display:'block'},onError:e=>{e.target.style.display='none'}})
+                          :h('div',{style:{width:'100%',height:70,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}},'💪')
+                      ),
+                      // Content
+                      h('div',{style:{flex:1,padding:'12px 16px',display:'flex',alignItems:'center',gap:12}},
+                        h('div',{style:{flex:1}},
+                          h('div',{style:{fontSize:14,fontWeight:600,color:C.white,marginBottom:8}},pe.exercise?.name||'—'),
+                          // Stats row
+                          h('div',{style:{display:'flex',gap:16,flexWrap:'wrap',alignItems:'center'}},
+                            pe.sets&&h('div',{style:{textAlign:'center'}},
+                              h('div',{style:{fontSize:20,fontWeight:800,color:C.gold,lineHeight:1}},pe.sets),
+                              h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Séries')),
+                            (pe.sets&&pe.reps)&&h('div',{style:{color:C.muted,fontSize:16,alignSelf:'center',marginBottom:4}},'×'),
+                            pe.reps&&h('div',{style:{textAlign:'center'}},
+                              h('div',{style:{fontSize:20,fontWeight:800,color:C.white,lineHeight:1}},pe.reps),
+                              h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Reps')),
+                            pe.charge&&h('div',{style:{textAlign:'center',borderLeft:`1px solid ${C.border}`,paddingLeft:12}},
+                              h('div',{style:{fontSize:16,fontWeight:700,color:C.blue,lineHeight:1}},pe.charge),
+                              h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Charge')),
+                            pe.rest_seconds&&h('div',{style:{textAlign:'center'}},
+                              h('div',{style:{fontSize:16,fontWeight:600,color:C.muted,lineHeight:1}},`${pe.rest_seconds}s`),
+                              h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Repos'))
+                          ),
+                          pe.notes&&h('div',{style:{fontSize:11,color:C.muted,marginTop:7,fontStyle:'italic',borderTop:`1px solid ${C.border}`,paddingTop:6}},pe.notes)
+                        ),
+                        pe.exercise?.youtube_id&&h('a',{href:'https://www.youtube.com/watch?v='+pe.exercise.youtube_id,target:'_blank',
+                          style:{width:36,height:36,borderRadius:'50%',background:`${C.red}22`,display:'flex',alignItems:'center',justifyContent:'center',color:C.red,textDecoration:'none',fontSize:13,flexShrink:0}},'▶'),
+                        isAdmin&&h('button',{onClick:()=>handleRemoveExo(pe.id),style:{width:32,height:32,borderRadius:8,background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:13,flexShrink:0}},'🗑')
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          ),
+          addExoOpen&&h(AddExoModal,null),
+          editProg&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
+            h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:540}},
+              h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:14}},'Modifier le programme'),
+              ...pFields(editProg,setEditProg),
+              h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end',marginTop:10}},
+                h('button',{onClick:()=>setEditProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 18px',cursor:'pointer'}},'Annuler'),
+                h('button',{onClick:handleEditProg,disabled:saving,style:{...btn,opacity:saving?0.5:1}},saving?'Sauvegarde...':'Enregistrer')
+              )
+            )
+          ),
+          delProg&&h(DelProgModal,null)
+        );
+      }
+
+      // ── GRID VIEW ──
+      const filteredProgs=filter?progs.filter(p=>p.categorie===filter):progs;
       return h('div',null,
-        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}},
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24,flexWrap:'wrap',gap:12}},
           h('div',null,
             h('h1',{style:{fontSize:24,fontWeight:700,color:C.white}},'Programmes'),
-            h('p',{style:{color:C.muted,fontSize:14,marginTop:4}},`${PROGRAMMES.length} programmes · importés depuis Azeoo Taya Fitness`)
+            h('p',{style:{color:C.muted,fontSize:14,marginTop:4}},`${progs.length} programme${progs.length!==1?'s':''} · Taya Fitness`)
           ),
-          h('a',{href:'https://tayafitness.azeoo.com/programs',target:'_blank',style:{...btn,textDecoration:'none',fontSize:13,padding:'10px 18px'}},'Gérer sur Azeoo →')
+          isAdmin&&h('button',{onClick:()=>{setPForm(EP);setCreateOpen(true);},style:{...btn,fontSize:13,padding:'10px 20px'}},'+ Créer un programme')
         ),
-        // Filter buttons
         h('div',{style:{display:'flex',gap:8,marginBottom:24,flexWrap:'wrap'}},
-          ...[['','Tous',C.white],['Sculpt Your Body','Sculpt',C.gold],['Lose Weight','Lose Weight',C.blue],['Build Muscle','Build Muscle',C.green],['Get Fit','Get Fit',C.purple]].map(([val,label,color])=>
+          ...[['','Tous',C.white],['musculation','Musculation',C.green],['perte-de-poids','Perte de poids',C.blue],['post-partum','Post-Partum',C.purple],['force','Force',C.gold]].map(([val,label,color])=>
             h('button',{key:val,onClick:()=>setFilter(val),style:{background:'transparent',color:filter===val?color:C.muted,border:`1px solid ${filter===val?color:C.border}`,borderRadius:8,padding:'7px 14px',fontSize:12,cursor:'pointer',fontWeight:filter===val?600:400}},label)
           )
         ),
-        // Cards grid
-        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:20}},
-          ...filtered.map((prog,i)=>h('div',{key:i,className:'prog-card',style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:'hidden',transition:'transform 0.2s'}},
-            h('div',{style:{position:'relative',paddingBottom:'56%',overflow:'hidden',background:C.soft}},
-              h('img',{src:prog.img,alt:prog.nom,style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'},onError:e=>{e.target.style.display='none'}})
-            ),
-            h('div',{style:{padding:16}},
-              h('div',{style:{fontSize:13,fontWeight:700,color:C.white,marginBottom:8,lineHeight:1.3}},prog.nom),
-              h('div',{style:{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}},
-                h('span',{style:badge(goalColors[prog.objectif]||C.muted)},prog.objectif),
-                prog.niveau && h('span',{style:badge(C.muted)},prog.niveau)
+        msg&&h('div',{style:{background:msg.startsWith('✅')?`${C.green}22`:`${C.red}22`,color:msg.startsWith('✅')?C.green:C.red,padding:'10px 16px',borderRadius:8,marginBottom:16,fontSize:13}},msg),
+        loading?h('div',{style:{color:C.muted,textAlign:'center',padding:60}},'Chargement...'):
+        progs.length===0?
+          h('div',{style:{...card,textAlign:'center',padding:48,color:C.muted}},
+            h('div',{style:{fontSize:36,marginBottom:12}},'🏋️'),
+            h('div',{style:{fontWeight:600,color:C.white,marginBottom:8}},'Aucun programme encore'),
+            isAdmin&&h('button',{onClick:()=>{setPForm(EP);setCreateOpen(true);},style:{...btn,marginTop:12,fontSize:13}},'Créer le premier programme')
+          ):
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:20}},
+          ...filteredProgs.map(prog=>
+            h('div',{key:prog.id,className:'prog-card',style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:'hidden',position:'relative'}},
+              h('div',{style:{position:'relative',paddingBottom:'56%',overflow:'hidden',background:C.soft}},
+                prog.image_url&&h('img',{src:prog.image_url,alt:prog.titre,onClick:()=>handleSelectProg(prog),style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',cursor:'pointer'},onError:e=>{e.target.style.display='none'}}),
+                isAdmin&&h('div',{style:{position:'absolute',top:8,right:8,display:'flex',gap:4}},
+                  h('button',{onClick:e=>{e.stopPropagation();setEditProg({...prog});},style:{width:28,height:28,borderRadius:7,background:'rgba(0,0,0,0.55)',border:'none',color:'#fff',cursor:'pointer',fontSize:12}},'✏️'),
+                  h('button',{onClick:e=>{e.stopPropagation();setDelProg(prog);},style:{width:28,height:28,borderRadius:7,background:'rgba(0,0,0,0.55)',border:'none',color:C.red,cursor:'pointer',fontSize:12}},'🗑')
+                ),
+                !prog.actif&&h('div',{style:{position:'absolute',bottom:8,left:8,...badge(C.muted)}},'Inactif')
               ),
-              h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
-                h('span',{style:{fontSize:12,color:C.muted}},`⏱ ${prog.duree}`),
-                h('span',{style:{fontSize:14,fontWeight:700,color:C.gold}},prog.prix)
+              h('div',{onClick:()=>handleSelectProg(prog),style:{padding:18,cursor:'pointer'}},
+                h('div',{style:{fontSize:14,fontWeight:700,color:C.white,marginBottom:10,lineHeight:1.3}},prog.titre),
+                h('div',{style:{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}},
+                  h('span',{style:badge(catColors[prog.categorie]||C.muted)},catLabels[prog.categorie]||prog.categorie),
+                  h('span',{style:badge(C.muted)},niveauLabels[prog.niveau]||prog.niveau)
+                ),
+                h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
+                  h('span',{style:{fontSize:12,color:C.muted}},`⏱ ${prog.duree_heures}h`),
+                  h('div',null,
+                    prog.prix_promo&&h('span',{style:{fontSize:12,color:C.muted,textDecoration:'line-through',marginRight:6}},`${prog.prix}€`),
+                    h('span',{style:{fontSize:15,fontWeight:700,color:C.gold}},`${prog.prix_promo||prog.prix}€`)
+                  )
+                ),
+                h('div',{style:{marginTop:10,fontSize:12,color:C.muted}},'👁 Voir les exercices →')
               )
             )
-          ))
-        )
+          )
+        ),
+        // Modals
+        createOpen&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
+          h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:540}},
+            h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:14}},'Créer un programme'),
+            ...pFields(pForm,setPForm),
+            h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end',marginTop:10}},
+              h('button',{onClick:()=>setCreateOpen(false),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 18px',cursor:'pointer'}},'Annuler'),
+              h('button',{onClick:handleCreate,disabled:saving||!pForm.titre,style:{...btn,opacity:saving||!pForm.titre?0.5:1}},saving?'Création...':'Créer')
+            )
+          )
+        ),
+        editProg&&!selectedProg&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
+          h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:540}},
+            h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:14}},'Modifier le programme'),
+            ...pFields(editProg,setEditProg),
+            h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end',marginTop:10}},
+              h('button',{onClick:()=>setEditProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 18px',cursor:'pointer'}},'Annuler'),
+              h('button',{onClick:handleEditProg,disabled:saving,style:{...btn,opacity:saving?0.5:1}},saving?'Sauvegarde...':'Enregistrer')
+            )
+          )
+        ),
+        delProg&&h(DelProgModal,null)
       );
     }
 
