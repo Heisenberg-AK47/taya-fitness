@@ -365,215 +365,222 @@
 
     // ── Programmes ────────────────────────────────────────────────────────────
     function Programmes() {
+      const ADMIN = ['fumeysarah@yahoo.fr','contact@sergepaulmier.com','contact@tayafitness.com'];
       const [progs,setProgs] = useState([]);
       const [loading,setLoading] = useState(true);
       const [isAdmin,setIsAdmin] = useState(false);
       const [filter,setFilter] = useState('');
       const [msg,setMsg] = useState('');
       const [saving,setSaving] = useState(false);
-      // Detail view
       const [selectedProg,setSelectedProg] = useState(null);
-      const [selWeek,setSelWeek] = useState(1);
+      const [selectedDay,setSelectedDay] = useState(null);
       const [progExos,setProgExos] = useState([]);
+      const [workouts,setWorkouts] = useState([]);
       const [loadingExos,setLoadingExos] = useState(false);
-      // Workouts (séances nommées par jour)
-      const [workouts,setWorkouts] = useState([]); // [{id,programme_id,week_number,day_number,name}]
-      const [selectedDay,setSelectedDay] = useState(null); // {week,day} or null
-      const [editWorkoutName,setEditWorkoutName] = useState(false);
-      const [workoutNameDraft,setWorkoutNameDraft] = useState('');
-      // Programme CRUD
-      const EP = {titre:'',description:'',description_courte:'',image_url:'',prix:'',prix_promo:'',categorie:'musculation',niveau:'debutant',duree_heures:12,actif:true};
-      const [createOpen,setCreateOpen] = useState(false);
-      const [editProg,setEditProg] = useState(null);
-      const [delProg,setDelProg] = useState(null);
-      const [pForm,setPForm] = useState(EP);
-      // Exercise CRUD
       const [addExoOpen,setAddExoOpen] = useState(false);
       const [allExos,setAllExos] = useState([]);
       const [exoSearch,setExoSearch] = useState('');
       const [aForm,setAForm] = useState({exercise_id:'',week_number:1,day_number:1,order_index:1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''});
+      const [editExoEntry,setEditExoEntry] = useState(null);
+      const [editExoForm,setEditExoForm] = useState({sets:3,reps:12,rest_seconds:60,charge:'',notes:''});
+      const [editWorkoutName,setEditWorkoutName] = useState(null);
+      const [workoutNameDraft,setWorkoutNameDraft] = useState('');
+      const EP = {titre:'',description:'',description_courte:'',image_url:'',prix:'19.95',prix_promo:'',objectif:'Build Muscle',niveau:'intermediaire',duree_semaines:8,sexe:'tous',actif:true};
+      const [createOpen,setCreateOpen] = useState(false);
+      const [editProg,setEditProg] = useState(null);
+      const [delProg,setDelProg] = useState(null);
+      const [pForm,setPForm] = useState(EP);
 
-      const catColors = {musculation:C.green,'perte-de-poids':C.blue,'post-partum':C.purple,'force':C.gold};
-      const catLabels = {musculation:'Musculation','perte-de-poids':'Perte de poids','post-partum':'Post-Partum','force':'Force'};
+      const objColors = {'Build Muscle':C.green,'Lose Weight':C.blue,'Sculpt Your Body':C.gold,'Get Fit':C.purple};
       const niveauLabels = {debutant:'Débutant',intermediaire:'Intermédiaire',avance:'Avancé'};
+      const sexeLabels = {tous:'Tous',homme:'Homme',femme:'Femme'};
       const filtExos = useMemo(()=>allExos.filter(e=>!exoSearch||e.name.toLowerCase().includes(exoSearch.toLowerCase())),[allExos,exoSearch]);
 
       useEffect(()=>{
-        sb.auth.getSession().then(({data:{session}})=>{if(session?.user)setIsAdmin(ADMIN_EMAILS.includes(session.user.email));});
+        sb.auth.getSession().then(({data:{session}})=>{if(session?.user)setIsAdmin(ADMIN.includes(session.user.email));});
         sb.from('programmes').select('*').order('created_at').then(({data})=>{setProgs(data||[]);setLoading(false);});
       },[]);
 
-      // ── Programme CRUD ──
-      async function handleCreate() {
+      async function handleCreate(){
         setSaving(true);
-        const slug = pForm.titre.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-        const {data,error} = await sb.from('programmes')
-          .insert({...pForm,slug,prix:parseFloat(pForm.prix)||0,prix_promo:pForm.prix_promo?parseFloat(pForm.prix_promo):null,duree_heures:parseInt(pForm.duree_heures)||0})
-          .select().single();
-        if (!error&&data){setProgs(p=>[...p,data]);setCreateOpen(false);setPForm(EP);setMsg('✅ Programme créé');}
+        const slug=pForm.titre.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+        const {data,error}=await sb.from('programmes').insert({...pForm,slug,prix:parseFloat(pForm.prix)||0,prix_promo:pForm.prix_promo?parseFloat(pForm.prix_promo):null,duree_semaines:parseInt(pForm.duree_semaines)||8}).select().single();
+        if(!error&&data){setProgs(p=>[...p,data]);setCreateOpen(false);setPForm(EP);setMsg('✅ Programme créé');}
         else setMsg('❌ '+(error?.message||'Erreur'));
         setSaving(false);setTimeout(()=>setMsg(''),4000);
       }
-      async function handleEditProg() {
+      async function handleEditProg(){
         setSaving(true);
-        const {data,error} = await sb.from('programmes')
-          .update({...editProg,prix:parseFloat(editProg.prix)||0,prix_promo:editProg.prix_promo?parseFloat(editProg.prix_promo):null,duree_heures:parseInt(editProg.duree_heures)||0})
-          .eq('id',editProg.id).select().single();
-        if (!error&&data){setProgs(p=>p.map(x=>x.id===data.id?data:x));if(selectedProg?.id===data.id)setSelectedProg(data);setEditProg(null);setMsg('✅ Programme mis à jour');}
+        const {data,error}=await sb.from('programmes').update({...editProg,prix:parseFloat(editProg.prix)||0,prix_promo:editProg.prix_promo?parseFloat(editProg.prix_promo):null,duree_semaines:parseInt(editProg.duree_semaines)||8}).eq('id',editProg.id).select().single();
+        if(!error&&data){setProgs(p=>p.map(x=>x.id===data.id?data:x));if(selectedProg?.id===data.id)setSelectedProg(data);setEditProg(null);setMsg('✅ Programme mis à jour');}
         else setMsg('❌ '+(error?.message||'Erreur'));
         setSaving(false);setTimeout(()=>setMsg(''),4000);
       }
-      async function handleDeleteProg() {
+      async function handleDeleteProg(){
         setSaving(true);
-        const {error} = await sb.from('programmes').delete().eq('id',delProg.id);
-        if (!error){setProgs(p=>p.filter(x=>x.id!==delProg.id));if(selectedProg?.id===delProg.id)setSelectedProg(null);setDelProg(null);setMsg('✅ Supprimé');}
+        const {error}=await sb.from('programmes').delete().eq('id',delProg.id);
+        if(!error){setProgs(p=>p.filter(x=>x.id!==delProg.id));if(selectedProg?.id===delProg.id)setSelectedProg(null);setDelProg(null);setMsg('✅ Supprimé');}
         else setMsg('❌ '+(error?.message||'Erreur'));
         setSaving(false);setTimeout(()=>setMsg(''),4000);
       }
-
-      // ── Exercise & Workout CRUD ──
+      async function handleTogglePublish(prog,e){
+        if(e)e.stopPropagation();
+        const newActif=!prog.actif;
+        const {data,error}=await sb.from('programmes').update({actif:newActif}).eq('id',prog.id).select().single();
+        if(!error&&data){setProgs(p=>p.map(x=>x.id===data.id?data:x));if(selectedProg?.id===data.id)setSelectedProg(data);setMsg(newActif?'✅ Programme publié sur le site 🌐':'✅ Programme dépublié du site');}
+        else setMsg('❌ '+(error?.message||'Erreur'));
+        setTimeout(()=>setMsg(''),4000);
+      }
       async function loadProgData(id){
         setLoadingExos(true);
-        const [{data:exData},{data:wData}] = await Promise.all([
-          sb.from('programme_exercises').select('*, exercise:exercises(id,name,youtube_id,image_filename,tags)')
-            .eq('programme_id',id).order('week_number').order('day_number').order('order_index'),
+        const [{data:exData},{data:wData}]=await Promise.all([
+          sb.from('programme_exercises').select('*,exercise:exercises(id,name,youtube_id,image_filename,tags)').eq('programme_id',id).order('week_number').order('day_number').order('order_index'),
           sb.from('programme_workouts').select('*').eq('programme_id',id).order('week_number').order('day_number')
         ]);
-        setProgExos(exData||[]);
-        setWorkouts(wData||[]);
-        setLoadingExos(false);
+        setProgExos(exData||[]);setWorkouts(wData||[]);setLoadingExos(false);
       }
-      function handleSelectProg(p){setSelectedProg(p);setSelWeek(1);setSelectedDay(null);loadProgData(p.id);setMsg('');}
+      function handleSelectProg(p){setSelectedProg(p);setSelectedDay(null);loadProgData(p.id);setMsg('');}
 
-      // Créer ou mettre à jour le nom d'une séance
+      function calcStats(week,day){
+        const exos=progExos.filter(e=>(e.week_number||1)===week&&(e.day_number||1)===day);
+        const totalSets=exos.reduce((s,e)=>s+(e.sets||0),0);
+        const durationSec=exos.reduce((s,e)=>s+(e.sets||0)*((parseInt(e.reps)||10)*3+(e.rest_seconds||60)),0);
+        return{totalSets,totalExos:exos.length,durationMin:Math.round(durationSec/60),energy:Math.round(totalSets*9.8)};
+      }
       async function saveWorkoutName(week,day,name){
         setSaving(true);
-        const existing = workouts.find(w=>w.week_number===week&&w.day_number===day);
-        if(existing){
-          const{data,error}=await sb.from('programme_workouts').update({name}).eq('id',existing.id).select().single();
-          if(!error&&data) setWorkouts(prev=>prev.map(w=>w.id===data.id?data:w));
-          else setMsg('❌ '+(error?.message||'Erreur'));
-        } else {
-          const{data,error}=await sb.from('programme_workouts').insert({programme_id:selectedProg.id,week_number:week,day_number:day,name}).select().single();
-          if(!error&&data) setWorkouts(prev=>[...prev,data]);
-          else setMsg('❌ '+(error?.message||'Erreur'));
-        }
-        setSaving(false);setEditWorkoutName(false);setTimeout(()=>setMsg(''),4000);
+        const existing=workouts.find(w=>w.week_number===week&&w.day_number===day);
+        if(existing){const{data,error}=await sb.from('programme_workouts').update({name}).eq('id',existing.id).select().single();if(!error&&data)setWorkouts(prev=>prev.map(w=>w.id===data.id?data:w));}
+        else{const{data,error}=await sb.from('programme_workouts').insert({programme_id:selectedProg.id,week_number:week,day_number:day,name}).select().single();if(!error&&data)setWorkouts(prev=>[...prev,data]);}
+        setSaving(false);setEditWorkoutName(null);
       }
-
-      // Supprimer tous les exos d'un jour
       async function deleteWorkoutDay(week,day){
-        if(!confirm(`Supprimer toute la séance Semaine ${week} / Séance ${day} ?`))return;
+        if(!confirm(`Supprimer la séance Sem.${week}/Jour${day} ?`))return;
         setSaving(true);
         const ids=progExos.filter(e=>e.week_number===week&&e.day_number===day).map(e=>e.id);
-        if(ids.length) await sb.from('programme_exercises').delete().in('id',ids);
+        if(ids.length)await sb.from('programme_exercises').delete().in('id',ids);
         const wo=workouts.find(w=>w.week_number===week&&w.day_number===day);
-        if(wo) await sb.from('programme_workouts').delete().eq('id',wo.id);
+        if(wo)await sb.from('programme_workouts').delete().eq('id',wo.id);
         setProgExos(prev=>prev.filter(e=>!(e.week_number===week&&e.day_number===day)));
         setWorkouts(prev=>prev.filter(w=>!(w.week_number===week&&w.day_number===day)));
         setSelectedDay(null);setSaving(false);
       }
-
-      async function openAddExo(wk,dk){
-        const w = wk!==undefined?wk:selWeek;
-        const d = dk!==undefined?dk:(selectedDay?.day||1);
+      async function openAddExo(week,day){
         if(!allExos.length){const{data}=await sb.from('exercises').select('id,name,tags').order('name').limit(2000);setAllExos(data||[]);}
-        const wdExos=progExos.filter(e=>(e.week_number||1)===w&&(e.day_number||1)===d);
+        const wdExos=progExos.filter(e=>(e.week_number||1)===week&&(e.day_number||1)===day);
         setAddExoOpen(true);setExoSearch('');
-        setAForm({exercise_id:'',week_number:w,day_number:d,order_index:wdExos.length+1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''});
+        setAForm({exercise_id:'',week_number:week,day_number:day,order_index:wdExos.length+1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''});
       }
       async function handleAddExo(){
         if(!aForm.exercise_id){setMsg('❌ Sélectionnez un exercice');return;}
         setSaving(true);
-        const{data,error}=await sb.from('programme_exercises')
-          .insert({...aForm,programme_id:selectedProg.id})
-          .select('*, exercise:exercises(id,name,youtube_id,image_filename,tags)').single();
-        if(!error&&data){
-          setProgExos(prev=>[...prev,data].sort((a,b)=>(a.week_number-b.week_number)||((a.day_number||0)-(b.day_number||0))||(a.order_index-b.order_index)));
-          setSelWeek(aForm.week_number);
-          setSelectedDay({week:aForm.week_number,day:aForm.day_number});
-          setAddExoOpen(false);setMsg('✅ Exercice ajouté');
-        }else setMsg('❌ '+(error?.message||'Erreur'));
+        const{data,error}=await sb.from('programme_exercises').insert({...aForm,programme_id:selectedProg.id}).select('*,exercise:exercises(id,name,youtube_id,image_filename,tags)').single();
+        if(!error&&data){setProgExos(prev=>[...prev,data].sort((a,b)=>(a.week_number-b.week_number)||((a.day_number||0)-(b.day_number||0))||(a.order_index-b.order_index)));setAddExoOpen(false);setMsg('✅ Exercice ajouté');}
+        else setMsg('❌ '+(error?.message||'Erreur'));
         setSaving(false);setTimeout(()=>setMsg(''),4000);
       }
       async function handleRemoveExo(peId){
-        if(!confirm('Retirer cet exercice du programme ?'))return;
+        if(!confirm('Retirer cet exercice ?'))return;
         const{error}=await sb.from('programme_exercises').delete().eq('id',peId);
         if(!error)setProgExos(prev=>prev.filter(e=>e.id!==peId));
         else setMsg('❌ '+(error?.message||'Erreur'));
         setTimeout(()=>setMsg(''),4000);
       }
+      function openEditExoEntry(pe){
+        setEditExoEntry(pe);
+        setEditExoForm({sets:pe.sets||3,reps:pe.reps||12,rest_seconds:pe.rest_seconds||60,charge:pe.charge||'',notes:pe.notes||''});
+      }
+      async function handleEditExoEntry(){
+        if(!editExoEntry)return;
+        setSaving(true);
+        const{data,error}=await sb.from('programme_exercises')
+          .update({sets:editExoForm.sets,reps:editExoForm.reps,rest_seconds:editExoForm.rest_seconds,charge:editExoForm.charge,notes:editExoForm.notes})
+          .eq('id',editExoEntry.id).select('*,exercise:exercises(id,name,youtube_id,image_filename,tags)').single();
+        if(!error&&data){setProgExos(prev=>prev.map(e=>e.id===data.id?data:e));setEditExoEntry(null);setMsg('✅ Exercice mis à jour');}
+        else setMsg('❌ '+(error?.message||'Erreur'));
+        setSaving(false);setTimeout(()=>setMsg(''),4000);
+      }
 
-      // ── Shared prog form fields ──
       function pFields(data,set){
         const fi=(label,field,type='text',extra={})=>{
           const val=data[field]??'';
           const onChange=e=>set(p=>({...p,[field]:type==='number'?Number(e.target.value)||0:e.target.value}));
-          if(type==='select')return h('div',{key:field,style:{marginBottom:10}},
-            h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3,textTransform:'uppercase',letterSpacing:'0.08em'}},label),
-            h('select',{value:val,onChange,style:inp},...(extra.opts||[]).map(([v,l])=>h('option',{key:v,value:v},l))));
-          if(type==='textarea')return h('div',{key:field,style:{marginBottom:10}},
-            h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3,textTransform:'uppercase',letterSpacing:'0.08em'}},label),
-            h('textarea',{value:val,onChange,placeholder:extra.ph||'',style:{...inp,height:68,resize:'vertical'}}));
-          return h('div',{key:field,style:{marginBottom:10}},
-            h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3,textTransform:'uppercase',letterSpacing:'0.08em'}},label),
-            h('input',{type,value:val,onChange,placeholder:extra.ph||'',style:inp}));
+          if(type==='select')return h('div',{key:field,style:{marginBottom:10}},h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3,textTransform:'uppercase',letterSpacing:'0.08em'}},label),h('select',{value:val,onChange,style:inp},...(extra.opts||[]).map(([v,l])=>h('option',{key:v,value:v},l))));
+          if(type==='textarea')return h('div',{key:field,style:{marginBottom:10}},h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3,textTransform:'uppercase',letterSpacing:'0.08em'}},label),h('textarea',{value:val,onChange,placeholder:extra.ph||'',style:{...inp,height:68,resize:'vertical'}}));
+          return h('div',{key:field,style:{marginBottom:10}},h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3,textTransform:'uppercase',letterSpacing:'0.08em'}},label),h('input',{type,value:val,onChange,placeholder:extra.ph||'',style:inp}));
         };
-        return [
-          fi('Titre','titre','text',{ph:'Ex: Transformation Corps & Mental'}),
+        return[
+          fi('Titre *','titre','text',{ph:'Ex: Black Panther special program'}),
           fi('Description courte','description_courte','text',{ph:'Résumé en une phrase'}),
-          fi('Description complète','description','textarea',{ph:'Description du programme...'}),
-          fi('URL image','image_url','text',{ph:'https://...'}),
-          h('div',{key:'row1',style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:0}},
-            fi('Prix (€)','prix','number',{ph:'99'}),
-            fi('Prix promo (€)','prix_promo','number',{ph:'(optionnel)'})
-          ),
-          h('div',{key:'row2',style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:0}},
-            fi('Catégorie','categorie','select',{opts:[['musculation','Musculation'],['perte-de-poids','Perte de poids'],['post-partum','Post-Partum'],['force','Force']]}),
+          fi('Description','description','textarea',{ph:'Description complète du programme...'}),
+          fi('URL image','image_url','text',{ph:'https://cdn.azeoo.com/programs/large/...'}),
+          h('div',{key:'rp',style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:0}},fi('Prix (€)','prix','number',{ph:'19.95'}),fi('Prix promo (€)','prix_promo','number',{ph:'(optionnel)'})),
+          h('div',{key:'rm',style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr 1fr',gap:10,marginBottom:0}},
+            fi('Durée (sem.)','duree_semaines','number',{ph:'8'}),
             fi('Niveau','niveau','select',{opts:[['debutant','Débutant'],['intermediaire','Intermédiaire'],['avance','Avancé']]}),
-            fi('Durée (h)','duree_heures','number',{ph:'12'})
+            fi('Objectif','objectif','select',{opts:[['Build Muscle','Build Muscle'],['Lose Weight','Lose Weight'],['Sculpt Your Body','Sculpt Your Body'],['Get Fit','Get Fit']]}),
+            fi('Genre','sexe','select',{opts:[['tous','Tous'],['homme','Homme'],['femme','Femme']]})
           ),
         ];
       }
 
-      // ── Modal helper ──
-      const Modal=(children)=>h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
-        h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:540}},children));
-
-      // ── Add Exercise Modal (shared) ──
-      const AddExoModal=()=>h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
-        h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:560}},
-          h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:16}},`Ajouter un exercice — Sem. ${aForm.week_number} / Jour ${aForm.day_number}`),
-          h('input',{placeholder:'Rechercher un exercice...',value:exoSearch,onChange:e=>setExoSearch(e.target.value),style:{...inp,marginBottom:8}}),
-          h('div',{style:{maxHeight:180,overflowY:'auto',marginBottom:12,border:`1px solid ${C.border}`,borderRadius:10}},
-            filtExos.length===0?h('div',{style:{padding:20,textAlign:'center',color:C.muted,fontSize:13}},'Aucun résultat')
-            :filtExos.slice(0,60).map(e=>h('div',{key:e.id,onClick:()=>setAForm(f=>({...f,exercise_id:e.id})),
-              style:{padding:'9px 14px',cursor:'pointer',fontSize:13,background:aForm.exercise_id===e.id?`${C.gold}22`:C.soft,color:aForm.exercise_id===e.id?C.gold:C.white,borderBottom:`1px solid ${C.border}`}},e.name))
-          ),
-          h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8,marginBottom:8}},
-            ...[['Semaine','week_number','number'],['Séance','day_number','number'],['Ordre','order_index','number']].map(([l,f,t])=>
-              h('div',{key:f},h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3}},l),
-                h('input',{type:t,min:0,value:aForm[f],onChange:e=>setAForm(g=>({...g,[f]:parseInt(e.target.value)||0})),style:{...inp,padding:'8px 10px'}})))
-          ),
-          h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8,marginBottom:10}},
-            ...[['Séries','sets','number'],['Reps','reps','number'],['Repos s','rest_seconds','number'],['Charge','charge','text']].map(([l,f,t])=>
-              h('div',{key:f},h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3}},l),
-                h('input',{type:t,min:t==='number'?0:undefined,value:aForm[f],onChange:e=>setAForm(g=>({...g,[f]:t==='number'?(parseInt(e.target.value)||0):e.target.value})),placeholder:f==='charge'?'20kg':'',style:{...inp,padding:'8px 8px'}})))
-          ),
-          h('textarea',{placeholder:'Notes...',value:aForm.notes,onChange:e=>setAForm(f=>({...f,notes:e.target.value})),style:{...inp,height:48,resize:'vertical',marginBottom:12}}),
-          h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end'}},
-            h('button',{onClick:()=>setAddExoOpen(false),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 18px',cursor:'pointer'}},'Annuler'),
-            h('button',{onClick:handleAddExo,disabled:saving||!aForm.exercise_id,style:{...btn,opacity:saving||!aForm.exercise_id?0.5:1}},saving?'Ajout...':'Ajouter')
+      const AddExoModal=()=>{
+        const selExo=allExos.find(e=>e.id===aForm.exercise_id);
+        return h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
+          h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:620}},
+            h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:16}},`Ajouter un exercice — Sem.${aForm.week_number} / Jour ${aForm.day_number}`),
+            h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:0}},
+              // Left: exercise picker
+              h('div',null,
+                h('input',{placeholder:'Rechercher un exercice...',value:exoSearch,onChange:e=>setExoSearch(e.target.value),style:{...inp,marginBottom:8},autoFocus:true}),
+                h('div',{style:{maxHeight:260,overflowY:'auto',border:`1px solid ${C.border}`,borderRadius:10}},
+                  filtExos.length===0?h('div',{style:{padding:20,textAlign:'center',color:C.muted,fontSize:13}},'Aucun résultat')
+                  :filtExos.slice(0,100).map(e=>h('div',{key:e.id,onClick:()=>setAForm(f=>({...f,exercise_id:e.id})),
+                    style:{padding:'9px 14px',cursor:'pointer',fontSize:13,background:aForm.exercise_id===e.id?`${C.gold}22`:C.soft,color:aForm.exercise_id===e.id?C.gold:C.white,borderBottom:`1px solid ${C.border}`}},e.name))
+                )
+              ),
+              // Right: selected exercise preview
+              h('div',{style:{display:'flex',flexDirection:'column',gap:8}},
+                selExo
+                  ?h('div',{style:{background:C.soft,borderRadius:12,overflow:'hidden',border:`1px solid ${C.gold}44`}},
+                      selExo.image_filename
+                        ?h('img',{src:'https://cdn.azeoo.com/exercises/small-wide/'+selExo.image_filename,style:{width:'100%',height:130,objectFit:'cover',display:'block'},onError:e=>{e.target.style.display='none'}})
+                        :h('div',{style:{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:32}},'💪'),
+                      h('div',{style:{padding:'10px 12px'}},
+                        h('div',{style:{fontSize:13,fontWeight:700,color:C.gold,marginBottom:8}},selExo.name),
+                        selExo.youtube_id&&h('a',{href:'https://www.youtube.com/watch?v='+selExo.youtube_id,target:'_blank',
+                          style:{display:'flex',alignItems:'center',gap:6,background:'rgba(255,0,0,0.15)',border:'1px solid rgba(255,0,0,0.3)',color:'#ff4444',borderRadius:8,padding:'6px 10px',textDecoration:'none',fontSize:12,fontWeight:600}},
+                          h('span',null,'▶'),h('span',null,'Voir la vidéo')
+                        ),
+                        selExo.youtube_id&&h('img',{src:`https://img.youtube.com/vi/${selExo.youtube_id}/mqdefault.jpg`,style:{width:'100%',borderRadius:8,marginTop:8,cursor:'pointer'},onClick:()=>window.open('https://www.youtube.com/watch?v='+selExo.youtube_id,'_blank'),onError:e=>{e.target.style.display='none'}})
+                      )
+                    )
+                  :h('div',{style:{background:C.soft,borderRadius:12,border:`1px solid ${C.border}`,height:200,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:8,color:C.muted,fontSize:13}},
+                      h('div',{style:{fontSize:28}},'🏋️'),
+                      h('div',null,'Sélectionne un exercice')
+                    )
+              )
+            ),
+            h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8,margin:'12px 0'  }},
+              ...[['Séries','sets','number'],['Reps','reps','number'],['Repos (s)','rest_seconds','number'],['Charge','charge','text']].map(([l,f,t])=>
+                h('div',{key:f},h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3}},l),
+                  h('input',{type:t,min:t==='number'?0:undefined,value:aForm[f],onChange:e=>setAForm(g=>({...g,[f]:t==='number'?(parseInt(e.target.value)||0):e.target.value})),placeholder:f==='charge'?'20kg':'',style:{...inp,padding:'8px'}}))
+              )
+            ),
+            h('textarea',{placeholder:'Notes...',value:aForm.notes,onChange:e=>setAForm(f=>({...f,notes:e.target.value})),style:{...inp,height:44,resize:'vertical',marginBottom:12}}),
+            h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end'}},
+              h('button',{onClick:()=>setAddExoOpen(false),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 18px',cursor:'pointer'}},'Annuler'),
+              h('button',{onClick:handleAddExo,disabled:saving||!aForm.exercise_id,style:{...btn,opacity:saving||!aForm.exercise_id?0.5:1}},saving?'Ajout...':'Ajouter')
+            )
           )
-        )
-      );
+        );
+      };
 
-      // ── Delete confirm modal ──
-      const DelProgModal=()=>h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:16}},
+      const DelProgModal=()=>h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}},
         h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,maxWidth:380,textAlign:'center'}},
           h('div',{style:{fontSize:32,marginBottom:12}},'⚠️'),
           h('div',{style:{fontSize:15,fontWeight:700,color:C.white,marginBottom:8}},'Supprimer ce programme ?'),
-          h('div',{style:{fontSize:13,color:C.muted,marginBottom:20}},`"${delProg?.titre}" et tous ses exercices liés seront supprimés.`),
+          h('div',{style:{fontSize:13,color:C.muted,marginBottom:20}},`"${delProg?.titre}"`),
           h('div',{style:{display:'flex',gap:10,justifyContent:'center'}},
             h('button',{onClick:()=>setDelProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 20px',cursor:'pointer'}},'Annuler'),
             h('button',{onClick:handleDeleteProg,disabled:saving,style:{...btn,background:`linear-gradient(135deg,${C.red},#c0392b)`,opacity:saving?0.5:1}},saving?'Suppression...':'Supprimer')
@@ -581,236 +588,282 @@
         )
       );
 
-      // ── DETAIL VIEW ──
-      if (selectedProg) {
-        const allWeeks=[...new Set(progExos.map(e=>e.week_number||1))].sort((a,b)=>a-b);
-        // Also include weeks from workouts table
-        workouts.forEach(w=>{if(!allWeeks.includes(w.week_number))allWeeks.push(w.week_number);});
-        allWeeks.sort((a,b)=>a-b);
-        if(!allWeeks.length)allWeeks.push(1);
-        const weeks=allWeeks;
-
-        const DAYS_FR=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
-
-        // Workout detail panel (when a day is selected)
-        if(selectedDay){
-          const {week:sw,day:sd}=selectedDay;
-          const dayExos=progExos.filter(e=>(e.week_number||1)===sw&&(e.day_number||1)===sd).sort((a,b)=>a.order_index-b.order_index);
-          const workout=workouts.find(w=>w.week_number===sw&&w.day_number===sd);
-          const woName=workout?.name||`Séance ${sd}`;
-          const totalSets=dayExos.reduce((s,e)=>s+(e.sets||0),0);
-
-          return h('div',null,
-            // Top nav
-            h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:18,flexWrap:'wrap'}},
-              h('button',{onClick:()=>setSelectedDay(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'← Séances'),
-              h('div',{style:{fontSize:13,color:C.muted}},`${selectedProg.titre} · Semaine ${sw}`),
-              h('div',{style:{flex:1}}),
-              isAdmin&&h('button',{onClick:()=>{setAddExoOpen(true);setExoSearch('');if(!allExos.length)sb.from('exercises').select('id,name,tags').order('name').limit(2000).then(({data})=>setAllExos(data||[]));setAForm({exercise_id:'',week_number:sw,day_number:sd,order_index:dayExos.length+1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''});},style:{...btn,fontSize:13,padding:'9px 18px'}},'+ Exercice'),
-              isAdmin&&h('button',{onClick:()=>deleteWorkoutDay(sw,sd),style:{background:'transparent',border:`1px solid ${C.red}33`,color:C.red,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'🗑 Séance')
-            ),
-            msg&&h('div',{style:{background:msg.startsWith('✅')?`${C.green}22`:`${C.red}22`,color:msg.startsWith('✅')?C.green:C.red,padding:'10px 16px',borderRadius:8,marginBottom:14,fontSize:13}},msg),
-            // Workout header card
-            h('div',{style:{...card,marginBottom:18,display:'flex',alignItems:'center',gap:16}},
-              h('div',{style:{width:46,height:46,borderRadius:12,background:`${C.gold}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,fontWeight:800,color:C.gold,flexShrink:0}},sd),
+      const EditExoEntryModal=()=>{
+        if(!editExoEntry)return null;
+        const exo=editExoEntry.exercise;
+        return h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:'16px'}},
+          h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:500}},
+            h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:4}},'Modifier l\'exercice'),
+            // Exercise header with image + video
+            h('div',{style:{display:'flex',gap:12,alignItems:'center',background:C.soft,borderRadius:12,padding:'12px',marginBottom:16,border:`1px solid ${C.gold}33`}},
+              exo?.image_filename
+                ?h('img',{src:'https://cdn.azeoo.com/exercises/small-wide/'+exo.image_filename,style:{width:80,height:52,objectFit:'cover',borderRadius:8,flexShrink:0},onError:e=>{e.target.style.display='none'}})
+                :h('div',{style:{width:80,height:52,background:`${C.gold}22`,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,flexShrink:0}},'💪'),
               h('div',{style:{flex:1}},
-                editWorkoutName
-                  ? h('div',{style:{display:'flex',gap:8,alignItems:'center'}},
-                      h('input',{value:workoutNameDraft,onChange:e=>setWorkoutNameDraft(e.target.value),onKeyDown:e=>{if(e.key==='Enter')saveWorkoutName(sw,sd,workoutNameDraft);if(e.key==='Escape')setEditWorkoutName(false);},autoFocus:true,style:{...inp,fontSize:16,fontWeight:700,padding:'6px 12px',flex:1}}),
-                      h('button',{onClick:()=>saveWorkoutName(sw,sd,workoutNameDraft),disabled:saving,style:{...btn,padding:'6px 14px',fontSize:13}},saving?'...':'✓'),
-                      h('button',{onClick:()=>setEditWorkoutName(false),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'6px 12px',cursor:'pointer',fontSize:13}},'✕')
-                    )
-                  : h('div',{style:{display:'flex',alignItems:'center',gap:8}},
-                      h('div',{style:{fontSize:18,fontWeight:700,color:C.white}},woName),
-                      isAdmin&&h('button',{onClick:()=>{setWorkoutNameDraft(woName);setEditWorkoutName(true);},style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:13,padding:'2px 6px'}},'✏️')
-                    )
-              ),
-              h('div',{style:{display:'flex',gap:20,marginLeft:'auto'}},
-                h('div',{style:{textAlign:'center'}},h('div',{style:{fontSize:20,fontWeight:800,color:C.white}},dayExos.length),h('div',{style:{fontSize:10,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em'}},'Exercices')),
-                h('div',{style:{textAlign:'center'}},h('div',{style:{fontSize:20,fontWeight:800,color:C.gold}},totalSets),h('div',{style:{fontSize:10,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em'}},'Séries'))
+                h('div',{style:{fontSize:14,fontWeight:700,color:C.white,marginBottom:4}},exo?.name||'—'),
+                exo?.youtube_id&&h('a',{href:'https://www.youtube.com/watch?v='+exo.youtube_id,target:'_blank',
+                  style:{display:'inline-flex',alignItems:'center',gap:5,background:'rgba(255,0,0,0.15)',border:'1px solid rgba(255,0,0,0.3)',color:'#ff5555',borderRadius:6,padding:'4px 10px',textDecoration:'none',fontSize:11,fontWeight:600}},
+                  '▶ Voir la vidéo'
+                )
               )
             ),
-            // Exercises list
-            loadingExos?h('div',{style:{color:C.muted,textAlign:'center',padding:60}},'Chargement...'):
-            dayExos.length===0
-              ?h('div',{style:{...card,textAlign:'center',padding:48,color:C.muted}},
-                  h('div',{style:{fontSize:36,marginBottom:12}},'💪'),
-                  h('div',{style:{fontWeight:600,color:C.white,marginBottom:8}}),'Aucun exercice pour cette séance',
-                  isAdmin&&h('button',{onClick:()=>{setAddExoOpen(true);setExoSearch('');if(!allExos.length)sb.from('exercises').select('id,name,tags').order('name').limit(2000).then(({data})=>setAllExos(data||[]));setAForm({exercise_id:'',week_number:sw,day_number:sd,order_index:1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''});},style:{...btn,marginTop:12,fontSize:13}},'+ Ajouter un exercice')
+            // YouTube thumbnail preview
+            exo?.youtube_id&&h('img',{src:`https://img.youtube.com/vi/${exo.youtube_id}/mqdefault.jpg`,
+              style:{width:'100%',borderRadius:10,marginBottom:14,cursor:'pointer'},
+              onClick:()=>window.open('https://www.youtube.com/watch?v='+exo.youtube_id,'_blank'),
+              onError:e=>{e.target.style.display='none'}
+            }),
+            h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8,marginBottom:10}},
+              ...[['Séries','sets','number'],['Reps','reps','number'],['Repos (s)','rest_seconds','number'],['Charge','charge','text']].map(([l,f,t])=>
+                h('div',{key:f},
+                  h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3,textTransform:'uppercase',letterSpacing:'0.06em'}},l),
+                  h('input',{type:t,min:t==='number'?0:undefined,value:editExoForm[f],
+                    onChange:e=>setEditExoForm(g=>({...g,[f]:t==='number'?(parseInt(e.target.value)||0):e.target.value})),
+                    placeholder:f==='charge'?'20kg':'',style:{...inp,padding:'8px'}})
                 )
-              :h('div',{style:{display:'flex',flexDirection:'column',gap:10}},
+              )
+            ),
+            h('textarea',{placeholder:'Notes...',value:editExoForm.notes,onChange:e=>setEditExoForm(f=>({...f,notes:e.target.value})),style:{...inp,height:44,resize:'vertical',marginBottom:12}}),
+            h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end'}},
+              h('button',{onClick:()=>setEditExoEntry(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 18px',cursor:'pointer'}},'Annuler'),
+              h('button',{onClick:handleEditExoEntry,disabled:saving,style:{...btn,opacity:saving?0.5:1}},saving?'Sauvegarde...':'Enregistrer')
+            )
+          )
+        );
+      };
+
+      function EditProgModal({data,onSave,onClose}){
+        return h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
+          h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:560}},
+            h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:14}},'Modifier le programme'),
+            ...pFields(data,setEditProg),
+            h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end',marginTop:10}},
+              h('button',{onClick:onClose,style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 18px',cursor:'pointer'}},'Annuler'),
+              h('button',{onClick:onSave,disabled:saving,style:{...btn,opacity:saving?0.5:1}},saving?'Sauvegarde...':'Enregistrer')
+            )
+          )
+        );
+      }
+
+      // ─── WORKOUT DAY VIEW ─────────────────────────────────────────────────────
+      if(selectedProg&&selectedDay){
+        const{week:sw,day:sd}=selectedDay;
+        const DAYS_FR=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+        const dayExos=progExos.filter(e=>(e.week_number||1)===sw&&(e.day_number||1)===sd).sort((a,b)=>a.order_index-b.order_index);
+        const workout=workouts.find(w=>w.week_number===sw&&w.day_number===sd);
+        const woName=workout?.name||`Séance ${sd}`;
+        const stats=calcStats(sw,sd);
+
+        return h('div',null,
+          h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:20,flexWrap:'wrap'}},
+            h('button',{onClick:()=>setSelectedProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'← Programmes'),
+            h('span',{style:{color:C.muted,fontSize:13}},'/'),
+            h('button',{onClick:()=>setSelectedDay(null),style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:13,textDecoration:'underline'}},selectedProg.titre),
+            h('span',{style:{color:C.muted,fontSize:13}},'/'),
+            h('span',{style:{color:C.white,fontSize:13,fontWeight:600}},`Sem.${sw} · ${DAYS_FR[sd-1]}`),
+            h('div',{style:{flex:1}}),
+            isAdmin&&h('button',{onClick:()=>openAddExo(sw,sd),style:{...btn,fontSize:13,padding:'9px 18px'}},'+ Exercice'),
+            isAdmin&&h('button',{onClick:()=>deleteWorkoutDay(sw,sd),style:{background:'transparent',border:`1px solid ${C.red}33`,color:C.red,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'🗑 Séance')
+          ),
+          msg&&h('div',{style:{background:msg.startsWith('✅')?`${C.green}22`:`${C.red}22`,color:msg.startsWith('✅')?C.green:C.red,padding:'10px 16px',borderRadius:8,marginBottom:14,fontSize:13}},msg),
+
+          // Header card
+          h('div',{style:{...card,marginBottom:20}},
+            h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:20}},
+              h('div',{style:{width:52,height:52,borderRadius:14,background:`${C.gold}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,fontWeight:800,color:C.gold,flexShrink:0}},sd),
+              h('div',{style:{flex:1}},
+                editWorkoutName&&editWorkoutName.week===sw&&editWorkoutName.day===sd
+                  ?h('div',{style:{display:'flex',gap:8,alignItems:'center'}},
+                      h('input',{value:workoutNameDraft,onChange:e=>setWorkoutNameDraft(e.target.value),onKeyDown:e=>{if(e.key==='Enter')saveWorkoutName(sw,sd,workoutNameDraft);if(e.key==='Escape')setEditWorkoutName(null);},autoFocus:true,style:{...inp,fontSize:16,fontWeight:700,padding:'6px 12px',flex:1}}),
+                      h('button',{onClick:()=>saveWorkoutName(sw,sd,workoutNameDraft),disabled:saving,style:{...btn,padding:'6px 14px',fontSize:13}},saving?'...':'✓'),
+                      h('button',{onClick:()=>setEditWorkoutName(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'6px 12px',cursor:'pointer',fontSize:13}},'✕')
+                    )
+                  :h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+                      h('div',{style:{fontSize:20,fontWeight:700,color:C.white}},woName),
+                      isAdmin&&h('button',{onClick:()=>{setWorkoutNameDraft(woName);setEditWorkoutName({week:sw,day:sd});},style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:14}},'✏️')
+                    )
+              )
+            ),
+            // Stats (like Azeoo)
+            h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,background:C.soft,borderRadius:10,padding:'14px 18px'}},
+              ...[
+                {label:'DURÉE',value:stats.durationMin?`${stats.durationMin}min`:'—',color:C.white},
+                {label:'ÉNERGIE',value:stats.energy?`${stats.energy} kcal`:'—',color:C.gold},
+                {label:'SÉRIES',value:stats.totalSets||'—',color:C.green},
+                {label:'EXERCICES',value:stats.totalExos||'—',color:C.blue},
+              ].map(s=>h('div',{key:s.label,style:{textAlign:'center'}},
+                h('div',{style:{fontSize:20,fontWeight:800,color:s.color,lineHeight:1}},s.value),
+                h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:4}},s.label)
+              ))
+            )
+          ),
+
+          // Exercise list
+          loadingExos?h('div',{style:{color:C.muted,textAlign:'center',padding:60}},'Chargement...')
+          :dayExos.length===0
+            ?h('div',{style:{...card,textAlign:'center',padding:48,color:C.muted}},
+                h('div',{style:{fontSize:36,marginBottom:12}},'💪'),
+                h('div',{style:{fontWeight:600,color:C.white,marginBottom:8}},'Aucun exercice pour cette séance'),
+                isAdmin&&h('button',{onClick:()=>openAddExo(sw,sd),style:{...btn,marginTop:12,fontSize:13}},'+ Ajouter un exercice')
+              )
+            :h('div',{style:{display:'flex',flexDirection:'column',gap:10}},
                 ...dayExos.map((pe,idx)=>
                   h('div',{key:pe.id,style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,display:'flex',alignItems:'stretch',overflow:'hidden'}},
-                    // Order badge
-                    h('div',{style:{width:36,flexShrink:0,background:C.soft,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:C.muted}},(idx+1)),
-                    // Thumbnail
-                    h('div',{style:{width:80,flexShrink:0,background:C.soft,position:'relative'}},
+                    h('div',{style:{width:36,flexShrink:0,background:C.soft,display:'flex',alignItems:'center',justifyContent:'center',fontSize:13,fontWeight:700,color:C.muted}},idx+1),
+                    h('div',{style:{width:88,flexShrink:0,background:C.soft,position:'relative',minHeight:72}},
                       pe.exercise?.image_filename
-                        ?h('img',{src:'https://cdn.azeoo.com/exercises/small-wide/'+pe.exercise.image_filename,style:{width:'100%',height:'100%',objectFit:'cover',display:'block',minHeight:68},onError:e=>{e.target.style.display='none'}})
-                        :h('div',{style:{width:'100%',height:68,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22}},'💪')
+                        ?h('img',{src:'https://cdn.azeoo.com/exercises/small-wide/'+pe.exercise.image_filename,style:{width:'100%',height:'100%',objectFit:'cover',display:'block',minHeight:72},onError:e=>{e.target.style.display='none'}})
+                        :h('div',{style:{width:'100%',height:72,display:'flex',alignItems:'center',justifyContent:'center',fontSize:24}},'💪')
                     ),
-                    // Content
-                    h('div',{style:{flex:1,padding:'10px 14px',display:'flex',alignItems:'center',gap:10}},
+                    h('div',{style:{flex:1,padding:'12px 16px',display:'flex',alignItems:'center',gap:12}},
                       h('div',{style:{flex:1}},
-                        h('div',{style:{fontSize:14,fontWeight:600,color:C.white,marginBottom:7}},pe.exercise?.name||'—'),
-                        h('div',{style:{display:'flex',gap:14,flexWrap:'wrap',alignItems:'center'}},
-                          pe.sets&&h('div',{style:{textAlign:'center'}},
-                            h('div',{style:{fontSize:20,fontWeight:800,color:C.gold,lineHeight:1}},pe.sets),
-                            h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Séries')),
-                          (pe.sets&&pe.reps)&&h('div',{style:{color:C.muted,fontSize:16,alignSelf:'center',paddingBottom:4}},'×'),
-                          pe.reps&&h('div',{style:{textAlign:'center'}},
-                            h('div',{style:{fontSize:20,fontWeight:800,color:C.white,lineHeight:1}},pe.reps),
-                            h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Reps')),
-                          pe.charge&&h('div',{style:{textAlign:'center',borderLeft:`1px solid ${C.border}`,paddingLeft:12}},
-                            h('div',{style:{fontSize:15,fontWeight:700,color:C.blue,lineHeight:1}},pe.charge),
-                            h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Charge')),
-                          pe.rest_seconds&&h('div',{style:{textAlign:'center'}},
-                            h('div',{style:{fontSize:15,fontWeight:600,color:C.muted,lineHeight:1}},pe.rest_seconds>=60?`${Math.floor(pe.rest_seconds/60)}min${pe.rest_seconds%60?` ${pe.rest_seconds%60}s`:''}`:pe.rest_seconds+'s'),
-                            h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Repos'))
+                        h('div',{style:{fontSize:14,fontWeight:600,color:C.white,marginBottom:8}},pe.exercise?.name||'—'),
+                        h('div',{style:{display:'flex',gap:16,flexWrap:'wrap',alignItems:'center'}},
+                          pe.sets&&h('div',{style:{textAlign:'center'}},h('div',{style:{fontSize:18,fontWeight:800,color:C.gold,lineHeight:1}},pe.sets),h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Séries')),
+                          pe.sets&&pe.reps&&h('div',{style:{color:C.muted,fontSize:14,alignSelf:'center'}},'×'),
+                          pe.reps&&h('div',{style:{textAlign:'center'}},h('div',{style:{fontSize:18,fontWeight:800,color:C.white,lineHeight:1}},pe.reps),h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Reps')),
+                          pe.charge&&h('div',{style:{textAlign:'center',borderLeft:`1px solid ${C.border}`,paddingLeft:14}},h('div',{style:{fontSize:14,fontWeight:700,color:C.blue,lineHeight:1}},pe.charge),h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Charge')),
+                          pe.rest_seconds&&h('div',{style:{textAlign:'center'}},h('div',{style:{fontSize:14,fontWeight:600,color:C.muted,lineHeight:1}},pe.rest_seconds>=60?`${Math.floor(pe.rest_seconds/60)}min${pe.rest_seconds%60?` ${pe.rest_seconds%60}s`:''}`:pe.rest_seconds+'s'),h('div',{style:{fontSize:9,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:2}},'Repos'))
                         ),
                         pe.notes&&h('div',{style:{fontSize:11,color:C.muted,marginTop:6,fontStyle:'italic',borderTop:`1px solid ${C.border}`,paddingTop:5}},pe.notes)
                       ),
                       pe.exercise?.youtube_id&&h('a',{href:'https://www.youtube.com/watch?v='+pe.exercise.youtube_id,target:'_blank',
-                        style:{width:34,height:34,borderRadius:'50%',background:`${C.red}22`,display:'flex',alignItems:'center',justifyContent:'center',color:C.red,textDecoration:'none',fontSize:12,flexShrink:0}},'▶'),
-                      isAdmin&&h('button',{onClick:()=>handleRemoveExo(pe.id),style:{width:30,height:30,borderRadius:8,background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:12,flexShrink:0}},'🗑')
+                        style:{width:36,height:36,borderRadius:'50%',background:`${C.red}22`,display:'flex',alignItems:'center',justifyContent:'center',color:C.red,textDecoration:'none',fontSize:14,flexShrink:0}},'▶'),
+                      isAdmin&&h('button',{onClick:()=>openEditExoEntry(pe),title:'Modifier',style:{width:32,height:32,borderRadius:8,background:`${C.gold}15`,border:`1px solid ${C.gold}33`,color:C.gold,cursor:'pointer',fontSize:13,flexShrink:0}},'✏️'),
+                      isAdmin&&h('button',{onClick:()=>handleRemoveExo(pe.id),style:{width:32,height:32,borderRadius:8,background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:13,flexShrink:0}},'🗑')
                     )
                   )
                 )
               ),
-            addExoOpen&&h(AddExoModal,null),
-            editProg&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
-              h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:540}},
-                h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:14}},'Modifier le programme'),
-                ...pFields(editProg,setEditProg),
-                h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end',marginTop:10}},
-                  h('button',{onClick:()=>setEditProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 18px',cursor:'pointer'}},'Annuler'),
-                  h('button',{onClick:handleEditProg,disabled:saving,style:{...btn,opacity:saving?0.5:1}},saving?'Sauvegarde...':'Enregistrer')
-                )
-              )
-            ),
-            delProg&&h(DelProgModal,null)
-          );
-        }
+          addExoOpen&&h(AddExoModal,null),
+          editExoEntry&&h(EditExoEntryModal,null)
+        );
+      }
 
-        // ── WEEKLY GRID VIEW (Azeoo style) ──
+      // ─── PROGRAMME DETAIL VIEW ────────────────────────────────────────────────
+      if(selectedProg){
+        const DAYS_FR=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+        const totalWeeks=selectedProg.duree_semaines||8;
+        const weeksArr=Array.from({length:totalWeeks},(_,i)=>i+1);
+
         return h('div',null,
-          // Image header
-          h('div',{style:{position:'relative',borderRadius:20,overflow:'hidden',marginBottom:18,height:160}},
-            h('div',{style:{position:'absolute',inset:0,background:C.soft}}),
-            selectedProg.image_url&&h('img',{src:selectedProg.image_url,style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover'},onError:e=>{e.target.style.display='none'}}),
-            h('div',{style:{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(13,27,42,0.95) 0%,rgba(13,27,42,0.15) 100%)'}}),
-            h('div',{style:{position:'absolute',bottom:16,left:20,right:20,display:'flex',alignItems:'flex-end',justifyContent:'space-between'}},
-              h('div',null,
-                h('div',{style:{fontSize:20,fontWeight:800,color:C.white}},selectedProg.titre),
-                h('div',{style:{display:'flex',gap:6,marginTop:6,flexWrap:'wrap'}},
-                  h('span',{style:badge(catColors[selectedProg.categorie]||C.muted)},catLabels[selectedProg.categorie]||selectedProg.categorie),
-                  h('span',{style:badge(C.muted)},niveauLabels[selectedProg.niveau]||selectedProg.niveau),
-                  h('span',{style:badge(C.muted)},`${selectedProg.duree_heures}h`)
-                )
-              ),
-              h('div',{style:{textAlign:'right'}},
-                h('div',{style:{fontSize:22,fontWeight:800,color:C.gold}},`${selectedProg.prix_promo||selectedProg.prix}€`),
-                selectedProg.prix_promo&&h('div',{style:{fontSize:12,color:C.muted,textDecoration:'line-through'}},`${selectedProg.prix}€`)
-              )
-            )
-          ),
-          // Nav bar
-          h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:16,flexWrap:'wrap'}},
-            h('button',{onClick:()=>setSelectedProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'← Retour'),
+          // Breadcrumb + actions
+          h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:20,flexWrap:'wrap'}},
+            h('button',{onClick:()=>setSelectedProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'← Programmes'),
+            h('span',{style:{color:C.muted,fontSize:13}},'/'),
+            h('span',{style:{color:C.white,fontSize:13,fontWeight:600}},selectedProg.titre),
             h('div',{style:{flex:1}}),
+            isAdmin&&h('button',{onClick:e=>handleTogglePublish(selectedProg,e),style:{background:selectedProg.actif?`${C.green}22`:'rgba(255,255,255,0.06)',border:`1px solid ${selectedProg.actif?C.green:C.border}`,color:selectedProg.actif?C.green:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13,fontWeight:600}},selectedProg.actif?'🌐 Publié sur le site':'☁ Publier sur le site'),
             isAdmin&&h('button',{onClick:()=>setEditProg({...selectedProg}),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'✏️ Éditer'),
             isAdmin&&h('button',{onClick:()=>setDelProg(selectedProg),style:{background:'transparent',border:`1px solid ${C.red}33`,color:C.red,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'🗑')
           ),
           msg&&h('div',{style:{background:msg.startsWith('✅')?`${C.green}22`:`${C.red}22`,color:msg.startsWith('✅')?C.green:C.red,padding:'10px 16px',borderRadius:8,marginBottom:14,fontSize:13}},msg),
-          // Stats row
-          h('div',{style:{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}},
-            h('div',{style:{...card,flex:1,minWidth:120,padding:16,textAlign:'center'}},
-              h('div',{style:{fontSize:22,fontWeight:800,color:C.white}},progExos.length),
-              h('div',{style:{fontSize:11,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:4}},'Exercices')
+
+          // Programme info card — like Azeoo detail page
+          h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:'hidden',marginBottom:20}},
+            // Image header
+            selectedProg.image_url&&h('div',{style:{position:'relative',height:200,background:C.soft}},
+              h('img',{src:selectedProg.image_url,alt:selectedProg.titre,style:{width:'100%',height:'100%',objectFit:'cover'},onError:e=>{e.target.style.display='none'}}),
+              h('div',{style:{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(22,39,58,0.9) 0%,rgba(22,39,58,0.1) 60%)'}})
             ),
-            h('div',{style:{...card,flex:1,minWidth:120,padding:16,textAlign:'center'}},
-              h('div',{style:{fontSize:22,fontWeight:800,color:C.gold}},weeks.length),
-              h('div',{style:{fontSize:11,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:4}},'Semaines')
-            ),
-            h('div',{style:{...card,flex:1,minWidth:120,padding:16,textAlign:'center'}},
-              h('div',{style:{fontSize:22,fontWeight:800,color:C.green}},progExos.reduce((s,e)=>s+(e.sets||0),0)),
-              h('div',{style:{fontSize:11,color:C.muted,textTransform:'uppercase',letterSpacing:'0.08em',marginTop:4}},'Séries totales')
+            h('div',{style:{padding:24}},
+              h('h2',{style:{fontSize:20,fontWeight:800,color:C.white,marginBottom:6}},selectedProg.titre),
+              selectedProg.description_courte&&h('p',{style:{color:C.muted,fontSize:14,lineHeight:1.5,marginBottom:16}},selectedProg.description_courte),
+              // Azeoo-style info table
+              h('div',{style:{borderRadius:12,overflow:'hidden',border:`1px solid ${C.border}`}},
+                h('table',{style:{width:'100%',borderCollapse:'collapse'}},
+                  h('thead',null,h('tr',null,
+                    ...['Durée','Niveau','Objectif','Genre','Prix'].map(l=>h('th',{key:l,style:{padding:'10px 16px',textAlign:'left',fontSize:11,fontWeight:700,letterSpacing:'0.1em',textTransform:'uppercase',color:C.muted,borderBottom:`1px solid ${C.border}`,background:C.soft}},l))
+                  )),
+                  h('tbody',null,h('tr',null,
+                    h('td',{style:{padding:'14px 16px',fontSize:14,fontWeight:600,color:C.white}},`${selectedProg.duree_semaines||8} semaines`),
+                    h('td',{style:{padding:'14px 16px',fontSize:14,color:C.white}},niveauLabels[selectedProg.niveau]||selectedProg.niveau||'—'),
+                    h('td',{style:{padding:'14px 16px'}},h('span',{style:{background:`${objColors[selectedProg.objectif]||C.muted}22`,color:objColors[selectedProg.objectif]||C.muted,fontSize:12,fontWeight:700,padding:'4px 12px',borderRadius:100}},selectedProg.objectif||'—')),
+                    h('td',{style:{padding:'14px 16px',fontSize:14,color:C.white}},sexeLabels[selectedProg.sexe]||'Tous'),
+                    h('td',{style:{padding:'14px 16px',fontSize:18,fontWeight:800,color:C.gold}},selectedProg.prix_promo?h('span',null,h('span',{style:{textDecoration:'line-through',color:C.muted,fontSize:13,marginRight:8}},`${selectedProg.prix}€`),`${selectedProg.prix_promo}€`):`${selectedProg.prix}€`)
+                  ))
+                )
+              ),
+              selectedProg.description&&h('p',{style:{color:C.muted,fontSize:13,lineHeight:1.6,marginTop:16,paddingTop:14,borderTop:`1px solid ${C.border}`}},selectedProg.description)
             )
           ),
-          // Week selector + Add week
-          h('div',{style:{display:'flex',gap:6,marginBottom:16,overflowX:'auto',paddingBottom:2,alignItems:'center'}},
-            h('div',{style:{fontSize:13,color:C.muted,fontWeight:600,marginRight:4,whiteSpace:'nowrap',flexShrink:0}},'Semaine :'),
-            ...weeks.map(w=>h('button',{key:w,onClick:()=>setSelWeek(w),
-              style:{background:selWeek===w?C.gold:'transparent',color:selWeek===w?'#000':C.muted,border:`1px solid ${selWeek===w?C.gold:C.border}`,
-                borderRadius:8,padding:'7px 18px',cursor:'pointer',fontSize:13,fontWeight:selWeek===w?700:400,whiteSpace:'nowrap',flexShrink:0}},`${w}`)),
-            isAdmin&&h('button',{onClick:()=>{const nw=weeks.length?Math.max(...weeks)+1:1;setSelWeek(nw);},
-              style:{background:'transparent',border:`1px dashed ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 12px',cursor:'pointer',fontSize:12,whiteSpace:'nowrap',flexShrink:0}},'+ Semaine')
-          ),
-          // 7-day grid (Azeoo style)
-          loadingExos?h('div',{style:{color:C.muted,textAlign:'center',padding:60}},'Chargement...'):
-          h('div',null,
-            // Column headers
-            h('div',{style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:8,marginBottom:8}},
-              ...DAYS_FR.map((d,i)=>h('div',{key:i,style:{textAlign:'center',fontSize:11,fontWeight:700,color:C.muted,textTransform:'uppercase',letterSpacing:'0.1em',padding:'4px 0'}},d))
-            ),
-            // Day cells
-            h('div',{style:{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:8}},
-              ...[1,2,3,4,5,6,7].map(dayNum=>{
-                const dayExos=progExos.filter(e=>(e.week_number||1)===selWeek&&(e.day_number||1)===dayNum);
-                const workout=workouts.find(w=>w.week_number===selWeek&&w.day_number===dayNum);
-                const hasContent=dayExos.length>0||workout;
-                const totalSets=dayExos.reduce((s,e)=>s+(e.sets||0),0);
-                const woName=workout?.name||null;
-                return h('div',{key:dayNum,
-                  style:{background:hasContent?C.card:C.soft,border:`1px solid ${hasContent?C.border:'transparent'}`,borderRadius:12,padding:10,minHeight:120,display:'flex',flexDirection:'column',gap:6,
-                    cursor:hasContent?'pointer':'default',transition:'all 0.15s'},
-                  onClick:hasContent?()=>setSelectedDay({week:selWeek,day:dayNum}):undefined,
-                  onMouseEnter:hasContent?e=>{e.currentTarget.style.borderColor=C.gold;}:undefined,
-                  onMouseLeave:hasContent?e=>{e.currentTarget.style.borderColor=C.border;}:undefined
-                },
-                  // Day number badge
-                  h('div',{style:{width:28,height:28,borderRadius:8,background:hasContent?`${C.gold}22`:C.soft,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:hasContent?C.gold:C.muted,marginBottom:2,border:`1px solid ${hasContent?`${C.gold}44`:'transparent'}`}},dayNum),
-                  // Workout name
-                  woName?h('div',{style:{fontSize:11,fontWeight:700,color:C.white,lineHeight:1.3,marginBottom:2}},woName):null,
-                  // Stats
-                  hasContent&&h('div',{style:{fontSize:10,color:C.muted,lineHeight:1.8}},
-                    dayExos.length>0&&h('div',null,`${dayExos.length} exercice${dayExos.length>1?'s':''}`),
-                    totalSets>0&&h('div',null,`${totalSets} séries`)
-                  ),
-                  // Exercise thumbnails preview (max 3)
-                  dayExos.length>0&&h('div',{style:{display:'flex',gap:3,marginTop:'auto',flexWrap:'wrap'}},
-                    ...dayExos.slice(0,3).map(pe=>pe.exercise?.image_filename
-                      ?h('img',{key:pe.id,src:'https://cdn.azeoo.com/exercises/small-wide/'+pe.exercise.image_filename,
-                          style:{width:28,height:28,borderRadius:5,objectFit:'cover',opacity:0.8},onError:e=>{e.target.style.display='none'}})
-                      :h('div',{key:pe.id,style:{width:28,height:28,borderRadius:5,background:C.soft,display:'flex',alignItems:'center',justifyContent:'center',fontSize:11}},'💪')
-                    ),
-                    dayExos.length>3&&h('div',{style:{width:28,height:28,borderRadius:5,background:`${C.gold}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,color:C.gold,fontWeight:700}},`+${dayExos.length-3}`)
-                  ),
-                  // Add button (admin, empty cells)
-                  !hasContent&&isAdmin&&h('button',{onClick:e=>{e.stopPropagation();setSelectedDay({week:selWeek,day:dayNum});setAddExoOpen(true);setExoSearch('');if(!allExos.length)sb.from('exercises').select('id,name,tags').order('name').limit(2000).then(({data})=>setAllExos(data||[]));setAForm({exercise_id:'',week_number:selWeek,day_number:dayNum,order_index:1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''}); },
-                    style:{width:'100%',marginTop:'auto',background:'transparent',border:`1px dashed ${C.border}`,color:C.muted,borderRadius:8,padding:'5px 0',cursor:'pointer',fontSize:11,display:'flex',alignItems:'center',justifyContent:'center',gap:4}
-                  },'+ Ajouter')
-                );
-              })
+
+          // Workout calendar builder
+          h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}},
+            h('h3',{style:{fontSize:16,fontWeight:700,color:C.white}},`Planning d'entraînement · ${totalWeeks} semaines`),
+            isAdmin&&h('div',{style:{display:'flex',gap:8}},
+              h('span',{style:{color:C.muted,fontSize:12,alignSelf:'center'}},'Cliquez sur une case pour ajouter'),
             )
           ),
+
+          loadingExos?h('div',{style:{color:C.muted,textAlign:'center',padding:60}},'Chargement du planning...')
+          :h('div',{style:{overflowX:'auto'}},
+              // Column headers
+              h('div',{style:{display:'grid',gridTemplateColumns:'60px repeat(7,1fr)',gap:5,marginBottom:5,minWidth:700}},
+                h('div',null),
+                ...DAYS_FR.map((d,i)=>h('div',{key:i,style:{textAlign:'center',fontSize:10,fontWeight:700,color:C.muted,textTransform:'uppercase',letterSpacing:'0.1em',padding:'4px 0'}},d))
+              ),
+              // All weeks stacked
+              ...weeksArr.map(week=>h('div',{key:week,style:{display:'grid',gridTemplateColumns:'60px repeat(7,1fr)',gap:5,marginBottom:5,minWidth:700}},
+                // Week label
+                h('div',{style:{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'4px 0'}},
+                  h('div',{style:{fontSize:8,color:C.muted,textTransform:'uppercase',letterSpacing:'0.06em'}},'SEM.'),
+                  h('div',{style:{fontSize:16,fontWeight:800,color:C.gold,lineHeight:1}},week)
+                ),
+                // 7 day cells
+                ...[1,2,3,4,5,6,7].map(dayNum=>{
+                  const dayExos=progExos.filter(e=>(e.week_number||1)===week&&(e.day_number||1)===dayNum);
+                  const workout=workouts.find(w=>w.week_number===week&&w.day_number===dayNum);
+                  const hasContent=dayExos.length>0||!!workout;
+                  const stats=hasContent?calcStats(week,dayNum):null;
+                  const woName=workout?.name||null;
+                  const absDay=(week-1)*7+dayNum;
+
+                  return h('div',{key:dayNum,
+                    onClick:hasContent?()=>setSelectedDay({week,day:dayNum}):isAdmin?()=>openAddExo(week,dayNum):undefined,
+                    style:{background:hasContent?C.card:C.soft,border:`1px solid ${hasContent?C.border:'rgba(255,255,255,0.03)'}`,borderRadius:10,padding:'8px 10px',minHeight:120,display:'flex',flexDirection:'column',gap:3,cursor:(hasContent||isAdmin)?'pointer':'default',transition:'all 0.12s'},
+                    onMouseEnter:e=>{if(hasContent||isAdmin){e.currentTarget.style.borderColor=C.gold;e.currentTarget.style.transform='translateY(-2px)';}},
+                    onMouseLeave:e=>{e.currentTarget.style.borderColor=hasContent?C.border:'rgba(255,255,255,0.03)';e.currentTarget.style.transform='translateY(0)';}
+                  },
+                    // Day number label
+                    h('div',{style:{fontSize:9,color:C.muted,fontWeight:600,letterSpacing:'0.06em'}},`Jour ${absDay}`),
+
+                    // Workout name
+                    woName&&h('div',{style:{fontSize:11,fontWeight:700,color:C.white,lineHeight:1.3,marginTop:2}},woName),
+
+                    // Stats (like Azeoo)
+                    hasContent&&stats?h('div',{style:{flex:1,marginTop:4}},
+                      stats.durationMin>0&&h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:1}},h('span',{style:{fontSize:8,color:C.muted,textTransform:'uppercase',letterSpacing:'0.05em'}},'DURÉE:'),h('span',{style:{fontSize:10,fontWeight:700,color:C.white}},`${stats.durationMin}min`)),
+                      stats.energy>0&&h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:1}},h('span',{style:{fontSize:8,color:C.muted,textTransform:'uppercase',letterSpacing:'0.05em'}},'ÉNERGIE:'),h('span',{style:{fontSize:10,fontWeight:700,color:C.white}},`${stats.energy} kcal`)),
+                      stats.totalSets>0&&h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:1}},h('span',{style:{fontSize:8,color:C.muted,textTransform:'uppercase',letterSpacing:'0.05em'}},'SÉRIES:'),h('span',{style:{fontSize:10,fontWeight:700,color:C.white}},stats.totalSets)),
+                      stats.totalExos>0&&h('div',{style:{display:'flex',justifyContent:'space-between'}},h('span',{style:{fontSize:8,color:C.muted,textTransform:'uppercase',letterSpacing:'0.05em'}},'EXERCICES:'),h('span',{style:{fontSize:10,fontWeight:700,color:C.white}},stats.totalExos))
+                    ):null,
+
+                    // Empty cell with + for admin
+                    !hasContent&&isAdmin&&h('div',{style:{marginTop:'auto',textAlign:'center',color:C.muted,fontSize:20,opacity:0.3}},'+'),
+
+                    // Exercise thumbnails
+                    hasContent&&dayExos.length>0&&h('div',{style:{display:'flex',gap:2,marginTop:'auto',flexWrap:'wrap'}},
+                      ...dayExos.slice(0,3).map(pe=>pe.exercise?.image_filename
+                        ?h('img',{key:pe.id,src:'https://cdn.azeoo.com/exercises/small-wide/'+pe.exercise.image_filename,style:{width:22,height:22,borderRadius:4,objectFit:'cover'},onError:e=>{e.target.style.display='none'}})
+                        :h('div',{key:pe.id,style:{width:22,height:22,borderRadius:4,background:C.soft,display:'flex',alignItems:'center',justifyContent:'center',fontSize:9}},'💪')
+                      ),
+                      dayExos.length>3&&h('div',{style:{width:22,height:22,borderRadius:4,background:`${C.gold}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,color:C.gold,fontWeight:700}},`+${dayExos.length-3}`)
+                    )
+                  );
+                })
+              ))
+            ),
+
+          editProg&&h(EditProgModal,{data:editProg,onSave:handleEditProg,onClose:()=>setEditProg(null)}),
+          delProg&&h(DelProgModal,null),
           addExoOpen&&h(AddExoModal,null),
-          editProg&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
-            h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:540}},
-              h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:14}},'Modifier le programme'),
-              ...pFields(editProg,setEditProg),
-              h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end',marginTop:10}},
-                h('button',{onClick:()=>setEditProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 18px',cursor:'pointer'}},'Annuler'),
-                h('button',{onClick:handleEditProg,disabled:saving,style:{...btn,opacity:saving?0.5:1}},saving?'Sauvegarde...':'Enregistrer')
-              )
-            )
-          ),
-          delProg&&h(DelProgModal,null)
+          editExoEntry&&h(EditExoEntryModal,null)
         );
       }
 
-      // ── GRID VIEW ──
-      const filteredProgs=filter?progs.filter(p=>p.categorie===filter):progs;
+      // ─── LIST VIEW ────────────────────────────────────────────────────────────
+      const filteredProgs=filter?progs.filter(p=>p.objectif===filter):progs;
       return h('div',null,
         h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24,flexWrap:'wrap',gap:12}},
           h('div',null,
@@ -820,50 +873,49 @@
           isAdmin&&h('button',{onClick:()=>{setPForm(EP);setCreateOpen(true);},style:{...btn,fontSize:13,padding:'10px 20px'}},'+ Créer un programme')
         ),
         h('div',{style:{display:'flex',gap:8,marginBottom:24,flexWrap:'wrap'}},
-          ...[['','Tous',C.white],['musculation','Musculation',C.green],['perte-de-poids','Perte de poids',C.blue],['post-partum','Post-Partum',C.purple],['force','Force',C.gold]].map(([val,label,color])=>
+          ...[['','Tous',C.white],['Lose Weight','Lose Weight',C.blue],['Build Muscle','Build Muscle',C.green],['Sculpt Your Body','Sculpt Your Body',C.gold],['Get Fit','Get Fit',C.purple]].map(([val,label,color])=>
             h('button',{key:val,onClick:()=>setFilter(val),style:{background:'transparent',color:filter===val?color:C.muted,border:`1px solid ${filter===val?color:C.border}`,borderRadius:8,padding:'7px 14px',fontSize:12,cursor:'pointer',fontWeight:filter===val?600:400}},label)
           )
         ),
         msg&&h('div',{style:{background:msg.startsWith('✅')?`${C.green}22`:`${C.red}22`,color:msg.startsWith('✅')?C.green:C.red,padding:'10px 16px',borderRadius:8,marginBottom:16,fontSize:13}},msg),
-        loading?h('div',{style:{color:C.muted,textAlign:'center',padding:60}},'Chargement...'):
-        progs.length===0?
-          h('div',{style:{...card,textAlign:'center',padding:48,color:C.muted}},
+        loading?h('div',{style:{color:C.muted,textAlign:'center',padding:60}},'Chargement...')
+        :progs.length===0?h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,padding:48,textAlign:'center',color:C.muted}},
             h('div',{style:{fontSize:36,marginBottom:12}},'🏋️'),
             h('div',{style:{fontWeight:600,color:C.white,marginBottom:8}},'Aucun programme encore'),
             isAdmin&&h('button',{onClick:()=>{setPForm(EP);setCreateOpen(true);},style:{...btn,marginTop:12,fontSize:13}},'Créer le premier programme')
-          ):
-        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:20}},
-          ...filteredProgs.map(prog=>
-            h('div',{key:prog.id,className:'prog-card',style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:'hidden',position:'relative'}},
-              h('div',{style:{position:'relative',paddingBottom:'56%',overflow:'hidden',background:C.soft}},
-                prog.image_url&&h('img',{src:prog.image_url,alt:prog.titre,onClick:()=>handleSelectProg(prog),style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',cursor:'pointer'},onError:e=>{e.target.style.display='none'}}),
-                isAdmin&&h('div',{style:{position:'absolute',top:8,right:8,display:'flex',gap:4}},
-                  h('button',{onClick:e=>{e.stopPropagation();setEditProg({...prog});},style:{width:28,height:28,borderRadius:7,background:'rgba(0,0,0,0.55)',border:'none',color:'#fff',cursor:'pointer',fontSize:12}},'✏️'),
-                  h('button',{onClick:e=>{e.stopPropagation();setDelProg(prog);},style:{width:28,height:28,borderRadius:7,background:'rgba(0,0,0,0.55)',border:'none',color:C.red,cursor:'pointer',fontSize:12}},'🗑')
+          )
+        :h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:20}},
+            ...filteredProgs.map(prog=>
+              h('div',{key:prog.id,className:'prog-card',style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,overflow:'hidden',position:'relative'}},
+                h('div',{style:{position:'relative',paddingBottom:'56%',overflow:'hidden',background:C.soft}},
+                  prog.image_url?h('img',{src:prog.image_url,alt:prog.titre,onClick:()=>handleSelectProg(prog),style:{position:'absolute',inset:0,width:'100%',height:'100%',objectFit:'cover',cursor:'pointer'},onError:e=>{e.target.style.display='none'}}):
+                  h('div',{onClick:()=>handleSelectProg(prog),style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:36,cursor:'pointer'}},'🏋️'),
+                  isAdmin&&h('div',{style:{position:'absolute',top:8,right:8,display:'flex',gap:4}},
+                    h('button',{onClick:e=>{e.stopPropagation();setEditProg({...prog});},style:{width:28,height:28,borderRadius:7,background:'rgba(0,0,0,0.6)',border:'none',color:'#fff',cursor:'pointer',fontSize:12}},'✏️'),
+                    h('button',{onClick:e=>{e.stopPropagation();setDelProg(prog);},style:{width:28,height:28,borderRadius:7,background:'rgba(0,0,0,0.6)',border:'none',color:C.red,cursor:'pointer',fontSize:12}},'🗑')
+                  ),
+                  isAdmin&&h('button',{onClick:e=>handleTogglePublish(prog,e),style:{position:'absolute',bottom:8,left:8,display:'flex',alignItems:'center',gap:4,padding:'4px 10px',borderRadius:20,border:'none',cursor:'pointer',fontSize:10,fontWeight:700,background:prog.actif?`${C.green}cc`:'rgba(0,0,0,0.65)',color:prog.actif?'#fff':C.muted,backdropFilter:'blur(4px)'}},prog.actif?'🌐 Publié':'☁ Hors ligne')
                 ),
-                !prog.actif&&h('div',{style:{position:'absolute',bottom:8,left:8,...badge(C.muted)}},'Inactif')
-              ),
-              h('div',{onClick:()=>handleSelectProg(prog),style:{padding:18,cursor:'pointer'}},
-                h('div',{style:{fontSize:14,fontWeight:700,color:C.white,marginBottom:10,lineHeight:1.3}},prog.titre),
-                h('div',{style:{display:'flex',gap:8,flexWrap:'wrap',marginBottom:12}},
-                  h('span',{style:badge(catColors[prog.categorie]||C.muted)},catLabels[prog.categorie]||prog.categorie),
-                  h('span',{style:badge(C.muted)},niveauLabels[prog.niveau]||prog.niveau)
-                ),
-                h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
-                  h('span',{style:{fontSize:12,color:C.muted}},`⏱ ${prog.duree_heures}h`),
-                  h('div',null,
-                    prog.prix_promo&&h('span',{style:{fontSize:12,color:C.muted,textDecoration:'line-through',marginRight:6}},`${prog.prix}€`),
-                    h('span',{style:{fontSize:15,fontWeight:700,color:C.gold}},`${prog.prix_promo||prog.prix}€`)
+                h('div',{onClick:()=>handleSelectProg(prog),style:{padding:16,cursor:'pointer'}},
+                  h('div',{style:{fontSize:14,fontWeight:700,color:C.white,marginBottom:10,lineHeight:1.3}},prog.titre),
+                  // Mini info table (like Azeoo)
+                  h('div',{style:{background:C.soft,borderRadius:8,padding:'8px 12px',marginBottom:10}},
+                    h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6}},
+                      h('div',null,h('div',{style:{fontSize:8,color:C.muted,textTransform:'uppercase',letterSpacing:'0.06em'}},'Durée'),h('div',{style:{fontSize:12,fontWeight:700,color:C.white,marginTop:2}},`${prog.duree_semaines||8} sem.`)),
+                      h('div',null,h('div',{style:{fontSize:8,color:C.muted,textTransform:'uppercase',letterSpacing:'0.06em'}},'Niveau'),h('div',{style:{fontSize:12,fontWeight:700,color:C.white,marginTop:2}},niveauLabels[prog.niveau]||prog.niveau||'—')),
+                      h('div',null,h('div',{style:{fontSize:8,color:C.muted,textTransform:'uppercase',letterSpacing:'0.06em'}},'Prix'),h('div',{style:{fontSize:13,fontWeight:800,color:C.gold,marginTop:2}},`${prog.prix_promo||prog.prix}€`))
+                    )
+                  ),
+                  h('div',{style:{display:'flex',gap:6,flexWrap:'wrap'}},
+                    prog.objectif&&h('span',{style:{background:`${objColors[prog.objectif]||C.muted}22`,color:objColors[prog.objectif]||C.muted,fontSize:10,fontWeight:600,padding:'2px 8px',borderRadius:100}},prog.objectif),
+                    prog.sexe&&prog.sexe!=='tous'&&h('span',{style:{background:`${C.muted}22`,color:C.muted,fontSize:10,fontWeight:600,padding:'2px 8px',borderRadius:100}},sexeLabels[prog.sexe])
                   )
-                ),
-                h('div',{style:{marginTop:10,fontSize:12,color:C.muted}},'👁 Voir les exercices →')
+                )
               )
             )
-          )
-        ),
-        // Modals
-        createOpen&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
-          h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:540}},
+          ),
+        createOpen&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
+          h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:560}},
             h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:14}},'Créer un programme'),
             ...pFields(pForm,setPForm),
             h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end',marginTop:10}},
@@ -872,21 +924,10 @@
             )
           )
         ),
-        editProg&&!selectedProg&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.78)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
-          h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,width:'100%',maxWidth:540}},
-            h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:14}},'Modifier le programme'),
-            ...pFields(editProg,setEditProg),
-            h('div',{style:{display:'flex',gap:10,justifyContent:'flex-end',marginTop:10}},
-              h('button',{onClick:()=>setEditProg(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 18px',cursor:'pointer'}},'Annuler'),
-              h('button',{onClick:handleEditProg,disabled:saving,style:{...btn,opacity:saving?0.5:1}},saving?'Sauvegarde...':'Enregistrer')
-            )
-          )
-        ),
+        editProg&&!selectedProg&&h(EditProgModal,{data:editProg,onSave:handleEditProg,onClose:()=>setEditProg(null)}),
         delProg&&h(DelProgModal,null)
       );
     }
-
-    // ── Exercices ─────────────────────────────────────────────────────────────
     const ADMIN_EMAILS = ['fumeysarah@yahoo.fr','contact@sergepaulmier.com','contact@tayafitness.com'];
     const EX_MUSCLES = ['Abs','Adductors','Back','Biceps','Calves','Chest','Forearms','Glutes','Hamstrings','Lower Back','Quads','Shoulders','Triceps'];
     const EX_TYPES = ['Bodyweight','Cardio','Cross-training','Stretching'];
