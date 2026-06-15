@@ -466,7 +466,7 @@
         setSelectedDay(null);setSaving(false);
       }
       async function openAddExo(week,day){
-        if(!allExos.length){const{data}=await sb.from('exercises').select('id,name,tags').order('name').limit(2000);setAllExos(data||[]);}
+        if(!allExos.length){const{data}=await sb.from('exercises').select('id,name,tags,image_filename,youtube_id').order('name').limit(2000);setAllExos(data||[]);}
         const wdExos=progExos.filter(e=>(e.week_number||1)===week&&(e.day_number||1)===day);
         setAddExoOpen(true);setExoSearch('');
         setAForm({exercise_id:'',week_number:week,day_number:day,order_index:wdExos.length+1,sets:3,reps:12,rest_seconds:60,charge:'',notes:''});
