@@ -1349,6 +1349,8 @@
       const [addOpen,setAddOpen]=useState(false);
       const [shareOpen,setShareOpen]=useState(false);
       const [msg,setMsg]=useState('');
+      const [settingsOpen,setSettingsOpen]=useState(false);
+      const [fmeta,setFmeta]=useState({cover_url:form.cover_url||'',homepage_title:form.homepage_title||'',homepage_description:form.homepage_description||'',homepage_button:form.homepage_button||'Commencer',end_title:form.end_title||'Merci !',end_description:form.end_description||'Vos réponses ont bien été enregistrées.',end_button:form.end_button||'Terminer',bg_color:(form.settings&&form.settings.bg_color)||'#0d1b2a',accent_color:(form.settings&&form.settings.accent_color)||'#ff6b4a'});
       const TYPES=[
         {v:'info_screen',l:"Page d'info",icon:'ℹ️'},
         {v:'short_answer',l:'Réponse courte',icon:'Aa'},
@@ -1367,7 +1369,7 @@
 
       async function save(){
         setSaving(true);
-        await sb.from('forms').update({title,updated_at:new Date().toISOString()}).eq('id',form.id);
+        await sb.from('forms').update({title,cover_url:fmeta.cover_url||null,homepage_title:fmeta.homepage_title||null,homepage_description:fmeta.homepage_description||null,homepage_button:fmeta.homepage_button||'Commencer',end_title:fmeta.end_title||null,end_description:fmeta.end_description||null,end_button:fmeta.end_button||'Terminer',settings:{...(form.settings||{}),bg_color:fmeta.bg_color,accent_color:fmeta.accent_color},updated_at:new Date().toISOString()}).eq('id',form.id);
         const updated=[];
         for(let i=0;i<questions.length;i++){
           const q={...questions[i]};
@@ -1411,6 +1413,7 @@
           h('div',{style:{flex:1}}),
           msg&&h('span',{style:{color:C.green,fontSize:13,marginRight:8}},msg),
           h('button',{onClick:()=>setShareOpen(true),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 12px',cursor:'pointer',fontSize:12,flexShrink:0}},'🔗 Partager'),
+          h('button',{onClick:()=>setSettingsOpen(true),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 12px',cursor:'pointer',fontSize:12,flexShrink:0}},'⚙️ Paramètres'),
           h('a',{href:formUrl,target:'_blank',style:{color:C.blue,fontSize:12,textDecoration:'none',padding:'7px 12px',border:`1px solid ${C.blue}44`,borderRadius:8,flexShrink:0}},'👁 Voir'),
           h('button',{onClick:save,disabled:saving,style:{...btn,padding:'8px 16px',fontSize:13,flexShrink:0}},saving?'Saving...':'💾 Sauvegarder')
         ),
@@ -1548,6 +1551,61 @@
               )
             )
           )
+        ),
+        settingsOpen&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.88)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:3001,padding:16}},
+          h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,maxWidth:640,width:'100%',maxHeight:'90vh',overflowY:'auto'}},
+            h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:22}},
+              h('h3',{style:{color:C.white,fontSize:16,fontWeight:700}},'⚙️ Paramètres du questionnaire'),
+              h('button',{onClick:()=>setSettingsOpen(false),style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:24,lineHeight:1}},'×')
+            ),
+            h('div',{style:{marginBottom:18,padding:'16px',background:C.soft,borderRadius:12,border:`1px solid ${C.border}`}},
+              h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:14}},'🎨 Couleurs'),
+              h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:20,marginBottom:14}},
+                h('div',null,
+                  h('label',{style:{display:'block',fontSize:12,color:C.muted,marginBottom:8}},'Couleur de fond'),
+                  h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+                    h('input',{type:'color',value:fmeta.bg_color,onChange:e=>setFmeta(p=>({...p,bg_color:e.target.value})),style:{width:44,height:38,border:'none',borderRadius:8,cursor:'pointer',padding:2,background:'transparent'}}),
+                    h('code',{style:{fontSize:11,color:C.muted,background:C.bg,padding:'4px 8px',borderRadius:6}},fmeta.bg_color)
+                  )
+                ),
+                h('div',null,
+                  h('label',{style:{display:'block',fontSize:12,color:C.muted,marginBottom:8}},"Couleur d'accent"),
+                  h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+                    h('input',{type:'color',value:fmeta.accent_color,onChange:e=>setFmeta(p=>({...p,accent_color:e.target.value})),style:{width:44,height:38,border:'none',borderRadius:8,cursor:'pointer',padding:2,background:'transparent'}}),
+                    h('code',{style:{fontSize:11,color:C.muted,background:C.bg,padding:'4px 8px',borderRadius:6}},fmeta.accent_color)
+                  )
+                )
+              ),
+              h('div',{style:{height:44,borderRadius:10,background:`linear-gradient(135deg,${fmeta.bg_color},${fmeta.accent_color})`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,color:'#fff',fontWeight:600,letterSpacing:'0.05em'}},'Aperçu • Preview')
+            ),
+            h('div',{style:{marginBottom:18,padding:'16px',background:C.soft,borderRadius:12,border:`1px solid ${C.border}`}},
+              h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:14}},'🖼 Image de couverture'),
+              h('input',{value:fmeta.cover_url,onChange:e=>setFmeta(p=>({...p,cover_url:e.target.value})),style:{...inp,width:'100%',marginBottom:10},placeholder:'https://... URL de votre image'}),
+              fmeta.cover_url&&h('img',{src:fmeta.cover_url,style:{width:'100%',height:130,objectFit:'cover',borderRadius:10,display:'block'},onError:e=>e.target.style.display='none'})
+            ),
+            h('div',{style:{marginBottom:18,padding:'16px',background:C.soft,borderRadius:12,border:`1px solid ${C.border}`}},
+              h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:14}},"🏠 Page d'accueil"),
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Titre'),
+              h('input',{value:fmeta.homepage_title,onChange:e=>setFmeta(p=>({...p,homepage_title:e.target.value})),style:{...inp,width:'100%',marginBottom:10},placeholder:'ex: Bienvenue dans votre bilan !'}),
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Description'),
+              h('textarea',{value:fmeta.homepage_description,onChange:e=>setFmeta(p=>({...p,homepage_description:e.target.value})),style:{...inp,width:'100%',height:70,resize:'vertical',marginBottom:10},placeholder:'Texte de présentation affiché sur la page d\'accueil du formulaire...'}),
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Texte du bouton'),
+              h('input',{value:fmeta.homepage_button,onChange:e=>setFmeta(p=>({...p,homepage_button:e.target.value})),style:{...inp,width:'100%'},placeholder:'Commencer'})
+            ),
+            h('div',{style:{marginBottom:24,padding:'16px',background:C.soft,borderRadius:12,border:`1px solid ${C.border}`}},
+              h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:14}},'🏁 Page de fin'),
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Titre'),
+              h('input',{value:fmeta.end_title,onChange:e=>setFmeta(p=>({...p,end_title:e.target.value})),style:{...inp,width:'100%',marginBottom:10},placeholder:'ex: Merci pour vos réponses !'}),
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Description'),
+              h('textarea',{value:fmeta.end_description,onChange:e=>setFmeta(p=>({...p,end_description:e.target.value})),style:{...inp,width:'100%',height:70,resize:'vertical',marginBottom:10},placeholder:'Message de confirmation affiché après la soumission...'}),
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Texte du bouton (optionnel)'),
+              h('input',{value:fmeta.end_button,onChange:e=>setFmeta(p=>({...p,end_button:e.target.value})),style:{...inp,width:'100%'},placeholder:'Terminer'})
+            ),
+            h('div',{style:{display:'flex',justifyContent:'flex-end',gap:10}},
+              h('button',{onClick:()=>setSettingsOpen(false),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 22px',cursor:'pointer'}},'Annuler'),
+              h('button',{onClick:()=>{save();setSettingsOpen(false);},style:btn},'💾 Sauvegarder')
+            )
+          )
         )
       );
     }
@@ -1665,25 +1723,36 @@
           isAdmin&&h('button',{onClick:createForm,style:{...btn,marginTop:12}},'+ Créer le premier')
         ):
         h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:16}},
-          ...forms.map(f=>h('div',{key:f.id,style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,display:'flex',flexDirection:'column',overflow:'hidden'}},
-            h('div',{style:{padding:'20px 20px 14px',flex:1}},
-              h('div',{style:{fontSize:15,fontWeight:700,color:C.white,lineHeight:1.3,marginBottom:10}},f.title),
-              h('div',{style:{display:'flex',gap:16,marginBottom:12}},
-                h('div',{style:{fontSize:13,color:C.muted}},h('strong',{style:{color:C.gold}},f._qCount),' questions'),
-                h('div',{style:{fontSize:13,color:C.muted}},h('strong',{style:{color:C.blue}},f._rCount),' réponses')
+          ...forms.map(f=>{
+            const accent=(f.settings&&f.settings.accent_color)||C.gold;
+            const bgClr=(f.settings&&f.settings.bg_color)||C.card;
+            return h('div',{key:f.id,style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,display:'flex',flexDirection:'column',overflow:'hidden',transition:'transform 0.15s,box-shadow 0.15s'},onMouseEnter:e=>{e.currentTarget.style.transform='translateY(-2px)';e.currentTarget.style.boxShadow=`0 8px 24px ${accent}22`;},onMouseLeave:e=>{e.currentTarget.style.transform='';e.currentTarget.style.boxShadow='';},},
+              h('div',{style:{height:5,background:`linear-gradient(90deg,${accent},${bgClr})`}}),
+              f.cover_url&&h('div',{style:{height:110,overflow:'hidden'}},
+                h('img',{src:f.cover_url,style:{width:'100%',height:'100%',objectFit:'cover'},onError:e=>e.target.parentNode.style.display='none'})
               ),
-              h('div',{style:{background:C.soft,borderRadius:8,padding:'8px 10px',display:'flex',alignItems:'center',gap:6}},
-                h('span',{style:{fontSize:11,color:C.muted,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},`${BASE_URL}/forms.html?slug=${f.slug}`),
-                h('button',{onClick:()=>{navigator.clipboard.writeText(`${BASE_URL}/forms.html?slug=${f.slug}`);setMsg('📋 Lien copié !');setTimeout(()=>setMsg(''),3000);},style:{background:'transparent',border:'none',color:C.gold,cursor:'pointer',fontSize:12,flexShrink:0,padding:'0 4px'}},'📋')
+              h('div',{style:{padding:'16px 18px 12px',flex:1}},
+                h('div',{style:{display:'flex',alignItems:'flex-start',gap:10,marginBottom:10}},
+                  h('div',{style:{width:10,height:10,borderRadius:'50%',background:accent,flexShrink:0,marginTop:4}}),
+                  h('div',{style:{fontSize:15,fontWeight:700,color:C.white,lineHeight:1.3}},f.title)
+                ),
+                h('div',{style:{display:'flex',gap:16,marginBottom:12,marginLeft:20}},
+                  h('div',{style:{fontSize:12,color:C.muted,display:'flex',alignItems:'center',gap:4}},h('span',{style:{color:accent,fontWeight:700,fontSize:14}},f._qCount),' questions'),
+                  h('div',{style:{fontSize:12,color:C.muted,display:'flex',alignItems:'center',gap:4}},h('span',{style:{color:C.blue,fontWeight:700,fontSize:14}},f._rCount),' réponses')
+                ),
+                h('div',{style:{background:C.soft,borderRadius:8,padding:'7px 10px',display:'flex',alignItems:'center',gap:6}},
+                  h('span',{style:{fontSize:10,color:C.muted,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},`${BASE_URL}/forms.html?slug=${f.slug}`),
+                  h('button',{onClick:()=>{navigator.clipboard.writeText(`${BASE_URL}/forms.html?slug=${f.slug}`);setMsg('📋 Lien copié !');setTimeout(()=>setMsg(''),3000);},style:{background:'transparent',border:'none',color:accent,cursor:'pointer',fontSize:12,flexShrink:0,padding:'0 4px'}},'📋')
+                )
+              ),
+              h('div',{style:{borderTop:`1px solid ${C.border}`,padding:'10px 12px',display:'flex',gap:6}},
+                isAdmin&&h('button',{onClick:()=>openBuilder(f),style:{...btn,flex:1,fontSize:12,padding:'7px 0',background:`linear-gradient(135deg,${accent}cc,${accent}88)`}},'✏️ Éditer'),
+                h('button',{onClick:()=>setResponsesView(f),title:'Réponses',style:{background:C.soft,border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 10px',cursor:'pointer',fontSize:13}},'📊'),
+                h('a',{href:`${BASE_URL}/forms.html?slug=${f.slug}`,target:'_blank',title:'Ouvrir',style:{background:C.soft,border:`1px solid ${C.blue}44`,color:C.blue,borderRadius:8,padding:'7px 10px',cursor:'pointer',fontSize:13,textDecoration:'none',display:'flex',alignItems:'center'}},'🔗'),
+                isAdmin&&h('button',{onClick:()=>setDelForm(f),title:'Supprimer',style:{background:'transparent',border:`1px solid ${C.red}33`,color:C.red,cursor:'pointer',fontSize:13,padding:'7px 10px',borderRadius:8}},'🗑')
               )
-            ),
-            h('div',{style:{borderTop:`1px solid ${C.border}`,padding:'12px 14px',display:'flex',gap:8}},
-              isAdmin&&h('button',{onClick:()=>openBuilder(f),style:{...btn,flex:1,fontSize:13,padding:'8px 0'}},'✏️ Éditer'),
-              h('button',{onClick:()=>setResponsesView(f),title:'Réponses',style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'8px 12px',cursor:'pointer',fontSize:13}},'📊'),
-              h('a',{href:`${BASE_URL}/forms.html?slug=${f.slug}`,target:'_blank',title:'Ouvrir',style:{background:'transparent',border:`1px solid ${C.blue}44`,color:C.blue,borderRadius:8,padding:'8px 12px',cursor:'pointer',fontSize:13,textDecoration:'none',display:'flex',alignItems:'center'}},'🔗'),
-              isAdmin&&h('button',{onClick:()=>setDelForm(f),style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:13,padding:'8px 6px'}},'🗑')
-            )
-          ))
+            );
+          })
         ),
         delForm&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}},
           h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,maxWidth:360,textAlign:'center'}},
