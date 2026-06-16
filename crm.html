@@ -1671,7 +1671,7 @@
       const BASE_URL='https://taya-fitness-site-1.vercel.app';
 
       useEffect(()=>{
-        sb.auth.getSession().then(({data:{session}})=>{if(session?.user)setIsAdmin(ADMIN.includes(session.user.email));});
+        sb.auth.getSession().then(({data:{session}})=>{if(session?.user)setIsAdmin(ADMIN_EMAILS.includes(session.user.email));});
         load();
       },[]);
 
