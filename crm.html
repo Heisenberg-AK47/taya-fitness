@@ -128,6 +128,7 @@
       {id:'revenus',icon:'💰',label:'Revenus'},
       {id:'emails',icon:'📧',label:'Campagnes mail'},
       {id:'taches',icon:'✅',label:'Tâches'},
+      {id:'questionnaires',icon:'📋',label:'Questionnaires'},
     ];
 
     function App() {
@@ -186,7 +187,7 @@
         )
       );
 
-      const pages = {dashboard:Dashboard,clients:ClientsAzeoo,programmes:Programmes,exercices:Exercices,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches};
+      const pages = {dashboard:Dashboard,clients:ClientsAzeoo,programmes:Programmes,exercices:Exercices,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches,questionnaires:Questionnaires};
       const Page = pages[tab] || Dashboard;
 
       return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',fontFamily:'Inter,sans-serif'}},
@@ -1333,6 +1334,366 @@
               h('span',{style:{flex:1,fontSize:14,textDecoration:'line-through',color:C.muted}},t.titre),
               h('button',{onClick:()=>del(t.id),style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:16}},'✕')
             ))
+          )
+        )
+      );
+    }
+
+
+    // ── Questionnaires ────────────────────────────────────────────────────────
+    function FormBuilder({form,initQuestions,onClose,baseUrl}){
+      const [questions,setQuestions]=useState(initQuestions);
+      const [selIdx,setSelIdx]=useState(0);
+      const [title,setTitle]=useState(form.title);
+      const [saving,setSaving]=useState(false);
+      const [addOpen,setAddOpen]=useState(false);
+      const [shareOpen,setShareOpen]=useState(false);
+      const [msg,setMsg]=useState('');
+      const TYPES=[
+        {v:'info_screen',l:"Page d'info",icon:'ℹ️'},
+        {v:'short_answer',l:'Réponse courte',icon:'Aa'},
+        {v:'long_answer',l:'Paragraphe',icon:'¶'},
+        {v:'single_choice',l:'Choix unique',icon:'◎'},
+        {v:'multiple_choice',l:'Choix multiple',icon:'☑'},
+        {v:'yesno',l:'Oui / Non',icon:'👍'},
+        {v:'rating',l:'Notation',icon:'⭐'},
+        {v:'email',l:'Email',icon:'📧'},
+        {v:'phone',l:'Téléphone',icon:'📞'},
+        {v:'date',l:'Date',icon:'📅'},
+      ];
+      const sel=questions[selIdx]||questions[0];
+      const formUrl=`${baseUrl}/forms.html?slug=${form.slug}`;
+      const embedCode=`<iframe src="${formUrl}" width="100%" height="600" frameborder="0" allowfullscreen></iframe>`;
+
+      async function save(){
+        setSaving(true);
+        await sb.from('forms').update({title,updated_at:new Date().toISOString()}).eq('id',form.id);
+        const updated=[];
+        for(let i=0;i<questions.length;i++){
+          const q={...questions[i]};
+          if(!q.id||String(q.id).startsWith('tmp-')){
+            const body={form_id:form.id,order_index:i,type:q.type,title:q.title,description:q.description||null,required:q.required||false,options:q.options||null,settings:q.settings||{}};
+            const{data:nq}=await sb.from('form_questions').insert(body).select('*').single();
+            updated.push(nq||{...q,id:'tmp-'+(i+Date.now())});
+          } else {
+            await sb.from('form_questions').update({order_index:i,type:q.type,title:q.title,description:q.description||null,required:q.required||false,options:q.options||null,settings:q.settings||{}}).eq('id',q.id);
+            updated.push(q);
+          }
+        }
+        setQuestions(updated);setSaving(false);
+        setMsg('✅ Sauvegardé !');setTimeout(()=>setMsg(''),3000);
+      }
+
+      function upd(ch){setQuestions(prev=>prev.map((q,i)=>i===selIdx?{...q,...ch}:q));}
+
+      function addQ(type){
+        const isInfo=type==='info_screen';
+        const hasOpts=['multiple_choice','single_choice'].includes(type);
+        const q={id:'tmp-'+Date.now(),type,title:isInfo?'Information':'Nouvelle question',description:'',required:!isInfo,options:hasOpts?['Option 1','Option 2']:null,settings:{}};
+        const nq=[...questions,q];setQuestions(nq);setSelIdx(nq.length-1);setAddOpen(false);
+      }
+
+      function delQ(idx){
+        const q=questions[idx];
+        if(q.id&&!String(q.id).startsWith('tmp-'))sb.from('form_questions').delete().eq('id',q.id);
+        const nq=questions.filter((_,i)=>i!==idx);setQuestions(nq);setSelIdx(Math.min(idx,nq.length-1));
+      }
+
+      function move(idx,dir){
+        if((dir<0&&idx===0)||(dir>0&&idx===questions.length-1))return;
+        const nq=[...questions];[nq[idx+dir],nq[idx]]=[nq[idx],nq[idx+dir]];setQuestions(nq);setSelIdx(idx+dir);
+      }
+
+      return h('div',{style:{position:'fixed',inset:0,background:C.bg,zIndex:2000,display:'flex',flexDirection:'column',fontFamily:'Inter,sans-serif'}},
+        h('div',{style:{background:C.card,borderBottom:`1px solid ${C.border}`,padding:'10px 16px',display:'flex',alignItems:'center',gap:12,flexShrink:0}},
+          h('button',{onClick:onClose,style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:20,lineHeight:1,padding:'0 8px'}},'←'),
+          h('input',{value:title,onChange:e=>setTitle(e.target.value),style:{...inp,flex:1,maxWidth:380,fontSize:14,fontWeight:600,padding:'7px 12px'}}),
+          h('div',{style:{flex:1}}),
+          msg&&h('span',{style:{color:C.green,fontSize:13,marginRight:8}},msg),
+          h('button',{onClick:()=>setShareOpen(true),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 12px',cursor:'pointer',fontSize:12,flexShrink:0}},'🔗 Partager'),
+          h('a',{href:formUrl,target:'_blank',style:{color:C.blue,fontSize:12,textDecoration:'none',padding:'7px 12px',border:`1px solid ${C.blue}44`,borderRadius:8,flexShrink:0}},'👁 Voir'),
+          h('button',{onClick:save,disabled:saving,style:{...btn,padding:'8px 16px',fontSize:13,flexShrink:0}},saving?'Saving...':'💾 Sauvegarder')
+        ),
+        h('div',{style:{flex:1,display:'flex',overflow:'hidden'}},
+          h('div',{style:{width:220,borderRight:`1px solid ${C.border}`,background:C.soft,display:'flex',flexDirection:'column',overflowY:'auto'}},
+            h('div',{style:{padding:10,flex:1}},
+              questions.map((q,idx)=>h('div',{key:q.id||idx,onClick:()=>setSelIdx(idx),style:{padding:'9px 10px',marginBottom:4,borderRadius:8,cursor:'pointer',background:selIdx===idx?`${C.gold}22`:C.card,border:`1px solid ${selIdx===idx?C.gold:C.border}`,display:'flex',alignItems:'center',gap:8}},
+                h('span',{style:{fontSize:14}},TYPES.find(t=>t.v===q.type)?.icon||'📝'),
+                h('div',{style:{flex:1,minWidth:0}},
+                  h('div',{style:{fontSize:11,fontWeight:600,color:selIdx===idx?C.gold:C.white,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},(q.title||q.type).slice(0,22)),
+                  h('div',{style:{fontSize:10,color:C.muted}},TYPES.find(t=>t.v===q.type)?.l||q.type)
+                ),
+                h('span',{style:{fontSize:10,color:C.muted,flexShrink:0}},idx+1)
+              ))
+            ),
+            h('div',{style:{padding:10,borderTop:`1px solid ${C.border}`}},
+              h('button',{onClick:()=>setAddOpen(true),style:{...btn,width:'100%',fontSize:13,padding:'8px 0'}},'+ Ajouter')
+            )
+          ),
+          h('div',{style:{flex:1,overflowY:'auto',padding:'28px 36px'}},
+            sel&&h('div',{style:{maxWidth:580,margin:'0 auto'}},
+              h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}},
+                h('span',{style:{fontSize:12,color:C.muted}},`Question ${selIdx+1} / ${questions.length}`),
+                h('div',{style:{display:'flex',gap:6}},
+                  h('button',{onClick:()=>move(selIdx,-1),disabled:selIdx===0,style:{background:'transparent',border:`1px solid ${C.border}`,color:selIdx===0?C.border:C.muted,borderRadius:6,padding:'4px 10px',cursor:selIdx===0?'default':'pointer',fontSize:12}},'↑'),
+                  h('button',{onClick:()=>move(selIdx,1),disabled:selIdx===questions.length-1,style:{background:'transparent',border:`1px solid ${C.border}`,color:selIdx===questions.length-1?C.border:C.muted,borderRadius:6,padding:'4px 10px',cursor:selIdx===questions.length-1?'default':'pointer',fontSize:12}},'↓'),
+                  questions.length>1&&h('button',{onClick:()=>delQ(selIdx),style:{background:'transparent',border:`1px solid ${C.red}44`,color:C.red,borderRadius:6,padding:'4px 10px',cursor:'pointer',fontSize:12}},'🗑 Supprimer')
+                )
+              ),
+              h('div',{style:{...card,padding:24,marginBottom:20}},
+                h('div',{style:{marginBottom:16}},
+                  h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Type'),
+                  h('select',{value:sel.type,onChange:e=>{const t=e.target.value;const hasOpts=['multiple_choice','single_choice'].includes(t);upd({type:t,options:hasOpts?['Option 1','Option 2']:null,required:t!=='info_screen'});},style:{...inp,width:'100%'}},
+                    ...TYPES.map(t=>h('option',{key:t.v,value:t.v},t.icon+' '+t.l))
+                  )
+                ),
+                h('div',{style:{marginBottom:16}},
+                  h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Titre *'),
+                  h('input',{value:sel.title||'',onChange:e=>upd({title:e.target.value}),style:{...inp,width:'100%'},placeholder:'Titre de la question'})
+                ),
+                h('div',{style:{marginBottom:16}},
+                  h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Description'),
+                  h('textarea',{value:sel.description||'',onChange:e=>upd({description:e.target.value}),style:{...inp,width:'100%',height:80,resize:'vertical'},placeholder:'Instructions, contexte...'})
+                ),
+                sel.type!=='info_screen'&&h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:16,padding:'10px 12px',background:C.soft,borderRadius:8}},
+                  h('input',{type:'checkbox',checked:sel.required||false,onChange:e=>upd({required:e.target.checked}),id:`req-${selIdx}`,style:{cursor:'pointer'}}),
+                  h('label',{htmlFor:`req-${selIdx}`,style:{color:C.white,fontSize:13,cursor:'pointer'}},'Réponse obligatoire')
+                ),
+                ['multiple_choice','single_choice'].includes(sel.type)&&h('div',null,
+                  h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:10}},'Options'),
+                  ...(sel.options||[]).map((opt,oi)=>h('div',{key:oi,style:{display:'flex',gap:8,marginBottom:8,alignItems:'center'}},
+                    h('span',{style:{fontSize:14,color:C.muted,width:20,textAlign:'center'}},sel.type==='single_choice'?'◎':'☑'),
+                    h('input',{value:opt||'',onChange:e=>{const opts=[...(sel.options||[])];opts[oi]=e.target.value;upd({options:opts});},style:{...inp,flex:1,padding:'8px 12px'},placeholder:`Option ${oi+1}`}),
+                    h('button',{onClick:()=>upd({options:(sel.options||[]).filter((_,i)=>i!==oi)}),style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:18,padding:'4px',lineHeight:1}},'×')
+                  )),
+                  h('button',{onClick:()=>upd({options:[...(sel.options||[]),'Nouvelle option']}),style:{background:'transparent',border:`1px dashed ${C.border}`,color:C.muted,borderRadius:8,padding:'8px 16px',cursor:'pointer',fontSize:13,width:'100%',marginTop:4}},'+ Ajouter une option')
+                ),
+                sel.type==='yesno'&&h('div',{style:{display:'flex',gap:12,marginTop:8}},
+                  h('div',{style:{flex:1,padding:'12px',border:`1px solid ${C.border}`,borderRadius:10,textAlign:'center',color:C.green,fontSize:14}},'👍 Oui'),
+                  h('div',{style:{flex:1,padding:'12px',border:`1px solid ${C.border}`,borderRadius:10,textAlign:'center',color:C.red,fontSize:14}},'👎 Non')
+                ),
+                sel.type==='rating'&&h('div',{style:{display:'flex',gap:10,marginTop:8}},
+                  h('div',null,h('label',{style:{fontSize:11,color:C.muted,display:'block',marginBottom:4}},'Min'),h('input',{type:'number',value:sel.settings?.min??1,onChange:e=>upd({settings:{...(sel.settings||{}),min:+e.target.value}}),style:{...inp,width:70,padding:'8px'}})),
+                  h('div',null,h('label',{style:{fontSize:11,color:C.muted,display:'block',marginBottom:4}},'Max'),h('input',{type:'number',value:sel.settings?.max??5,onChange:e=>upd({settings:{...(sel.settings||{}),max:+e.target.value}}),style:{...inp,width:70,padding:'8px'}}))
+                )
+              ),
+              h('div',{style:{...card,padding:20,opacity:0.85}},
+                h('div',{style:{fontSize:11,color:C.muted,marginBottom:10,textTransform:'uppercase',letterSpacing:'0.1em'}},'👁 Aperçu'),
+                h('div',{style:{fontSize:18,fontWeight:700,color:C.white,marginBottom:6}},sel.title||'Titre'),
+                sel.description&&h('div',{style:{fontSize:13,color:C.muted,marginBottom:12,whiteSpace:'pre-line'}},sel.description),
+                sel.type==='short_answer'&&h('input',{style:{...inp,width:'100%',opacity:0.5},placeholder:'Votre réponse...',disabled:true}),
+                sel.type==='long_answer'&&h('textarea',{style:{...inp,width:'100%',height:80,opacity:0.5,resize:'none'},placeholder:'Votre réponse...',disabled:true}),
+                sel.type==='email'&&h('input',{type:'email',style:{...inp,width:'100%',opacity:0.5},placeholder:'votre@email.com',disabled:true}),
+                sel.type==='phone'&&h('input',{type:'tel',style:{...inp,width:'100%',opacity:0.5},placeholder:'+33 6 00 00 00 00',disabled:true}),
+                sel.type==='date'&&h('input',{type:'date',style:{...inp,width:'100%',opacity:0.5},disabled:true}),
+                ['multiple_choice','single_choice'].includes(sel.type)&&h('div',{style:{display:'flex',flexDirection:'column',gap:6}},
+                  ...(sel.options||[]).map((opt,oi)=>h('div',{key:oi,style:{display:'flex',alignItems:'center',gap:10,padding:'10px 14px',border:`1px solid ${C.border}`,borderRadius:10,opacity:0.7}},
+                    h('span',{style:{fontSize:16}},sel.type==='single_choice'?'○':'□'),
+                    h('span',{style:{color:C.white,fontSize:13}},opt)
+                  ))
+                ),
+                sel.type==='yesno'&&h('div',{style:{display:'flex',gap:12}},
+                  h('div',{style:{flex:1,padding:'12px',border:`2px solid ${C.green}44`,borderRadius:12,textAlign:'center',color:C.green,fontWeight:600}},'✓ Oui'),
+                  h('div',{style:{flex:1,padding:'12px',border:`2px solid ${C.red}44`,borderRadius:12,textAlign:'center',color:C.red,fontWeight:600}},'✗ Non')
+                ),
+                sel.type==='rating'&&h('div',{style:{display:'flex',gap:8,flexWrap:'wrap'}},
+                  ...Array.from({length:Math.min((sel.settings?.max||5)-(sel.settings?.min||1)+1,10)},(_,i)=>i+(sel.settings?.min||1)).map(n=>
+                    h('div',{key:n,style:{width:40,height:40,borderRadius:8,border:`1px solid ${C.border}`,background:C.soft,color:C.white,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14}},n)
+                  )
+                ),
+                sel.type==='info_screen'&&h('div',{style:{marginTop:8}},
+                  h('button',{style:{...btn,opacity:0.5},disabled:true},'Continuer →')
+                )
+              )
+            )
+          )
+        ),
+        addOpen&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:3000}},
+          h('div',{style:{...card,padding:28,maxWidth:500,width:'100%'}},
+            h('h3',{style:{color:C.white,fontSize:16,fontWeight:700,marginBottom:20}},'Ajouter une question'),
+            h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}},
+              ...TYPES.map(t=>h('button',{key:t.v,onClick:()=>addQ(t.v),style:{background:C.soft,border:`1px solid ${C.border}`,borderRadius:10,padding:'14px 16px',cursor:'pointer',color:C.white,textAlign:'left',display:'flex',alignItems:'center',gap:10,fontSize:13,fontWeight:500}},
+                h('span',{style:{fontSize:20}},t.icon),h('span',null,t.l)
+              ))
+            ),
+            h('button',{onClick:()=>setAddOpen(false),style:{marginTop:16,background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'8px 20px',cursor:'pointer',width:'100%'}},'Annuler')
+          )
+        ),
+        shareOpen&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:3000}},
+          h('div',{style:{...card,padding:28,maxWidth:540,width:'100%'}},
+            h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}},
+              h('h3',{style:{color:C.white,fontSize:16,fontWeight:700}},'🔗 Partager'),
+              h('button',{onClick:()=>setShareOpen(false),style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:22,lineHeight:1}},'×')
+            ),
+            h('div',{style:{marginBottom:16}},
+              h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:8}},'Lien direct'),
+              h('div',{style:{display:'flex',gap:8}},
+                h('input',{value:formUrl,readOnly:true,style:{...inp,flex:1,fontSize:12}}),
+                h('button',{onClick:()=>navigator.clipboard.writeText(formUrl),style:{...btn,padding:'8px 14px',fontSize:12,flexShrink:0}},'📋')
+              )
+            ),
+            h('div',{style:{marginBottom:16}},
+              h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:8}},"Code iFrame"),
+              h('div',{style:{display:'flex',gap:8}},
+                h('textarea',{value:embedCode,readOnly:true,style:{...inp,flex:1,fontSize:11,height:56,resize:'none'}}),
+                h('button',{onClick:()=>navigator.clipboard.writeText(embedCode),style:{...btn,padding:'8px 14px',fontSize:12,flexShrink:0,alignSelf:'flex-start'}},'📋')
+              )
+            ),
+            h('div',null,
+              h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:8}},'Réseaux sociaux'),
+              h('div',{style:{display:'flex',gap:10}},
+                h('a',{href:`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(formUrl)}`,target:'_blank',style:{flex:1,padding:'10px',background:'#1877F2',borderRadius:10,textDecoration:'none',color:'#fff',textAlign:'center',fontSize:13,fontWeight:600}},'📘 Facebook'),
+                h('a',{href:`https://api.whatsapp.com/send?text=${encodeURIComponent(form.title+' — '+formUrl)}`,target:'_blank',style:{flex:1,padding:'10px',background:'#25D366',borderRadius:10,textDecoration:'none',color:'#fff',textAlign:'center',fontSize:13,fontWeight:600}},'💬 WhatsApp'),
+                h('a',{href:`https://www.instagram.com/`,target:'_blank',style:{flex:1,padding:'10px',background:'linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)',borderRadius:10,textDecoration:'none',color:'#fff',textAlign:'center',fontSize:13,fontWeight:600}},'📸 Insta')
+              )
+            )
+          )
+        )
+      );
+    }
+
+    function ResponsesView({form,onClose}){
+      const [responses,setResponses]=useState([]);
+      const [questions,setQuestions]=useState([]);
+      const [loading,setLoading]=useState(true);
+      const [selected,setSelected]=useState(null);
+      useEffect(()=>{
+        Promise.all([
+          sb.from('form_responses').select('*').eq('form_id',form.id).order('completed_at',{ascending:false}),
+          sb.from('form_questions').select('*').eq('form_id',form.id).order('order_index')
+        ]).then(([{data:r},{data:q}])=>{
+          setResponses(r||[]);
+          setQuestions((q||[]).filter(q=>q.type!=='info_screen'));
+          setLoading(false);
+        });
+      },[]);
+      return h('div',null,
+        h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:24}},
+          h('button',{onClick:onClose,style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer'}},'← Retour'),
+          h('h1',{style:{fontSize:20,fontWeight:700,color:C.white}},`Réponses — ${form.title}`),
+          h('span',{style:{...badge(C.blue),marginLeft:'auto'}},`${responses.length} réponse${responses.length>1?'s':''}`)
+        ),
+        loading?h('p',{style:{color:C.muted}},'Chargement...'):
+        responses.length===0?h('div',{style:{textAlign:'center',padding:'60px 20px',color:C.muted}},
+          h('div',{style:{fontSize:48,marginBottom:12}},'📭'),
+          h('p',null,'Aucune réponse pour ce questionnaire')
+        ):
+        h('div',{style:{display:'grid',gap:12}},
+          ...responses.map(r=>h('div',{key:r.id,style:{...card,cursor:'pointer',border:`1px solid ${selected===r.id?C.gold:C.border}`},onClick:()=>setSelected(selected===r.id?null:r.id)},
+            h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center'}},
+              h('div',null,
+                h('div',{style:{fontSize:14,fontWeight:600,color:C.white}},r.respondent_name||r.respondent_email||'Anonyme'),
+                h('div',{style:{fontSize:12,color:C.muted}},new Date(r.completed_at).toLocaleString('fr-FR'))
+              ),
+              h('span',{style:{...badge(C.green),fontSize:11}},'✓ Complété')
+            ),
+            selected===r.id&&h('div',{style:{marginTop:16,borderTop:`1px solid ${C.border}`,paddingTop:16}},
+              ...questions.map(q=>{
+                const ans=r.answers?.[q.id];
+                if(ans===undefined||ans===null||ans==='')return null;
+                return h('div',{key:q.id,style:{marginBottom:14,paddingBottom:14,borderBottom:`1px solid ${C.border}`}},
+                  h('div',{style:{fontSize:12,fontWeight:700,color:C.gold,marginBottom:4}},q.title),
+                  h('div',{style:{fontSize:14,color:C.white}},Array.isArray(ans)?ans.join(', '):String(ans))
+                );
+              }).filter(Boolean)
+            )
+          ))
+        )
+      );
+    }
+
+    function Questionnaires(){
+      const [isAdmin,setIsAdmin]=useState(false);
+      const [forms,setForms]=useState([]);
+      const [loading,setLoading]=useState(true);
+      const [builder,setBuilder]=useState(null);
+      const [responsesView,setResponsesView]=useState(null);
+      const [delForm,setDelForm]=useState(null);
+      const [msg,setMsg]=useState('');
+      const BASE_URL='https://taya-fitness-site-1.vercel.app';
+
+      useEffect(()=>{
+        sb.auth.getSession().then(({data:{session}})=>{if(session?.user)setIsAdmin(ADMIN.includes(session.user.email));});
+        load();
+      },[]);
+
+      async function load(){
+        setLoading(true);
+        const{data}=await sb.from('forms').select('*, form_questions(count), form_responses(count)').order('created_at',{ascending:false});
+        setForms((data||[]).map(f=>({...f,_qCount:f.form_questions?.[0]?.count||0,_rCount:f.form_responses?.[0]?.count||0})));
+        setLoading(false);
+      }
+
+      async function createForm(){
+        const slug='form-'+Date.now();
+        const{data}=await sb.from('forms').insert({title:'Nouveau questionnaire',slug}).select('*').single();
+        if(data){
+          await sb.from('form_questions').insert([
+            {form_id:data.id,order_index:0,type:'info_screen',title:'Bienvenue !',description:'Remplissez ce questionnaire.',required:false},
+            {form_id:data.id,order_index:1,type:'short_answer',title:'Votre nom complet',required:true}
+          ]);
+          await openBuilder(data);
+        }
+      }
+
+      async function openBuilder(form){
+        const{data:questions}=await sb.from('form_questions').select('*').eq('form_id',form.id).order('order_index');
+        setBuilder({form,questions:questions||[]});
+      }
+
+      async function deleteForm(f){
+        await sb.from('forms').delete().eq('id',f.id);
+        setDelForm(null);load();
+      }
+
+      if(builder)return h(FormBuilder,{key:builder.form.id,form:builder.form,initQuestions:builder.questions,onClose:()=>{setBuilder(null);load();},baseUrl:BASE_URL});
+      if(responsesView)return h(ResponsesView,{form:responsesView,onClose:()=>setResponsesView(null)});
+
+      return h('div',null,
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}},
+          h('div',null,
+            h('h1',{style:{fontSize:24,fontWeight:700,color:C.white,marginBottom:4}},'📋 Questionnaires'),
+            h('p',{style:{color:C.muted,fontSize:13}},'Formulaires Typeform — créez, partagez et collectez des réponses')
+          ),
+          isAdmin&&h('button',{onClick:createForm,style:btn},'+ Nouveau questionnaire')
+        ),
+        msg&&h('div',{style:{color:C.green,marginBottom:12,fontSize:13}},msg),
+        loading?h('p',{style:{color:C.muted}},'Chargement...'):
+        forms.length===0?h('div',{style:{textAlign:'center',padding:'60px 20px',color:C.muted}},
+          h('div',{style:{fontSize:48,marginBottom:12}},'📋'),
+          h('p',null,'Aucun questionnaire'),
+          isAdmin&&h('button',{onClick:createForm,style:{...btn,marginTop:12}},'+ Créer le premier')
+        ):
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(300px,1fr))',gap:16}},
+          ...forms.map(f=>h('div',{key:f.id,style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:16,display:'flex',flexDirection:'column',overflow:'hidden'}},
+            h('div',{style:{padding:'20px 20px 14px',flex:1}},
+              h('div',{style:{fontSize:15,fontWeight:700,color:C.white,lineHeight:1.3,marginBottom:10}},f.title),
+              h('div',{style:{display:'flex',gap:16,marginBottom:12}},
+                h('div',{style:{fontSize:13,color:C.muted}},h('strong',{style:{color:C.gold}},f._qCount),' questions'),
+                h('div',{style:{fontSize:13,color:C.muted}},h('strong',{style:{color:C.blue}},f._rCount),' réponses')
+              ),
+              h('div',{style:{background:C.soft,borderRadius:8,padding:'8px 10px',display:'flex',alignItems:'center',gap:6}},
+                h('span',{style:{fontSize:11,color:C.muted,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},`${BASE_URL}/forms.html?slug=${f.slug}`),
+                h('button',{onClick:()=>{navigator.clipboard.writeText(`${BASE_URL}/forms.html?slug=${f.slug}`);setMsg('📋 Lien copié !');setTimeout(()=>setMsg(''),3000);},style:{background:'transparent',border:'none',color:C.gold,cursor:'pointer',fontSize:12,flexShrink:0,padding:'0 4px'}},'📋')
+              )
+            ),
+            h('div',{style:{borderTop:`1px solid ${C.border}`,padding:'12px 14px',display:'flex',gap:8}},
+              isAdmin&&h('button',{onClick:()=>openBuilder(f),style:{...btn,flex:1,fontSize:13,padding:'8px 0'}},'✏️ Éditer'),
+              h('button',{onClick:()=>setResponsesView(f),title:'Réponses',style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'8px 12px',cursor:'pointer',fontSize:13}},'📊'),
+              h('a',{href:`${BASE_URL}/forms.html?slug=${f.slug}`,target:'_blank',title:'Ouvrir',style:{background:'transparent',border:`1px solid ${C.blue}44`,color:C.blue,borderRadius:8,padding:'8px 12px',cursor:'pointer',fontSize:13,textDecoration:'none',display:'flex',alignItems:'center'}},'🔗'),
+              isAdmin&&h('button',{onClick:()=>setDelForm(f),style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:13,padding:'8px 6px'}},'🗑')
+            )
+          ))
+        ),
+        delForm&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000}},
+          h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:20,padding:28,maxWidth:360,textAlign:'center'}},
+            h('div',{style:{fontSize:32,marginBottom:12}},'⚠️'),
+            h('div',{style:{fontSize:15,fontWeight:700,color:C.white,marginBottom:8}},'Supprimer ce questionnaire ?'),
+            h('div',{style:{fontSize:13,color:C.muted,marginBottom:20}},delForm.title),
+            h('div',{style:{display:'flex',gap:10,justifyContent:'center'}},
+              h('button',{onClick:()=>setDelForm(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 20px',cursor:'pointer'}},'Annuler'),
+              h('button',{onClick:()=>deleteForm(delForm),style:{...btn,background:`linear-gradient(135deg,${C.red},#c0392b)`}},'Supprimer')
+            )
           )
         )
       );
