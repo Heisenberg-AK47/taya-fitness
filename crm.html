@@ -1458,6 +1458,7 @@
     // ── Questionnaires ────────────────────────────────────────────────────────
     function FormBuilder({form,initQuestions,onClose,baseUrl}){
       const [questions,setQuestions]=useState(initQuestions);
+      const [deletedIds,setDeletedIds]=useState([]);
       const [selIdx,setSelIdx]=useState(0);
       const [title,setTitle]=useState(form.title);
       const [saving,setSaving]=useState(false);
@@ -1499,6 +1500,8 @@
         try{
           const{error:fe}=await sb.from('forms').update({title,cover_url:fmeta.cover_url||null,homepage_title:fmeta.homepage_title||null,homepage_description:fmeta.homepage_description||null,homepage_button:fmeta.homepage_button||'Commencer',end_title:fmeta.end_title||null,end_description:fmeta.end_description||null,end_button:fmeta.end_button||'Terminer',settings:{...(form.settings||{}),bg_color:fmeta.bg_color,accent_color:fmeta.accent_color,font_family:fmeta.font_family,cover_height:fmeta.cover_height,cover_position:fmeta.cover_position,cover_radius:fmeta.cover_radius,btn_shape:fmeta.btn_shape,btn_color:fmeta.btn_color,btn_text_color:fmeta.btn_text_color,title_font_family:fmeta.title_font_family,font_weight:fmeta.font_weight,title_font_weight:fmeta.title_font_weight,font_italic:fmeta.font_italic,text_color:fmeta.text_color,title_color:fmeta.title_color,desc_color:fmeta.desc_color},updated_at:new Date().toISOString()}).eq('id',form.id);
           if(fe)throw new Error('Formulaire: '+fe.message);
+          for(const did of deletedIds){await sb.from('form_questions').delete().eq('id',did);}
+          setDeletedIds([]);
           const updated=[];
           for(let i=0;i<questions.length;i++){
             const q={...questions[i]};
@@ -1555,7 +1558,7 @@
 
       function delQ(idx){
         const q=questions[idx];
-        if(q.id&&!String(q.id).startsWith('tmp-'))sb.from('form_questions').delete().eq('id',q.id);
+        if(q.id&&!String(q.id).startsWith('tmp-'))setDeletedIds(prev=>[...prev,q.id]);
         const nq=questions.filter((_,i)=>i!==idx);setQuestions(nq);setSelIdx(Math.min(idx,nq.length-1));
       }
 
