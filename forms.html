@@ -6,9 +6,8 @@
 <title>Questionnaire — Taya Fitness</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
-  :root{--bg:#111;--accent:#e8c547;--accent2:#d4af37;}
-  html,body{height:100%;font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:#fff;overflow:hidden;}
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  :root{--bg:#111;--accent:#e8c547;--accent2:#d4af37;--font:'Inter',sans-serif;}
+  html,body{height:100%;font-family:var(--font);background:var(--bg);color:#fff;overflow:hidden;}
 
   #root{height:100%;display:flex;flex-direction:column;}
   .screen{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:left;animation:fadeIn 0.35s ease;}
@@ -27,57 +26,73 @@
 
   .q-step{color:var(--accent);font-size:12px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;}
   .q-title{font-size:clamp(20px,4vw,32px);font-weight:700;line-height:1.3;margin-bottom:10px;max-width:620px;}
-  .q-desc{font-size:15px;color:#aaa;margin-bottom:28px;max-width:540px;line-height:1.6;white-space:pre-line;}
+  .q-desc{font-size:15px;color:rgba(255,255,255,0.6);margin-bottom:28px;max-width:540px;line-height:1.6;white-space:pre-line;}
   .required-star{color:var(--accent);margin-left:4px;}
-  .hint{font-size:12px;color:#555;margin-top:10px;display:flex;align-items:center;gap:6px;}
-  .hint kbd{background:rgba(255,255,255,0.08);border:1px solid #333;border-radius:4px;padding:2px 7px;font-family:inherit;font-size:11px;}
+  .hint{font-size:12px;color:rgba(255,255,255,0.35);margin-top:10px;display:flex;align-items:center;gap:6px;}
+  .hint kbd{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:2px 7px;font-family:inherit;font-size:11px;}
+
+  /* Media per question */
+  .q-media{width:100%;max-width:540px;margin-bottom:20px;border-radius:14px;overflow:hidden;}
+  .q-media img{width:100%;max-height:220px;object-fit:cover;display:block;}
+  .q-media video{width:100%;max-height:220px;object-fit:cover;display:block;border-radius:14px;}
+  .q-media iframe{width:100%;height:220px;border:none;border-radius:14px;display:block;}
 
   /* Inputs */
-  .tf-input{background:transparent;border:none;border-bottom:2px solid #333;color:#fff;font-size:20px;font-family:inherit;width:100%;max-width:500px;padding:10px 0;outline:none;transition:border-color 0.2s;}
+  .tf-input{background:transparent;border:none;border-bottom:2px solid rgba(255,255,255,0.15);color:#fff;font-size:20px;font-family:inherit;width:100%;max-width:500px;padding:10px 0;outline:none;transition:border-color 0.2s;}
   .tf-input:focus{border-bottom-color:var(--accent);}
-  .tf-input::placeholder{color:#444;}
-  .tf-textarea{background:rgba(255,255,255,0.04);border:1.5px solid #333;border-radius:12px;color:#fff;font-size:16px;font-family:inherit;width:100%;max-width:540px;padding:14px 16px;outline:none;resize:vertical;min-height:100px;line-height:1.6;transition:border-color 0.2s;}
+  .tf-input::placeholder{color:rgba(255,255,255,0.25);}
+  .tf-textarea{background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-size:16px;font-family:inherit;width:100%;max-width:540px;padding:14px 16px;outline:none;resize:vertical;min-height:100px;line-height:1.6;transition:border-color 0.2s;}
   .tf-textarea:focus{border-color:var(--accent);}
 
   /* Choice buttons */
   .choices{display:flex;flex-direction:column;gap:10px;max-width:540px;width:100%;}
-  .choice-btn{background:rgba(255,255,255,0.05);border:1.5px solid #333;border-radius:12px;color:#fff;font-size:15px;font-family:inherit;padding:14px 18px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:12px;transition:all 0.15s;width:100%;}
+  .choice-btn{background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;color:#fff;font-size:15px;font-family:inherit;padding:14px 18px;cursor:pointer;text-align:left;display:flex;align-items:center;gap:12px;transition:all 0.15s;width:100%;}
   .choice-btn:hover{border-color:var(--accent);background:rgba(255,255,255,0.07);}
-  .choice-btn.selected{border-color:var(--accent);background:rgba(255,255,255,0.12);color:var(--accent);}
+  .choice-btn.selected{border-color:var(--accent);background:rgba(255,255,255,0.1);color:var(--accent);}
   .choice-letter{width:26px;height:26px;border:1.5px solid currentColor;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;opacity:0.6;}
 
   /* Yes/No */
   .yesno-btns{display:flex;gap:14px;max-width:400px;}
-  .yesno-btn{flex:1;padding:18px;border-radius:14px;border:2px solid #333;background:rgba(255,255,255,0.04);color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;text-align:center;}
+  .yesno-btn{flex:1;padding:18px;border-radius:14px;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;text-align:center;}
   .yesno-btn.yes:hover,.yesno-btn.yes.selected{border-color:#3ecf8e;background:rgba(62,207,142,0.1);color:#3ecf8e;}
   .yesno-btn.no:hover,.yesno-btn.no.selected{border-color:#ff4d6a;background:rgba(255,77,106,0.1);color:#ff4d6a;}
 
   /* Scale */
   .scale-grid{display:flex;gap:8px;flex-wrap:wrap;max-width:560px;}
-  .scale-btn{width:46px;height:46px;border-radius:10px;border:1.5px solid #333;background:rgba(255,255,255,0.05);color:#fff;font-size:16px;cursor:pointer;transition:all 0.15s;font-family:inherit;}
+  .scale-btn{width:46px;height:46px;border-radius:10px;border:1.5px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#fff;font-size:16px;cursor:pointer;transition:all 0.15s;font-family:inherit;}
   .scale-btn:hover{border-color:var(--accent);background:rgba(255,255,255,0.08);}
-  .scale-btn.selected{border-color:var(--accent);background:rgba(255,255,255,0.18);color:var(--accent);font-weight:700;}
-  .scale-labels{display:flex;justify-content:space-between;max-width:560px;margin-top:8px;font-size:12px;color:#555;}
+  .scale-btn.selected{border-color:var(--accent);background:rgba(255,255,255,0.15);color:var(--accent);font-weight:700;}
+  .scale-labels{display:flex;justify-content:space-between;max-width:560px;margin-top:8px;font-size:12px;color:rgba(255,255,255,0.3);}
 
   /* CTA */
-  .cta-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;border:none;border-radius:12px;padding:14px 28px;font-size:16px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:8px;transition:all 0.2s;margin-top:16px;}
-  .cta-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,0,0,0.25);}
+  .cta-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;border:none;border-radius:14px;padding:16px 32px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:10px;transition:all 0.2s;margin-top:20px;}
+  .cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.3);}
   .cta-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
 
   /* Welcome/Ending */
   .welcome-screen{max-width:640px;width:100%;}
   .welcome-cover{width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:28px;}
-  .welcome-cover-img{width:100%;max-width:640px;height:200px;object-fit:cover;border-radius:20px;margin-bottom:28px;display:block;}
-  .ending-icon{font-size:60px;margin-bottom:20px;}
+  .welcome-cover-img{width:100%;max-width:640px;max-height:240px;object-fit:cover;border-radius:20px;margin-bottom:28px;display:block;}
+  .ending-icon{font-size:64px;margin-bottom:24px;}
+  .ending-screen{max-width:600px;width:100%;text-align:center;}
+
+  /* Social sharing */
+  .social-share{display:flex;gap:12px;justify-content:center;margin-top:28px;flex-wrap:wrap;}
+  .share-btn{padding:12px 20px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px;text-decoration:none;transition:all 0.15s;}
+  .share-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.3);}
+  .share-btn.wa{background:#25D366;color:#fff;}
+  .share-btn.fb{background:#1877F2;color:#fff;}
+  .share-btn.ig{background:linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff;}
+  .share-btn.copy{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);}
 
   /* Loading/Error */
-  .loading{display:flex;align-items:center;justify-content:center;height:100%;color:#555;font-size:16px;}
+  .loading{display:flex;align-items:center;justify-content:center;height:100%;color:rgba(255,255,255,0.3);font-size:16px;}
   .error-box{text-align:center;max-width:420px;}
   .error-box h2{font-size:22px;margin-bottom:10px;color:#fff;}
-  .error-box p{color:#666;font-size:14px;line-height:1.6;}
+  .error-box p{color:rgba(255,255,255,0.4);font-size:14px;line-height:1.6;}
 
   /* Branding */
-  .brand{position:fixed;top:18px;left:22px;font-size:13px;font-weight:700;color:#333;letter-spacing:0.05em;}
+  .brand{position:fixed;top:18px;left:22px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.2);letter-spacing:0.08em;}
 </style>
 </head>
 <body>
@@ -100,6 +115,18 @@ const slug = new URLSearchParams(location.search).get('slug');
 let form = null, questions = [], answers = {}, currentIdx = 0;
 let submitting = false, submitted = false;
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const PAGE_URL = location.href;
+
+function loadFont(family) {
+  if (!family || family === 'Inter') return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family.replace(/\+/g,' '))}:wght@400;500;600;700;800&display=swap`;
+  document.head.appendChild(link);
+  const cssFamily = family.includes('+') ? `'${family.replace(/\+/g,' ')}'` : family;
+  document.documentElement.style.setProperty('--font', `${cssFamily}, sans-serif`);
+  document.body.style.fontFamily = `${cssFamily}, sans-serif`;
+}
 
 async function init() {
   if (!slug) { renderError('Formulaire introuvable','Aucun identifiant spécifié.'); return; }
@@ -108,33 +135,47 @@ async function init() {
     if (!forms || !forms.length) { renderError('Formulaire introuvable','Ce formulaire n\'existe pas.'); return; }
     form = forms[0];
     document.title = (form.title||'Questionnaire') + ' — Taya Fitness';
-    // Apply custom colors from form settings
-    const bgColor = (form.settings && form.settings.bg_color) || '#111';
-    const accentColor = (form.settings && form.settings.accent_color) || '#e8c547';
+    const s = form.settings || {};
+    const bgColor = s.bg_color || '#111';
+    const accentColor = s.accent_color || '#e8c547';
     document.documentElement.style.setProperty('--bg', bgColor);
     document.documentElement.style.setProperty('--accent', accentColor);
     document.documentElement.style.setProperty('--accent2', accentColor);
     document.body.style.background = bgColor;
+    loadFont(s.font_family);
     const qs = await api(`form_questions?form_id=eq.${form.id}&order=order_index`);
     questions = qs || [];
-    // Inject homepage as first virtual screen if needed
     if (form.homepage_title || form.description) {
       questions = [{id:'__home',type:'info_screen',title:form.homepage_title||form.title,description:form.homepage_description||form.description||'',required:false,_isHome:true}, ...questions];
     } else if (!questions.length || questions[0].type !== 'info_screen') {
       questions = [{id:'__home',type:'info_screen',title:form.title,description:form.description||'',required:false,_isHome:true}, ...questions];
     }
-    // Append ending screen
     questions = [...questions, {id:'__end',type:'__end',title:form.end_title||'Merci !',description:form.end_description||'Vos réponses ont bien été enregistrées.',required:false}];
     currentIdx = 0;
     renderStep();
   } catch(e) {
     console.error(e);
-    renderError('Erreur de chargement','Impossible de charger le formulaire. Vérifiez votre connexion.');
+    renderError('Erreur de chargement','Impossible de charger le formulaire.');
   }
 }
 
 function getAnswerableQs() {
   return questions.filter(q => q.type !== 'info_screen' && q.type !== '__end' && !q._isHome);
+}
+
+function mediaHtml(q) {
+  const url = q.settings && q.settings.media_url;
+  if (!url) return '';
+  const mt = q.settings.media_type || 'image';
+  if (mt === 'youtube') {
+    let vid = '';
+    const m = url.match(/(?:v=|youtu\.be\/|embed\/)([^&?\s]+)/);
+    if (m) vid = m[1];
+    if (!vid) return `<div class="q-media" style="padding:10px;background:rgba(255,255,255,0.05);border-radius:14px;font-size:13px;color:rgba(255,255,255,0.5);">▶ ${esc(url)}</div>`;
+    return `<div class="q-media"><iframe src="https://www.youtube.com/embed/${vid}?autoplay=0&rel=0" allowfullscreen></iframe></div>`;
+  }
+  if (mt === 'video') return `<div class="q-media"><video src="${esc(url)}" controls playsinline></video></div>`;
+  return `<div class="q-media"><img src="${esc(url)}" onerror="this.parentNode.style.display='none'" /></div>`;
 }
 
 function renderStep() {
@@ -147,7 +188,6 @@ function renderStep() {
   const root = document.getElementById('root');
 
   if (q._isHome || (q.type === 'info_screen' && currentIdx === 0)) {
-    // Welcome screen
     const coverHtml = form.cover_url
       ? `<img src="${esc(form.cover_url)}" class="welcome-cover-img" onerror="this.style.display='none'" />`
       : `<div class="welcome-cover">🏋️</div>`;
@@ -163,13 +203,35 @@ function renderStep() {
         </div>
       </div>`;
   } else if (q.type === '__end') {
+    const shareUrl = encodeURIComponent(PAGE_URL);
+    const shareText = encodeURIComponent((form.title||'Questionnaire') + ' — ' + PAGE_URL);
     root.innerHTML = `
       <div class="progress-bar" style="width:100%"></div>
       <div class="brand">TAYA FITNESS</div>
       <div class="screen" style="text-align:center;">
-        <div class="ending-icon">✅</div>
-        <div class="q-title" style="text-align:center;">${esc(q.title)}</div>
-        ${q.description ? `<div class="q-desc" style="text-align:center;">${esc(q.description)}</div>` : ''}
+        <div class="ending-screen">
+          <div class="ending-icon">✅</div>
+          <div class="q-title" style="text-align:center;">${esc(q.title)}</div>
+          ${q.description ? `<div class="q-desc" style="text-align:center;max-width:480px;margin:0 auto 8px;">${esc(q.description)}</div>` : ''}
+          <div class="social-share">
+            <a class="share-btn wa" href="https://api.whatsapp.com/send?text=${shareText}" target="_blank" rel="noopener">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              WhatsApp
+            </a>
+            <a class="share-btn fb" href="https://www.facebook.com/sharer/sharer.php?u=${shareUrl}" target="_blank" rel="noopener">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              Facebook
+            </a>
+            <a class="share-btn ig" href="https://www.instagram.com/" target="_blank" rel="noopener">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+              Instagram
+            </a>
+            <button class="share-btn copy" onclick="navigator.clipboard.writeText('${esc(PAGE_URL)}').then(()=>{this.textContent='✅ Copié !';setTimeout(()=>{this.innerHTML='<svg width=\\'16\\' height=\\'16\\' viewBox=\\'0 0 24 24\\' fill=\\'currentColor\\'><path d=\\'M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z\\'/></svg> Copier le lien';},2500);}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+              Copier le lien
+            </button>
+          </div>
+        </div>
       </div>`;
   } else if (q.type === 'info_screen') {
     root.innerHTML = `
@@ -177,6 +239,7 @@ function renderStep() {
       <div class="brand">TAYA FITNESS</div>
       <div class="screen">
         <div class="welcome-screen">
+          ${mediaHtml(q)}
           <div class="q-step">Information</div>
           <div class="q-title">${esc(q.title)}</div>
           ${q.description ? `<div class="q-desc">${esc(q.description)}</div>` : ''}
@@ -196,6 +259,7 @@ function renderStep() {
       <div class="brand">TAYA FITNESS</div>
       <div class="screen">
         <div class="q-step">${stepLabel}</div>
+        ${mediaHtml(q)}
         <div class="q-title">${esc(q.title)}${required}</div>
         ${q.description ? `<div class="q-desc">${esc(q.description)}</div>` : ''}
         ${inputHtml}
@@ -221,7 +285,7 @@ function buildInputHtml(q) {
     case 'phone':
       return `<input class="tf-input" type="tel" placeholder="+33 6 00 00 00 00" value="${esc(cur||'')}" oninput="setAnswer('${q.id}',this.value)" onkeydown="if(event.key==='Enter')goNext()" id="main-input"/>`;
     case 'date':
-      return `<input class="tf-input" type="date" value="${esc(cur||'')}" onchange="setAnswer('${q.id}',this.value)" id="main-input" style="font-size:16px;"/>`;
+      return `<input class="tf-input" type="date" value="${esc(cur||'')}" onchange="setAnswer('${q.id}',this.value)" id="main-input" style="font-size:16px;color-scheme:dark;"/>`;
     case 'single_choice':
       return `<div class="choices">${(q.options||[]).map((opt,i)=>`
         <button class="choice-btn ${cur===opt?'selected':''}" onclick="selectSingle('${q.id}','${escAttr(opt)}')">
@@ -291,9 +355,7 @@ function goNext() {
   }
   if (currentIdx < questions.length - 1) {
     currentIdx++;
-    if (questions[currentIdx]?.type === '__end') {
-      submitResponses();
-    }
+    if (questions[currentIdx]?.type === '__end') submitResponses();
     renderStep();
   }
 }
@@ -313,14 +375,12 @@ function shakeInput() {
 async function submitResponses() {
   if (submitting || submitted) return;
   submitting = true;
-  // Find name and email from answers
   const realQs = questions.filter(q => !q._isHome && q.type !== '__end');
   let respondent_name = null, respondent_email = null;
   for (const q of realQs) {
     if (q.type === 'email' && answers[q.id]) respondent_email = answers[q.id];
     if (q.type === 'short_answer' && answers[q.id] && !respondent_name) respondent_name = answers[q.id];
   }
-  // Build clean answers (exclude virtual questions)
   const cleanAnswers = {};
   for (const q of realQs) {
     if (answers[q.id] !== undefined) cleanAnswers[q.id] = answers[q.id];
@@ -329,13 +389,7 @@ async function submitResponses() {
     await api('form_responses', {
       method: 'POST',
       headers: { Prefer: 'return=minimal' },
-      body: JSON.stringify({
-        form_id: form.id,
-        answers: cleanAnswers,
-        respondent_name,
-        respondent_email,
-        completed_at: new Date().toISOString()
-      })
+      body: JSON.stringify({ form_id: form.id, answers: cleanAnswers, respondent_name, respondent_email, completed_at: new Date().toISOString() })
     });
     submitted = true;
   } catch(e) { console.error('Submit error', e); }
