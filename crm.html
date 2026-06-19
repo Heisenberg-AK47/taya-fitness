@@ -2,6 +2,9 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Great+Vibes&display=swap" rel="stylesheet" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Taya CRM</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -189,11 +192,12 @@
       if (!user) return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'Inter,sans-serif'}},
         h('div',{style:{width:400}},
           h('div',{style:{textAlign:'center',marginBottom:40}},
-            h('div',{style:{fontSize:32,fontWeight:800,letterSpacing:-1}},
-              h('span',{style:{color:C.white}},'Taya'),
-              h('span',{style:{color:C.gold}},'CRM')
-            ),
-            h('p',{style:{color:C.muted,marginTop:8,fontSize:14}},'Espace de gestion — Sarah Fumey')
+            h('div',{dangerouslySetInnerHTML:{__html:`
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 110" style="width:240px;height:auto">
+                <text x="8" y="92" font-family="'Black Han Sans',Arial Black,Impact,sans-serif" font-size="100" font-weight="900" fill="#E8603C" letter-spacing="-2">TAYA</text>
+                <text x="154" y="84" font-family="'Great Vibes','Brush Script MT',cursive" font-size="46" fill="#1B2B4B" transform="rotate(-5,154,84)">Fitness</text>
+              </svg>`}}),
+            h('p',{style:{color:C.muted,marginTop:4,fontSize:13}},'Espace de gestion — Sarah Fumey')
           ),
           h('div',{style:card},
             h('p',{style:{color:C.muted,fontSize:14,marginBottom:24,textAlign:'center'}},'Connecte-toi avec ton compte Google'),
@@ -219,10 +223,11 @@
       return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',fontFamily:'Inter,sans-serif'}},
         h('div',{style:{width:230,background:C.soft,borderRight:`1px solid ${C.border}`,display:'flex',flexDirection:'column',minHeight:'100vh',flexShrink:0}},
           h('div',{style:{padding:'28px 20px 20px',borderBottom:`1px solid ${C.border}`}},
-            h('div',{style:{fontSize:22,fontWeight:800}},
-              h('span',{style:{color:C.white}},'Taya'),
-              h('span',{style:{color:C.gold}},'CRM')
-            ),
+            h('div',{dangerouslySetInnerHTML:{__html:`
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 110" style="width:160px;height:auto;display:block">
+                <text x="8" y="92" font-family="'Black Han Sans',Arial Black,Impact,sans-serif" font-size="100" font-weight="900" fill="#E8603C" letter-spacing="-2">TAYA</text>
+                <text x="154" y="84" font-family="'Great Vibes','Brush Script MT',cursive" font-size="46" fill="#1B2B4B" transform="rotate(-5,154,84)">Fitness</text>
+              </svg>`}}),
             h('div',{style:{fontSize:12,color:C.muted,marginTop:4}},user.email)
           ),
           h('nav',{style:{flex:1,padding:'12px 10px',overflowY:'auto'}},

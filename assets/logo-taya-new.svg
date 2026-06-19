@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 200" fill="none">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Great+Vibes&display=swap');
+    </style>
+  </defs>
+
+  <!-- TAYA — bloc orange -->
+  <text
+    x="10" y="168"
+    font-family="'Black Han Sans', 'Arial Black', 'Impact', sans-serif"
+    font-size="175"
+    font-weight="900"
+    fill="#E8603C"
+    letter-spacing="-2">TAYA</text>
+
+  <!-- Fitness — script navy, superposé -->
+  <text
+    x="195" y="148"
+    font-family="'Great Vibes', 'Brush Script MT', cursive"
+    font-size="80"
+    fill="#1B2B4B"
+    transform="rotate(-5, 195, 148)">Fitness</text>
+</svg>

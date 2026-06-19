@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 70" fill="none">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Great+Vibes&display=swap');
+    </style>
+  </defs>
+
+  <!-- TAYA -->
+  <text
+    x="4" y="62"
+    font-family="'Black Han Sans', 'Arial Black', Impact, sans-serif"
+    font-size="68"
+    font-weight="900"
+    fill="#E8603C"
+    letter-spacing="-1">TAYA</text>
+
+  <!-- Fitness script superposé -->
+  <text
+    x="148" y="56"
+    font-family="'Great Vibes', 'Brush Script MT', cursive"
+    font-size="34"
+    fill="#1B2B4B"
+    transform="rotate(-4, 148, 56)">Fitness</text>
+</svg>
