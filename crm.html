@@ -1366,6 +1366,95 @@
     }
 
 
+    // ── Form Preview Modal ────────────────────────────────────────────────────
+    function FormPreviewModal({form,fmeta,questions,onClose}){
+      const [step,setStep]=useState(0);
+      const bg=fmeta.bg_color||'#0d1b2a';
+      const accent=fmeta.accent_color||'#ff6b4a';
+      const btnShape=fmeta.btn_shape||'pill';
+      const btnRadius=btnShape==='sharp'?'0px':btnShape==='square'?'6px':btnShape==='rounded'?'14px':'50px';
+      const btnBg=fmeta.btn_color||accent;
+      const btnTextCol=fmeta.btn_text_color||'#000';
+      const fontFam=fmeta.font_family?`'${fmeta.font_family}',sans-serif`:'Inter,sans-serif';
+      const allSteps=[{_isHome:true},...(questions||[]),{type:'__end'}];
+      const cur=allSteps[step]||allSteps[0];
+      const answerableCount=(questions||[]).filter(q=>q.type!=='info_screen').length;
+      const answerableSoFar=(questions||[]).slice(0,step).filter(q=>q.type!=='info_screen').length;
+      const progress=step===0?0:Math.round((answerableSoFar/Math.max(answerableCount,1))*100);
+      const ctaBtn={background:btnBg,color:btnTextCol,border:'none',borderRadius:btnRadius,padding:'14px 28px',fontSize:16,fontWeight:700,cursor:'pointer',fontFamily:'inherit',marginTop:16,display:'inline-block'};
+      const iStyle={background:'transparent',border:'none',borderBottom:'2px solid rgba(255,255,255,0.2)',color:'rgba(255,255,255,0.8)',fontSize:16,width:'100%',padding:'8px 0',outline:'none',fontFamily:'inherit'};
+
+      function renderInput(q){
+        switch(q.type){
+          case 'short_answer': return h('input',{style:iStyle,placeholder:'Votre réponse...',readOnly:true});
+          case 'long_answer': return h('textarea',{style:{background:'rgba(255,255,255,0.04)',border:'1.5px solid rgba(255,255,255,0.12)',borderRadius:10,color:'rgba(255,255,255,0.8)',fontSize:15,width:'100%',padding:'12px',outline:'none',resize:'vertical',minHeight:80,fontFamily:'inherit'},placeholder:'Votre réponse...',readOnly:true});
+          case 'email': return h('input',{style:iStyle,placeholder:'votre@email.com',readOnly:true});
+          case 'phone': return h('input',{style:iStyle,placeholder:'+33 6 00 00 00 00',readOnly:true});
+          case 'date': return h('input',{type:'date',style:{...iStyle,colorScheme:'dark'},readOnly:true});
+          case 'yesno': return h('div',{style:{display:'flex',gap:12,marginTop:8}},
+            h('div',{style:{flex:1,padding:'14px',borderRadius:12,border:'2px solid rgba(62,207,142,0.3)',color:'#3ecf8e',textAlign:'center',fontWeight:600,fontSize:15}},'👍 Oui'),
+            h('div',{style:{flex:1,padding:'14px',borderRadius:12,border:'2px solid rgba(255,77,106,0.3)',color:'#ff4d6a',textAlign:'center',fontWeight:600,fontSize:15}},'👎 Non')
+          );
+          case 'single_choice':
+          case 'multiple_choice': return h('div',{style:{display:'flex',flexDirection:'column',gap:8}},
+            ...(q.options||[]).map((opt,i)=>h('div',{key:i,style:{padding:'12px 16px',border:'1.5px solid rgba(255,255,255,0.1)',borderRadius:10,fontSize:14,color:'rgba(255,255,255,0.7)',display:'flex',alignItems:'center',gap:10}},
+              h('span',{style:{width:22,height:22,border:'1.5px solid rgba(255,255,255,0.3)',borderRadius:q.type==='single_choice'?'50%':6,display:'inline-block',flexShrink:0}}),opt
+            ))
+          );
+          case 'rating': {
+            const min=q.settings?.min??1,max=q.settings?.max??5;
+            const nums=[];for(let n=min;n<=max;n++)nums.push(n);
+            return h('div',{style:{display:'flex',gap:8,flexWrap:'wrap',marginTop:4}},
+              ...nums.map(n=>h('div',{key:n,style:{width:42,height:42,borderRadius:8,border:'1.5px solid rgba(255,255,255,0.15)',background:'rgba(255,255,255,0.04)',color:'rgba(255,255,255,0.6)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:15}},n))
+            );
+          }
+          case 'multi_fields': return h('div',{style:{display:'flex',flexDirection:'column',gap:16,marginTop:4}},
+            ...((q.settings?.fields)||[]).map((f,i)=>h('div',{key:i},
+              h('div',{style:{fontSize:11,fontWeight:700,color:accent,letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:4}},f.label),
+              h('input',{style:iStyle,placeholder:f.label,readOnly:true})
+            ))
+          );
+          case 'info_screen': return h('div',null);
+          default: return h('input',{style:iStyle,placeholder:'Votre réponse...',readOnly:true});
+        }
+      }
+
+      function renderContent(){
+        if(cur._isHome) return h('div',{style:{width:'100%'}},
+          fmeta.cover_url&&h('img',{src:fmeta.cover_url,style:{width:'100%',height:fmeta.cover_height||220,objectFit:'cover',objectPosition:fmeta.cover_position||'center center',borderRadius:fmeta.cover_radius||16,marginBottom:20,display:'block'}}),
+          h('h1',{style:{fontSize:22,fontWeight:800,marginBottom:8,lineHeight:1.3}},fmeta.homepage_title||form.title||'Bienvenue'),
+          fmeta.homepage_description&&h('p',{style:{color:'rgba(255,255,255,0.55)',fontSize:14,lineHeight:1.6,marginBottom:16}},fmeta.homepage_description),
+          h('button',{onClick:()=>setStep(1),style:ctaBtn},(fmeta.homepage_button||'Commencer')+' →')
+        );
+        if(cur.type==='__end') return h('div',{style:{textAlign:'center',padding:'20px 0'}},
+          h('div',{style:{fontSize:52,marginBottom:16}},'🎉'),
+          h('h2',{style:{fontSize:20,fontWeight:800,marginBottom:8}},fmeta.end_title||'Merci !'),
+          fmeta.end_description&&h('p',{style:{color:'rgba(255,255,255,0.55)',fontSize:14,lineHeight:1.6}},fmeta.end_description)
+        );
+        return h('div',{style:{width:'100%'}},
+          h('div',{style:{fontSize:11,fontWeight:600,color:accent,letterSpacing:'0.15em',textTransform:'uppercase',marginBottom:8}},'Question '+(step)+' / '+(questions||[]).length),
+          h('h2',{style:{fontSize:20,fontWeight:700,marginBottom:8,lineHeight:1.3}},cur.title),
+          cur.description&&h('p',{style:{color:'rgba(255,255,255,0.5)',fontSize:13,marginBottom:16,lineHeight:1.5,whiteSpace:'pre-line'}},cur.description),
+          renderInput(cur)
+        );
+      }
+
+      return h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.88)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:3000},onClick:onClose},
+        h('div',{style:{position:'relative',width:'min(390px,90vw)',height:'min(750px,90vh)',borderRadius:20,overflow:'hidden',boxShadow:'0 30px 80px rgba(0,0,0,0.7)',border:'1px solid rgba(255,255,255,0.1)',background:bg,color:'#fff',fontFamily:fontFam,display:'flex',flexDirection:'column'},onClick:e=>e.stopPropagation()},
+          step>0&&step<allSteps.length-1&&h('div',{style:{position:'absolute',top:0,left:0,right:0,height:3,background:'rgba(255,255,255,0.08)',zIndex:10}},
+            h('div',{style:{height:'100%',width:progress+'%',background:`linear-gradient(90deg,${accent},${accent}99)`,transition:'width 0.3s'}})
+          ),
+          h('button',{onClick:onClose,style:{position:'absolute',top:10,right:10,zIndex:20,background:'rgba(0,0,0,0.55)',border:'none',color:'#fff',borderRadius:'50%',width:30,height:30,cursor:'pointer',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(4px)'}},'×'),
+          h('div',{style:{position:'absolute',top:10,left:10,zIndex:20,background:'rgba(0,0,0,0.45)',borderRadius:6,padding:'3px 8px',fontSize:10,color:'rgba(255,255,255,0.4)',letterSpacing:'0.08em',backdropFilter:'blur(4px)'}},'APERÇU'),
+          h('div',{style:{flex:1,overflowY:'auto',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:28}},renderContent()),
+          step>0&&step<allSteps.length-1&&h('div',{style:{display:'flex',justifyContent:'flex-end',padding:'10px 16px',gap:8,borderTop:'1px solid rgba(255,255,255,0.07)',flexShrink:0}},
+            step>1&&h('button',{onClick:()=>setStep(s=>s-1),style:{background:'rgba(255,255,255,0.08)',border:'none',color:'#aaa',borderRadius:'50%',width:36,height:36,cursor:'pointer',fontSize:15}},'↑'),
+            h('button',{onClick:()=>setStep(s=>Math.min(s+1,allSteps.length-1)),style:{background:`linear-gradient(135deg,${accent},${accent}bb)`,border:'none',color:'#000',borderRadius:'50%',width:36,height:36,cursor:'pointer',fontSize:15,fontWeight:700}},'↓')
+          )
+        )
+      );
+    }
+
     // ── Questionnaires ────────────────────────────────────────────────────────
     function FormBuilder({form,initQuestions,onClose,baseUrl}){
       const [questions,setQuestions]=useState(initQuestions);
@@ -1642,13 +1731,7 @@
             h('button',{onClick:()=>setAddOpen(false),style:{marginTop:16,background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'8px 20px',cursor:'pointer',width:'100%'}},'Annuler')
           )
         ),
-        previewOpen&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.88)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:3000}},
-          h('div',{style:{position:'relative',width:'min(420px,90vw)',height:'min(750px,90vh)',borderRadius:20,overflow:'hidden',boxShadow:'0 30px 80px rgba(0,0,0,0.7)',border:`1px solid ${C.border}`}},
-            h('button',{onClick:()=>setPreviewOpen(false),style:{position:'absolute',top:12,right:12,zIndex:10,background:'rgba(0,0,0,0.6)',border:'none',color:'#fff',borderRadius:'50%',width:32,height:32,cursor:'pointer',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(4px)'}},'×'),
-            h('div',{style:{position:'absolute',top:12,left:12,zIndex:10,background:'rgba(0,0,0,0.5)',borderRadius:8,padding:'4px 10px',fontSize:11,color:'rgba(255,255,255,0.6)',backdropFilter:'blur(4px)',letterSpacing:'0.05em'}},'APERÇU'),
-            h('iframe',{key:previewOpen?'open':'closed',src:formUrl,style:{width:'100%',height:'100%',border:'none',display:'block'},allow:'autoplay'})
-          )
-        ),
+        previewOpen&&h(FormPreviewModal,{form,fmeta,questions,onClose:()=>setPreviewOpen(false)}),
         shareOpen&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.75)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:3000}},
           h('div',{style:{...card,padding:28,maxWidth:540,width:'100%'}},
             h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}},
