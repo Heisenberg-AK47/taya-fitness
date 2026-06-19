@@ -1286,9 +1286,9 @@
           ),
 
           // ── Section 2: Type d'offre
-          h('div',{style:{fontSize:10,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,marginBottom:10}},'Type d'offre'),
+          h('div',{style:{fontSize:10,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,marginBottom:10}},'Type d\'offre'),
           h('div',{style:{display:'flex',gap:8,marginBottom:12}},
-            ...([['subscription','🔄 Abonnement'],['pack','📦 Pack'],['single','1️⃣ Séance à l'unité']]).map(([v,l])=>
+            ...([['subscription','🔄 Abonnement'],['pack','📦 Pack'],['single','1️⃣ Séance à l\'unité']]).map(([v,l])=>
               h('button',{key:v,onClick:()=>setPlanForm(p=>({...p,plan_type:v})),style:{flex:1,padding:'9px 6px',borderRadius:8,border:`1.5px solid ${planForm.plan_type===v?C.gold:C.border}`,background:planForm.plan_type===v?`${C.gold}22`:C.soft,color:planForm.plan_type===v?C.gold:C.muted,cursor:'pointer',fontSize:11,fontWeight:600,textAlign:'center'}},l)
             )
           ),
