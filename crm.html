@@ -1378,7 +1378,7 @@
       const [settingsOpen,setSettingsOpen]=useState(false);
       const [dragIdx,setDragIdx]=useState(null);
       const [dragOverIdx,setDragOverIdx]=useState(null);
-      const [fmeta,setFmeta]=useState({cover_url:form.cover_url||'',homepage_title:form.homepage_title||'',homepage_description:form.homepage_description||'',homepage_button:form.homepage_button||'Commencer',end_title:form.end_title||'Merci !',end_description:form.end_description||'Vos réponses ont bien été enregistrées.',end_button:form.end_button||'Terminer',bg_color:(form.settings&&form.settings.bg_color)||'#0d1b2a',accent_color:(form.settings&&form.settings.accent_color)||'#ff6b4a',font_family:(form.settings&&form.settings.font_family)||'Inter'});
+      const [fmeta,setFmeta]=useState({cover_url:form.cover_url||'',homepage_title:form.homepage_title||'',homepage_description:form.homepage_description||'',homepage_button:form.homepage_button||'Commencer',end_title:form.end_title||'Merci !',end_description:form.end_description||'Vos réponses ont bien été enregistrées.',end_button:form.end_button||'Terminer',bg_color:(form.settings&&form.settings.bg_color)||'#0d1b2a',accent_color:(form.settings&&form.settings.accent_color)||'#ff6b4a',font_family:(form.settings&&form.settings.font_family)||'Inter',cover_height:(form.settings&&form.settings.cover_height)||220,cover_position:(form.settings&&form.settings.cover_position)||'center center',cover_radius:(form.settings&&form.settings.cover_radius)||16,btn_shape:(form.settings&&form.settings.btn_shape)||'pill',btn_color:(form.settings&&form.settings.btn_color)||'',btn_text_color:(form.settings&&form.settings.btn_text_color)||'#000000'});
       const TYPES=[
         {v:'info_screen',l:"Page d'info",icon:'ℹ️'},
         {v:'short_answer',l:'Réponse courte',icon:'Aa'},
@@ -1397,7 +1397,7 @@
 
       async function save(){
         setSaving(true);
-        await sb.from('forms').update({title,cover_url:fmeta.cover_url||null,homepage_title:fmeta.homepage_title||null,homepage_description:fmeta.homepage_description||null,homepage_button:fmeta.homepage_button||'Commencer',end_title:fmeta.end_title||null,end_description:fmeta.end_description||null,end_button:fmeta.end_button||'Terminer',settings:{...(form.settings||{}),bg_color:fmeta.bg_color,accent_color:fmeta.accent_color,font_family:fmeta.font_family},updated_at:new Date().toISOString()}).eq('id',form.id);
+        await sb.from('forms').update({title,cover_url:fmeta.cover_url||null,homepage_title:fmeta.homepage_title||null,homepage_description:fmeta.homepage_description||null,homepage_button:fmeta.homepage_button||'Commencer',end_title:fmeta.end_title||null,end_description:fmeta.end_description||null,end_button:fmeta.end_button||'Terminer',settings:{...(form.settings||{}),bg_color:fmeta.bg_color,accent_color:fmeta.accent_color,font_family:fmeta.font_family,cover_height:fmeta.cover_height,cover_position:fmeta.cover_position,cover_radius:fmeta.cover_radius,btn_shape:fmeta.btn_shape,btn_color:fmeta.btn_color,btn_text_color:fmeta.btn_text_color},updated_at:new Date().toISOString()}).eq('id',form.id);
         const updated=[];
         for(let i=0;i<questions.length;i++){
           const q={...questions[i]};
@@ -1682,14 +1682,69 @@
             ),
             h('div',{style:{marginBottom:18,padding:'16px',background:C.soft,borderRadius:12,border:`1px solid ${C.border}`}},
               h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:12}},'🖼 Image de couverture'),
-              h('div',{style:{display:'flex',gap:8,marginBottom:10}},
+              h('div',{style:{display:'flex',gap:8,marginBottom:12}},
                 h('input',{value:fmeta.cover_url,onChange:e=>setFmeta(p=>({...p,cover_url:e.target.value})),style:{...inp,flex:1},placeholder:'https://... URL de votre image'}),
                 h('label',{style:{...btn,padding:'8px 14px',fontSize:12,cursor:'pointer',flexShrink:0,display:'inline-flex',alignItems:'center',gap:4}},
                   '📁 Upload',
                   h('input',{type:'file',accept:'image/*',style:{display:'none'},onChange:e=>{const f=e.target.files&&e.target.files[0];if(f)uploadCover(f);}})
                 )
               ),
-              fmeta.cover_url&&h('img',{src:fmeta.cover_url,style:{width:'100%',height:130,objectFit:'cover',borderRadius:10,display:'block'},onError:e=>e.target.style.display='none'})
+              fmeta.cover_url&&h('div',null,
+                h('div',{style:{position:'relative',width:'100%',height:fmeta.cover_height,borderRadius:fmeta.cover_radius,overflow:'hidden',marginBottom:12,background:C.bg}},
+                  h('img',{src:fmeta.cover_url,style:{width:'100%',height:'100%',objectFit:'cover',objectPosition:fmeta.cover_position,display:'block'},onError:e=>e.target.style.display='none'}),
+                  h('div',{style:{position:'absolute',inset:0,display:'grid',gridTemplateColumns:'repeat(3,1fr)',gridTemplateRows:'repeat(3,1fr)',gap:2,padding:6}},
+                    ...['top left','top center','top right','center left','center center','center right','bottom left','bottom center','bottom right'].map(pos=>
+                      h('button',{key:pos,onClick:()=>setFmeta(p=>({...p,cover_position:pos})),title:pos,style:{background:fmeta.cover_position===pos?'rgba(255,255,255,0.9)':'rgba(0,0,0,0.35)',borderRadius:4,border:fmeta.cover_position===pos?`2px solid ${C.gold}`:'2px solid transparent',cursor:'pointer',transition:'all 0.15s'}})
+                    )
+                  )
+                ),
+                h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}},
+                  h('div',null,
+                    h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Hauteur (px)'),
+                    h('div',{style:{display:'flex',alignItems:'center',gap:8}},
+                      h('input',{type:'range',min:80,max:420,step:10,value:fmeta.cover_height,onChange:e=>setFmeta(p=>({...p,cover_height:+e.target.value})),style:{flex:1,accentColor:C.gold}}),
+                      h('span',{style:{fontSize:12,color:C.muted,width:36,textAlign:'right'}},fmeta.cover_height+'px')
+                    )
+                  ),
+                  h('div',null,
+                    h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Arrondi (px)'),
+                    h('div',{style:{display:'flex',alignItems:'center',gap:8}},
+                      h('input',{type:'range',min:0,max:40,step:2,value:fmeta.cover_radius,onChange:e=>setFmeta(p=>({...p,cover_radius:+e.target.value})),style:{flex:1,accentColor:C.gold}}),
+                      h('span',{style:{fontSize:12,color:C.muted,width:36,textAlign:'right'}},fmeta.cover_radius+'px')
+                    )
+                  )
+                ),
+                h('div',{style:{marginTop:10,fontSize:11,color:C.muted}},
+                  '💡 Clique sur la grille pour repositionner l\'image'
+                )
+              )
+            ),
+            h('div',{style:{marginBottom:18,padding:'16px',background:C.soft,borderRadius:12,border:`1px solid ${C.border}`}},
+              h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:12}},'🔘 Style du bouton'),
+              h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8,marginBottom:14}},
+                ...[{v:'pill',r:50,l:'Pilule'},{v:'rounded',r:14,l:'Arrondi'},{v:'square',r:6,l:'Carré'},{v:'sharp',r:0,l:'Droit'}].map(s=>
+                  h('button',{key:s.v,onClick:()=>setFmeta(p=>({...p,btn_shape:s.v})),style:{padding:'12px 8px',borderRadius:10,border:`2px solid ${fmeta.btn_shape===s.v?C.gold:C.border}`,background:fmeta.btn_shape===s.v?`${C.gold}22`:C.card,cursor:'pointer',display:'flex',flexDirection:'column',alignItems:'center',gap:6,transition:'all 0.15s'}},
+                    h('div',{style:{width:'100%',height:28,background:`linear-gradient(135deg,${fmeta.btn_color||fmeta.accent_color},${fmeta.btn_color||fmeta.accent_color}bb)`,borderRadius:s.r,display:'flex',alignItems:'center',justifyContent:'center',fontSize:10,color:fmeta.btn_text_color||'#000',fontWeight:700}},'BTN'),
+                    h('span',{style:{fontSize:10,color:fmeta.btn_shape===s.v?C.gold:C.muted,fontWeight:600}},s.l)
+                  )
+                )
+              ),
+              h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}},
+                h('div',null,
+                  h('label',{style:{display:'block',fontSize:12,color:C.muted,marginBottom:8}},'Couleur du bouton'),
+                  h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+                    h('input',{type:'color',value:fmeta.btn_color||fmeta.accent_color,onChange:e=>setFmeta(p=>({...p,btn_color:e.target.value})),style:{width:44,height:38,border:'none',borderRadius:8,cursor:'pointer',padding:2,background:'transparent'}}),
+                    h('button',{onClick:()=>setFmeta(p=>({...p,btn_color:''})),style:{fontSize:11,background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:6,padding:'4px 8px',cursor:'pointer'}},fmeta.btn_color?'Reset':'= Accent')
+                  )
+                ),
+                h('div',null,
+                  h('label',{style:{display:'block',fontSize:12,color:C.muted,marginBottom:8}},'Couleur du texte'),
+                  h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+                    h('input',{type:'color',value:fmeta.btn_text_color||'#000000',onChange:e=>setFmeta(p=>({...p,btn_text_color:e.target.value})),style:{width:44,height:38,border:'none',borderRadius:8,cursor:'pointer',padding:2,background:'transparent'}}),
+                    h('div',{style:{padding:'6px 10px',borderRadius:8,background:fmeta.btn_color||fmeta.accent_color,fontSize:12,fontWeight:700,color:fmeta.btn_text_color||'#000',borderRadius:50,whiteSpace:'nowrap'}},'Aperçu →')
+                  )
+                )
+              )
             ),
             h('div',{style:{marginBottom:18,padding:'16px',background:C.soft,borderRadius:12,border:`1px solid ${C.border}`}},
               h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:14}},"🏠 Page d'accueil"),

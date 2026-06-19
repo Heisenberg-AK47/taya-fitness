@@ -6,7 +6,7 @@
 <title>Questionnaire — Taya Fitness</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
-  :root{--bg:#111;--accent:#e8c547;--accent2:#d4af37;--font:'Inter',sans-serif;}
+  :root{--bg:#111;--accent:#e8c547;--accent2:#d4af37;--font:'Inter',sans-serif;--btn-bg:var(--accent);--btn-text:#000;--btn-radius:50px;--cover-h:220px;--cover-pos:center center;--cover-r:16px;}
   html,body{height:100%;font-family:var(--font);background:var(--bg);color:#fff;overflow:hidden;}
 
   #root{height:100%;display:flex;flex-direction:column;}
@@ -33,7 +33,7 @@
 
   /* Media per question */
   .q-media{width:100%;max-width:540px;margin-bottom:20px;border-radius:14px;overflow:hidden;}
-  .q-media img{width:100%;max-height:220px;object-fit:cover;display:block;}
+  .q-media img{width:100%;max-height:220px;object-fit:cover;object-position:var(--cover-pos);display:block;}
   .q-media video{width:100%;max-height:220px;object-fit:cover;display:block;border-radius:14px;}
   .q-media iframe{width:100%;height:220px;border:none;border-radius:14px;display:block;}
 
@@ -65,14 +65,14 @@
   .scale-labels{display:flex;justify-content:space-between;max-width:560px;margin-top:8px;font-size:12px;color:rgba(255,255,255,0.3);}
 
   /* CTA */
-  .cta-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;border:none;border-radius:14px;padding:16px 32px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:10px;transition:all 0.2s;margin-top:20px;}
+  .cta-btn{background:var(--btn-bg);color:var(--btn-text);border:none;border-radius:var(--btn-radius);padding:16px 32px;font-size:17px;font-weight:700;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:10px;transition:all 0.2s;margin-top:20px;}
   .cta-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,0.3);}
   .cta-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
 
   /* Welcome/Ending */
   .welcome-screen{max-width:640px;width:100%;}
   .welcome-cover{width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:28px;}
-  .welcome-cover-img{width:100%;max-width:640px;max-height:240px;object-fit:cover;border-radius:20px;margin-bottom:28px;display:block;}
+  .welcome-cover-img{width:100%;max-width:640px;height:var(--cover-h);object-fit:cover;object-position:var(--cover-pos);border-radius:var(--cover-r);margin-bottom:28px;display:block;}
   .ending-icon{font-size:64px;margin-bottom:24px;}
   .ending-screen{max-width:600px;width:100%;text-align:center;}
 
@@ -138,9 +138,22 @@ async function init() {
     const s = form.settings || {};
     const bgColor = s.bg_color || '#111';
     const accentColor = s.accent_color || '#e8c547';
-    document.documentElement.style.setProperty('--bg', bgColor);
-    document.documentElement.style.setProperty('--accent', accentColor);
-    document.documentElement.style.setProperty('--accent2', accentColor);
+    const btnColor = s.btn_color || accentColor;
+    const btnTextColor = s.btn_text_color || '#000000';
+    const btnRadius = s.btn_shape === 'sharp' ? '0px' : s.btn_shape === 'square' ? '6px' : s.btn_shape === 'rounded' ? '14px' : '50px';
+    const coverH = (s.cover_height || 220) + 'px';
+    const coverPos = s.cover_position || 'center center';
+    const coverR = (s.cover_radius !== undefined ? s.cover_radius : 16) + 'px';
+    const root = document.documentElement;
+    root.style.setProperty('--bg', bgColor);
+    root.style.setProperty('--accent', accentColor);
+    root.style.setProperty('--accent2', accentColor);
+    root.style.setProperty('--btn-bg', btnColor);
+    root.style.setProperty('--btn-text', btnTextColor);
+    root.style.setProperty('--btn-radius', btnRadius);
+    root.style.setProperty('--cover-h', coverH);
+    root.style.setProperty('--cover-pos', coverPos);
+    root.style.setProperty('--cover-r', coverR);
     document.body.style.background = bgColor;
     loadFont(s.font_family);
     const qs = await api(`form_questions?form_id=eq.${form.id}&order=order_index`);
