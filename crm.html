@@ -1190,35 +1190,248 @@
 
     // ── Abonnements ──────────────────────────────────────────────────────────
     function Abonnements() {
+      const [tab,setTab]=useState('abos');
       const [abos,setAbos]=useState([]);
+      const [subPlans,setSubPlans]=useState([]);
+      const [clients,setClients]=useState([]);
       const [filter,setFilter]=useState('all');
       const [loading,setLoading]=useState(true);
-      useEffect(()=>{
-        sb.from('abonnements').select('*,profiles(full_name,email)').order('created_at',{ascending:false})
-          .then(({data})=>{setAbos(data||[]);setLoading(false);});
-      },[]);
+      const [showPlanModal,setShowPlanModal]=useState(false);
+      const [editingPlan,setEditingPlan]=useState(null);
+      const [showAboModal,setShowAboModal]=useState(false);
+      const [aboForm,setAboForm]=useState({user_id:'',plan:'',statut:'active',current_period_start:'',current_period_end:''});
+      const [saving,setSaving]=useState(false);
+      const [msg,setMsg]=useState('');
+      const [planForm,setPlanForm]=useState({name:'',price:'',billing_cycle:'monthly',description:'',features:'',color:'#e8c547',is_best_seller:false});
+
+      function loadData(){
+        setLoading(true);
+        Promise.all([
+          sb.from('abonnements').select('*,profiles(full_name,email)').order('created_at',{ascending:false}),
+          sb.from('subscription_plans').select('*').order('price'),
+          sb.from('profiles').select('id,full_name,email').order('full_name')
+        ]).then(([{data:a},{data:p},{data:cl}])=>{
+          setAbos(a||[]);setSubPlans(p||[]);setClients(cl||[]);setLoading(false);
+        });
+      }
+      useEffect(()=>{loadData();},[]);
+
       const filtered=abos.filter(a=>filter==='all'||a.statut===filter);
-      const pc={starter:C.blue,performance:C.gold,vip:'#b48cff'};
       const counts={all:abos.length,active:abos.filter(a=>a.statut==='active').length,cancelled:abos.filter(a=>a.statut==='cancelled').length,past_due:abos.filter(a=>a.statut==='past_due').length};
+
+      function openNewPlan(){setPlanForm({name:'',price:'',billing_cycle:'monthly',description:'',features:'',color:'#e8c547',is_best_seller:false});setEditingPlan(null);setShowPlanModal(true);}
+      function openEditPlan(pl){setPlanForm({...pl,features:(pl.features||[]).join('\n'),price:String(pl.price)});setEditingPlan(pl);setShowPlanModal(true);}
+
+      async function savePlan(){
+        if(!planForm.name.trim())return;
+        setSaving(true);
+        const body={name:planForm.name.trim(),price:parseFloat(planForm.price)||0,billing_cycle:planForm.billing_cycle,description:planForm.description||null,features:planForm.features.split('\n').map(s=>s.trim()).filter(Boolean),color:planForm.color,is_best_seller:!!planForm.is_best_seller,updated_at:new Date().toISOString()};
+        if(editingPlan){
+          const{error}=await sb.from('subscription_plans').update(body).eq('id',editingPlan.id);
+          if(error){setMsg('❌ '+error.message);setTimeout(()=>setMsg(''),4000);}
+          else{setMsg('✅ Formule mise à jour');setTimeout(()=>setMsg(''),2500);}
+        } else {
+          const{error}=await sb.from('subscription_plans').insert(body);
+          if(error){setMsg('❌ '+error.message);setTimeout(()=>setMsg(''),4000);}
+          else{setMsg('✅ Formule créée');setTimeout(()=>setMsg(''),2500);}
+        }
+        setSaving(false);setShowPlanModal(false);loadData();
+      }
+
+      async function deletePlan(id){
+        if(!confirm('Supprimer cette formule ?'))return;
+        await sb.from('subscription_plans').delete().eq('id',id);
+        loadData();
+      }
+
+      async function saveAbo(){
+        if(!aboForm.user_id||!aboForm.plan)return;
+        setSaving(true);
+        const{error}=await sb.from('abonnements').insert({user_id:aboForm.user_id,plan:aboForm.plan,statut:aboForm.statut,current_period_start:aboForm.current_period_start||new Date().toISOString(),current_period_end:aboForm.current_period_end||null});
+        if(error){setMsg('❌ '+error.message);setTimeout(()=>setMsg(''),4000);}
+        else{setMsg('✅ Abonnement créé');setTimeout(()=>setMsg(''),2500);setShowAboModal(false);}
+        setSaving(false);loadData();
+      }
+
+      async function updateAboStatus(id,statut){
+        await sb.from('abonnements').update({statut,updated_at:new Date().toISOString()}).eq('id',id);
+        loadData();
+      }
+
+      const CYCLE_LABEL={monthly:'/mois',yearly:'/an'};
+      const planColorMap={};subPlans.forEach(p=>{planColorMap[p.name]=p.color||C.gold;});
+
+      // ── Plan Modal ──
+      const planModal=showPlanModal&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:e=>{if(e.target===e.currentTarget)setShowPlanModal(false);}},
+        h('div',{style:{background:C.card,borderRadius:20,padding:28,width:'100%',maxWidth:480,maxHeight:'90vh',overflowY:'auto'}},
+          h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}},
+            h('h2',{style:{fontSize:18,fontWeight:700,color:C.white,margin:0}},editingPlan?'Modifier la formule':'Nouvelle formule'),
+            h('button',{onClick:()=>setShowPlanModal(false),style:{background:'transparent',border:'none',color:C.muted,fontSize:22,cursor:'pointer'}},'✕')
+          ),
+          msg&&h('div',{style:{padding:'10px 14px',borderRadius:8,background:msg.startsWith('❌')?'rgba(224,85,85,0.15)':'rgba(74,222,128,0.15)',color:msg.startsWith('❌')?'#e05555':C.green,marginBottom:14,fontSize:13}},msg),
+          h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}},
+            h('div',null,
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Nom de la formule *'),
+              h('input',{value:planForm.name,onChange:e=>setPlanForm(p=>({...p,name:e.target.value})),placeholder:'ex: Programme Elite',style:{...inp,width:'100%'}})
+            ),
+            h('div',null,
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Prix (€)'),
+              h('input',{type:'number',value:planForm.price,onChange:e=>setPlanForm(p=>({...p,price:e.target.value})),placeholder:'99',style:{...inp,width:'100%'}})
+            )
+          ),
+          h('div',{style:{marginBottom:12}},
+            h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Facturation'),
+            h('div',{style:{display:'flex',gap:8}},
+              ...['monthly','yearly'].map(v=>h('button',{key:v,onClick:()=>setPlanForm(p=>({...p,billing_cycle:v})),style:{flex:1,padding:'8px',borderRadius:8,border:`1.5px solid ${planForm.billing_cycle===v?C.gold:C.border}`,background:planForm.billing_cycle===v?`${C.gold}22`:C.soft,color:planForm.billing_cycle===v?C.gold:C.muted,cursor:'pointer',fontSize:12,fontWeight:600}},v==='monthly'?'Mensuel':'Annuel'))
+            )
+          ),
+          h('div',{style:{marginBottom:12}},
+            h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Description courte'),
+            h('input',{value:planForm.description||'',onChange:e=>setPlanForm(p=>({...p,description:e.target.value})),placeholder:'ex: Idéal pour les débutants motivés',style:{...inp,width:'100%'}})
+          ),
+          h('div',{style:{marginBottom:12}},
+            h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Inclus (une ligne par élément)'),
+            h('textarea',{value:planForm.features||'',onChange:e=>setPlanForm(p=>({...p,features:e.target.value})),placeholder:'Accès à tous les programmes\nSupport par messagerie\n2 séances live/mois',style:{...inp,width:'100%',height:90,resize:'vertical',fontSize:12}})
+          ),
+          h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:20}},
+            h('div',null,
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Couleur du badge'),
+              h('input',{type:'color',value:planForm.color||'#e8c547',onChange:e=>setPlanForm(p=>({...p,color:e.target.value})),style:{width:44,height:32,borderRadius:6,border:`1px solid ${C.border}`,cursor:'pointer',background:'transparent',padding:2}})
+            ),
+            h('label',{style:{display:'flex',alignItems:'center',gap:8,cursor:'pointer',marginTop:16}},
+              h('input',{type:'checkbox',checked:!!planForm.is_best_seller,onChange:e=>setPlanForm(p=>({...p,is_best_seller:e.target.checked})),style:{cursor:'pointer',accentColor:C.gold}}),
+              h('span',{style:{fontSize:13,color:C.white,fontWeight:600}},'⭐ Best-seller')
+            )
+          ),
+          h('div',{style:{display:'flex',gap:10}},
+            h('button',{onClick:()=>setShowPlanModal(false),style:{flex:1,padding:'11px',borderRadius:10,border:`1px solid ${C.border}`,background:'transparent',color:C.muted,cursor:'pointer'}},'Annuler'),
+            h('button',{onClick:savePlan,disabled:saving||!planForm.name.trim(),style:{...btn,flex:2,opacity:saving||!planForm.name.trim()?0.5:1}},saving?'Enregistrement...':'💾 Enregistrer')
+          )
+        )
+      );
+
+      // ── Abo Modal ──
+      const aboModal=showAboModal&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:e=>{if(e.target===e.currentTarget)setShowAboModal(false);}},
+        h('div',{style:{background:C.card,borderRadius:20,padding:28,width:'100%',maxWidth:420}},
+          h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}},
+            h('h2',{style:{fontSize:18,fontWeight:700,color:C.white,margin:0}},'Nouvel abonnement'),
+            h('button',{onClick:()=>setShowAboModal(false),style:{background:'transparent',border:'none',color:C.muted,fontSize:22,cursor:'pointer'}},'✕')
+          ),
+          h('div',{style:{marginBottom:12}},
+            h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Client *'),
+            h('select',{value:aboForm.user_id,onChange:e=>setAboForm(p=>({...p,user_id:e.target.value})),style:{...inp,width:'100%'}},
+              h('option',{value:''},'-- Sélectionner un client --'),
+              ...clients.map(cl=>h('option',{key:cl.id,value:cl.id},cl.full_name||cl.email||cl.id))
+            )
+          ),
+          h('div',{style:{marginBottom:12}},
+            h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Formule *'),
+            h('select',{value:aboForm.plan,onChange:e=>setAboForm(p=>({...p,plan:e.target.value})),style:{...inp,width:'100%'}},
+              h('option',{value:''},'-- Sélectionner une formule --'),
+              ...subPlans.map(pl=>h('option',{key:pl.id,value:pl.name},`${pl.name} — ${pl.price}€${CYCLE_LABEL[pl.billing_cycle]||''}${pl.is_best_seller?' ⭐':''}`))
+            )
+          ),
+          h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}},
+            h('div',null,
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Début'),
+              h('input',{type:'date',value:aboForm.current_period_start,onChange:e=>setAboForm(p=>({...p,current_period_start:e.target.value})),style:{...inp,width:'100%'}})
+            ),
+            h('div',null,
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Renouvellement'),
+              h('input',{type:'date',value:aboForm.current_period_end,onChange:e=>setAboForm(p=>({...p,current_period_end:e.target.value})),style:{...inp,width:'100%'}})
+            )
+          ),
+          h('div',{style:{marginBottom:20}},
+            h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Statut'),
+            h('div',{style:{display:'flex',gap:8}},
+              ...['active','past_due','cancelled'].map(v=>{
+                const colors={active:C.green,past_due:C.gold,cancelled:C.red};
+                const labels={active:'Actif',past_due:'En retard',cancelled:'Annulé'};
+                return h('button',{key:v,onClick:()=>setAboForm(p=>({...p,statut:v})),style:{flex:1,padding:'8px',borderRadius:8,border:`1.5px solid ${aboForm.statut===v?colors[v]:C.border}`,background:aboForm.statut===v?colors[v]+'22':C.soft,color:aboForm.statut===v?colors[v]:C.muted,cursor:'pointer',fontSize:11,fontWeight:600}},labels[v]);
+              })
+            )
+          ),
+          h('div',{style:{display:'flex',gap:10}},
+            h('button',{onClick:()=>setShowAboModal(false),style:{flex:1,padding:'11px',borderRadius:10,border:`1px solid ${C.border}`,background:'transparent',color:C.muted,cursor:'pointer'}},'Annuler'),
+            h('button',{onClick:saveAbo,disabled:saving||!aboForm.user_id||!aboForm.plan,style:{...btn,flex:2,opacity:saving||!aboForm.user_id||!aboForm.plan?0.5:1}},saving?'Enregistrement...':'✅ Créer')
+          )
+        )
+      );
+
       return h('div',null,
-        h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:24,color:C.white}},'Abonnements'),
-        h('div',{style:{display:'flex',gap:10,marginBottom:24}},
-          ...['all','active','past_due','cancelled'].map((v)=>{
-            const labels={all:'Tous',active:'Actifs',past_due:'En retard',cancelled:'Annulés'};
-            const colors={all:C.white,active:C.green,past_due:C.gold,cancelled:C.red};
-            return h('button',{key:v,onClick:()=>setFilter(v),style:{background:'transparent',color:filter===v?colors[v]:C.muted,border:`1px solid ${filter===v?colors[v]:C.border}`,borderRadius:10,padding:'8px 16px',fontSize:13,cursor:'pointer'}},`${labels[v]} (${counts[v]||0})`);
-          })
+        planModal, aboModal,
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}},
+          h('h1',{style:{fontSize:24,fontWeight:700,color:C.white,margin:0}},'Abonnements'),
+          tab==='abos'
+            ? h('button',{onClick:()=>{setAboForm({user_id:'',plan:'',statut:'active',current_period_start:'',current_period_end:''});setShowAboModal(true);},style:btn},'+ Nouvel abonnement')
+            : h('button',{onClick:openNewPlan,style:btn},'+ Nouvelle formule')
         ),
-        h('div',{style:card},
+        msg&&tab!=='plans'&&h('div',{style:{padding:'10px 14px',borderRadius:8,background:msg.startsWith('❌')?'rgba(224,85,85,0.15)':'rgba(74,222,128,0.15)',color:msg.startsWith('❌')?'#e05555':C.green,marginBottom:14,fontSize:13}},msg),
+        h('div',{style:{display:'flex',gap:10,marginBottom:24}},
+          ...['abos','plans'].map(v=>h('button',{key:v,onClick:()=>setTab(v),style:{background:'transparent',color:tab===v?C.white:C.muted,border:`1px solid ${tab===v?C.white:C.border}`,borderRadius:10,padding:'8px 18px',fontSize:13,cursor:'pointer',fontWeight:tab===v?600:400}},v==='abos'?'Abonnements':'Formules'))
+        ),
+
+        tab==='plans'?h('div',null,
+          msg&&h('div',{style:{padding:'10px 14px',borderRadius:8,background:msg.startsWith('❌')?'rgba(224,85,85,0.15)':'rgba(74,222,128,0.15)',color:msg.startsWith('❌')?'#e05555':C.green,marginBottom:14,fontSize:13}},msg),
           loading?h('p',{style:{color:C.muted}},'Chargement...'):
-          h('table',{style:{width:'100%',borderCollapse:'collapse'}},
-            h('thead',null,h('tr',null,...['Client','Plan','Statut','Renouvellement'].map(l=>h('th',{key:l,style:th},l)))),
-            h('tbody',null,...filtered.map((a,i)=>h('tr',{key:i},
-              h('td',{style:td},h('div',null,a.profiles?.full_name||'—',h('div',{style:{fontSize:12,color:C.muted}},a.profiles?.email||''))),
-              h('td',{style:td},h('span',{style:badge(pc[a.plan]||C.muted)},a.plan)),
-              h('td',{style:td},h('span',{style:badge(a.statut==='active'?C.green:a.statut==='past_due'?C.gold:C.red)},a.statut)),
-              h('td',{style:{...td,color:C.muted}},a.current_period_end?new Date(a.current_period_end).toLocaleDateString('fr-FR'):'—')
-            )))
+          subPlans.length===0
+            ? h('div',{style:{...card,textAlign:'center',padding:48}},
+                h('div',{style:{fontSize:40,marginBottom:12}},'💎'),
+                h('div',{style:{fontSize:16,color:C.white,fontWeight:600,marginBottom:8}},'Aucune formule créée'),
+                h('div',{style:{fontSize:13,color:C.muted,marginBottom:24}},'Créez vos offres pour les proposer à vos clients et dans vos questionnaires.'),
+                h('button',{onClick:openNewPlan,style:btn},'+ Créer ma première formule')
+              )
+            : h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:16}},
+                ...subPlans.map(pl=>h('div',{key:pl.id,style:{background:C.card,borderRadius:16,padding:22,border:`1px solid ${pl.is_best_seller?pl.color||C.gold:C.border}`,position:'relative'}},
+                  pl.is_best_seller&&h('div',{style:{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:pl.color||C.gold,color:'#000',fontSize:10,fontWeight:800,padding:'3px 12px',borderRadius:20,whiteSpace:'nowrap',letterSpacing:'0.05em'}},'⭐ BEST-SELLER'),
+                  h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:12}},
+                    h('div',null,
+                      h('div',{style:{fontSize:16,fontWeight:700,color:C.white}},pl.name),
+                      pl.description&&h('div',{style:{fontSize:12,color:C.muted,marginTop:2}},pl.description)
+                    ),
+                    h('span',{style:{...badge(pl.color||C.gold),fontSize:11}},`${pl.price}€${CYCLE_LABEL[pl.billing_cycle]||''}`)
+                  ),
+                  (pl.features||[]).length>0&&h('ul',{style:{margin:'0 0 16px 0',paddingLeft:18,listStyle:'none'}},
+                    ...(pl.features||[]).slice(0,5).map((f,i)=>h('li',{key:i,style:{fontSize:12,color:'rgba(255,255,255,0.7)',marginBottom:4,display:'flex',alignItems:'center',gap:6}},
+                      h('span',{style:{color:pl.color||C.gold,fontSize:14}},'✓'),f
+                    ))
+                  ),
+                  h('div',{style:{display:'flex',gap:8}},
+                    h('button',{onClick:()=>openEditPlan(pl),style:{flex:1,padding:'8px',borderRadius:8,border:`1px solid ${C.border}`,background:'transparent',color:C.white,cursor:'pointer',fontSize:12}},'✏️ Modifier'),
+                    h('button',{onClick:()=>deletePlan(pl.id),style:{padding:'8px 12px',borderRadius:8,border:'none',background:'rgba(224,85,85,0.15)',color:'#e05555',cursor:'pointer',fontSize:12}},'✕')
+                  )
+                ))
+              )
+        ):h('div',null,
+          h('div',{style:{display:'flex',gap:10,marginBottom:24}},
+            ...['all','active','past_due','cancelled'].map((v)=>{
+              const labels={all:'Tous',active:'Actifs',past_due:'En retard',cancelled:'Annulés'};
+              const colors={all:C.white,active:C.green,past_due:C.gold,cancelled:C.red};
+              return h('button',{key:v,onClick:()=>setFilter(v),style:{background:'transparent',color:filter===v?colors[v]:C.muted,border:`1px solid ${filter===v?colors[v]:C.border}`,borderRadius:10,padding:'8px 16px',fontSize:13,cursor:'pointer'}},`${labels[v]} (${counts[v]||0})`);
+            })
+          ),
+          h('div',{style:card},
+            loading?h('p',{style:{color:C.muted}},'Chargement...'):
+            filtered.length===0
+              ? h('div',{style:{textAlign:'center',padding:'48px 0',color:C.muted}},
+                  h('div',{style:{fontSize:32,marginBottom:12}},'📋'),
+                  h('div',null,'Aucun abonnement trouvé'),
+                  h('div',{style:{fontSize:12,marginTop:8}},'Cliquez sur "+ Nouvel abonnement" pour commencer')
+                )
+              : h('table',{style:{width:'100%',borderCollapse:'collapse'}},
+                  h('thead',null,h('tr',null,...['Client','Formule','Statut','Renouvellement','Actions'].map(l=>h('th',{key:l,style:th},l)))),
+                  h('tbody',null,...filtered.map((a,i)=>h('tr',{key:i},
+                    h('td',{style:td},h('div',null,a.profiles?.full_name||'—',h('div',{style:{fontSize:12,color:C.muted}},a.profiles?.email||''))),
+                    h('td',{style:td},h('span',{style:badge(planColorMap[a.plan]||C.muted)},a.plan)),
+                    h('td',{style:td},h('span',{style:badge(a.statut==='active'?C.green:a.statut==='past_due'?C.gold:C.red)},a.statut==='active'?'Actif':a.statut==='past_due'?'En retard':'Annulé')),
+                    h('td',{style:{...td,color:C.muted}},a.current_period_end?new Date(a.current_period_end).toLocaleDateString('fr-FR'):'—'),
+                    h('td',{style:td},h('select',{value:a.statut,onChange:e=>updateAboStatus(a.id,e.target.value),style:{background:C.soft,border:`1px solid ${C.border}`,borderRadius:6,color:C.white,padding:'4px 8px',fontSize:12,cursor:'pointer'}},
+                      h('option',{value:'active'},'Actif'),
+                      h('option',{value:'past_due'},'En retard'),
+                      h('option',{value:'cancelled'},'Annulé')
+                    ))
+                  )))
+                )
           )
         )
       );
