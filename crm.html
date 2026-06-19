@@ -1470,6 +1470,7 @@
       const [dragIdx,setDragIdx]=useState(null);
       const [dragOverIdx,setDragOverIdx]=useState(null);
       const [fmeta,setFmeta]=useState({cover_url:form.cover_url||'',homepage_title:form.homepage_title||'',homepage_description:form.homepage_description||'',homepage_button:form.homepage_button||'Commencer',end_title:form.end_title||'Merci !',end_description:form.end_description||'Vos réponses ont bien été enregistrées.',end_button:form.end_button||'Terminer',bg_color:(form.settings&&form.settings.bg_color)||'#0d1b2a',accent_color:(form.settings&&form.settings.accent_color)||'#ff6b4a',font_family:(form.settings&&form.settings.font_family)||'Inter',cover_height:(form.settings&&form.settings.cover_height)||220,cover_position:(form.settings&&form.settings.cover_position)||'center center',cover_radius:(form.settings&&form.settings.cover_radius)||16,btn_shape:(form.settings&&form.settings.btn_shape)||'pill',btn_color:(form.settings&&form.settings.btn_color)||'',btn_text_color:(form.settings&&form.settings.btn_text_color)||'#000000',title_font_family:(form.settings&&form.settings.title_font_family)||'',font_weight:(form.settings&&form.settings.font_weight)||'400',title_font_weight:(form.settings&&form.settings.title_font_weight)||'700',font_italic:(form.settings&&form.settings.font_italic)||false,title_font_italic:(form.settings&&form.settings.title_font_italic)||false,text_color:(form.settings&&form.settings.text_color)||'#ffffff',title_color:(form.settings&&form.settings.title_color)||'#ffffff',desc_color:(form.settings&&form.settings.desc_color)||'rgba(255,255,255,0.65)'});
+      const [plans,setPlans]=useState((form.settings&&form.settings.plans)||[]);
       const TYPES=[
         {v:'info_screen',l:"Page d'info",icon:'ℹ️'},
         {v:'multi_fields',l:'Multi-champs',icon:'📋'},
@@ -1498,7 +1499,7 @@
       async function save(){
         setSaving(true);
         try{
-          const{error:fe}=await sb.from('forms').update({title,cover_url:fmeta.cover_url||null,homepage_title:fmeta.homepage_title||null,homepage_description:fmeta.homepage_description||null,homepage_button:fmeta.homepage_button||'Commencer',end_title:fmeta.end_title||null,end_description:fmeta.end_description||null,end_button:fmeta.end_button||'Terminer',settings:{...(form.settings||{}),bg_color:fmeta.bg_color,accent_color:fmeta.accent_color,font_family:fmeta.font_family,cover_height:fmeta.cover_height,cover_position:fmeta.cover_position,cover_radius:fmeta.cover_radius,btn_shape:fmeta.btn_shape,btn_color:fmeta.btn_color,btn_text_color:fmeta.btn_text_color,title_font_family:fmeta.title_font_family,font_weight:fmeta.font_weight,title_font_weight:fmeta.title_font_weight,font_italic:fmeta.font_italic,title_font_italic:fmeta.title_font_italic,text_color:fmeta.text_color,title_color:fmeta.title_color,desc_color:fmeta.desc_color},updated_at:new Date().toISOString()}).eq('id',form.id);
+          const{error:fe}=await sb.from('forms').update({title,cover_url:fmeta.cover_url||null,homepage_title:fmeta.homepage_title||null,homepage_description:fmeta.homepage_description||null,homepage_button:fmeta.homepage_button||'Commencer',end_title:fmeta.end_title||null,end_description:fmeta.end_description||null,end_button:fmeta.end_button||'Terminer',settings:{...(form.settings||{}),bg_color:fmeta.bg_color,accent_color:fmeta.accent_color,font_family:fmeta.font_family,cover_height:fmeta.cover_height,cover_position:fmeta.cover_position,cover_radius:fmeta.cover_radius,btn_shape:fmeta.btn_shape,btn_color:fmeta.btn_color,btn_text_color:fmeta.btn_text_color,title_font_family:fmeta.title_font_family,font_weight:fmeta.font_weight,title_font_weight:fmeta.title_font_weight,font_italic:fmeta.font_italic,title_font_italic:fmeta.title_font_italic,text_color:fmeta.text_color,title_color:fmeta.title_color,desc_color:fmeta.desc_color,plans:plans},updated_at:new Date().toISOString()}).eq('id',form.id);
           if(fe)throw new Error('Formulaire: '+fe.message);
           for(const did of deletedIds){await sb.from('form_questions').delete().eq('id',did);}
           setDeletedIds([]);
@@ -2002,6 +2003,48 @@
               h('textarea',{value:fmeta.end_description,onChange:e=>setFmeta(p=>({...p,end_description:e.target.value})),style:{...inp,width:'100%',height:70,resize:'vertical',marginBottom:10},placeholder:'Message de confirmation affiché après la soumission...'}),
               h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Texte du bouton (optionnel)'),
               h('input',{value:fmeta.end_button,onChange:e=>setFmeta(p=>({...p,end_button:e.target.value})),style:{...inp,width:'100%'},placeholder:'Terminer'})
+            ),
+            h('div',{style:{marginBottom:24,padding:'16px',background:C.soft,borderRadius:12,border:`1px solid ${C.border}`}},
+              h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:14}},'💎 Formules / Abonnements'),
+              h('div',{style:{fontSize:12,color:C.muted,marginBottom:14,lineHeight:1.5}},'Proposez vos offres à la fin du questionnaire. Chaque carte affiche un bouton "Détails" et un lien vers votre page de paiement.'),
+              ...plans.map((pl,pi)=>h('div',{key:pi,style:{background:C.card,borderRadius:10,padding:14,marginBottom:10,border:`1px solid ${pl.highlighted?C.gold:C.border}`,position:'relative'}},
+                h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}},
+                  h('div',{style:{display:'flex',alignItems:'center',gap:8}},
+                    h('input',{type:'checkbox',id:`pl-hl-${pi}`,checked:!!pl.highlighted,onChange:e=>{const np=[...plans];np[pi]={...np[pi],highlighted:e.target.checked};setPlans(np);},style:{cursor:'pointer'}}),
+                    h('label',{htmlFor:`pl-hl-${pi}`,style:{fontSize:11,color:pl.highlighted?C.gold:C.muted,cursor:'pointer',fontWeight:600}},'⭐ Mise en avant')
+                  ),
+                  h('button',{onClick:()=>setPlans(plans.filter((_,i)=>i!==pi)),style:{background:'transparent',border:'none',color:'#e05555',cursor:'pointer',fontSize:16,padding:'0 4px'}},'✕')
+                ),
+                h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:8}},
+                  h('div',null,
+                    h('label',{style:{display:'block',fontSize:10,color:C.muted,marginBottom:3}},'Nom'),
+                    h('input',{value:pl.name||'',onChange:e=>{const np=[...plans];np[pi]={...np[pi],name:e.target.value};setPlans(np);},placeholder:'ex: Programme Elite',style:{...inp,width:'100%',fontSize:12}})
+                  ),
+                  h('div',null,
+                    h('label',{style:{display:'block',fontSize:10,color:C.muted,marginBottom:3}},'Prix'),
+                    h('input',{value:pl.price||'',onChange:e=>{const np=[...plans];np[pi]={...np[pi],price:e.target.value};setPlans(np);},placeholder:'ex: 99€/mois',style:{...inp,width:'100%',fontSize:12}})
+                  )
+                ),
+                h('div',{style:{marginBottom:8}},
+                  h('label',{style:{display:'block',fontSize:10,color:C.muted,marginBottom:3}},'Sous-titre'),
+                  h('input',{value:pl.subtitle||'',onChange:e=>{const np=[...plans];np[pi]={...np[pi],subtitle:e.target.value};setPlans(np);},placeholder:'ex: Idéal pour progresser rapidement',style:{...inp,width:'100%',fontSize:12}})
+                ),
+                h('div',{style:{marginBottom:8}},
+                  h('label',{style:{display:'block',fontSize:10,color:C.muted,marginBottom:3}},'Détails (modale au clic)'),
+                  h('textarea',{value:pl.details||'',onChange:e=>{const np=[...plans];np[pi]={...np[pi],details:e.target.value};setPlans(np);},placeholder:'Décrivez ce qui est inclus dans cette formule...',style:{...inp,width:'100%',height:60,resize:'vertical',fontSize:12}})
+                ),
+                h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}},
+                  h('div',null,
+                    h('label',{style:{display:'block',fontSize:10,color:C.muted,marginBottom:3}},'Texte du bouton CTA'),
+                    h('input',{value:pl.btn_label||'',onChange:e=>{const np=[...plans];np[pi]={...np[pi],btn_label:e.target.value};setPlans(np);},placeholder:'Choisir cette formule',style:{...inp,width:'100%',fontSize:12}})
+                  ),
+                  h('div',null,
+                    h('label',{style:{display:'block',fontSize:10,color:C.muted,marginBottom:3}},'Lien CTA (URL)'),
+                    h('input',{value:pl.btn_url||'',onChange:e=>{const np=[...plans];np[pi]={...np[pi],btn_url:e.target.value};setPlans(np);},placeholder:'https://...',style:{...inp,width:'100%',fontSize:12}})
+                  )
+                )
+              )),
+              h('button',{onClick:()=>setPlans([...plans,{name:'',price:'',subtitle:'',details:'',btn_label:'Choisir cette formule',btn_url:'',highlighted:false}]),style:{width:'100%',padding:'10px',borderRadius:8,border:`1.5px dashed ${C.border}`,background:'transparent',color:C.muted,cursor:'pointer',fontSize:12,marginTop:plans.length?8:0}},'+ Ajouter une formule')
             ),
             h('div',{style:{display:'flex',justifyContent:'flex-end',gap:10}},
               h('button',{onClick:()=>setSettingsOpen(false),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 22px',cursor:'pointer'}},'Annuler'),
