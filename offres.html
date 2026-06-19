@@ -43,108 +43,10 @@
     <!-- Cartes offres -->
     <section class="section offres-detail-section">
       <div class="container">
-        <div class="offres-detail-grid">
-
-          <!-- Starter -->
-          <div class="offre-detail-card" id="starter">
-            <div class="offre-detail-header">
-              <div class="offre-name">Starter</div>
-              <div class="offre-detail-price">
-                <span class="price-num" data-mensuel="49" data-annuel="39">49€</span>
-                <span class="price-per">/mois</span>
-              </div>
-              <p class="offre-tagline">Pour démarrer avec les bases solides</p>
-            </div>
-            <ul class="offre-detail-features">
-              <li class="feat-yes">✓ Accès application mobile</li>
-              <li class="feat-yes">✓ Programme d'entraînement mensuel</li>
-              <li class="feat-yes">✓ Base de recettes saines (200+)</li>
-              <li class="feat-yes">✓ Calcul des macros automatique</li>
-              <li class="feat-yes">✓ Suivi de progression</li>
-              <li class="feat-yes">✓ Exercices en vidéo</li>
-              <li class="feat-no">✗ Programme sur mesure</li>
-              <li class="feat-no">✗ Suivi personnalisé</li>
-              <li class="feat-no">✗ Visios avec Sarah</li>
-              <li class="feat-no">✗ Coaching Fitness Park La Défense</li>
-            </ul>
-            <div class="offre-detail-footer">
-              <button
-                class="btn btn-gold-outline"
-                style="width:100%;justify-content:center;"
-                data-checkout="abonnement"
-                data-plan="starter">
-                Commencer Starter
-              </button>
-            </div>
+        <div class="offres-detail-grid" id="plans-grid">
+          <div class="plans-loading" style="grid-column:1/-1;text-align:center;padding:60px 0;color:rgba(255,255,255,0.4);font-size:14px;">
+            Chargement des formules…
           </div>
-
-          <!-- Performance — featured -->
-          <div class="offre-detail-card featured" id="performance">
-            <div class="popular-badge">⭐ Le plus choisi</div>
-            <div class="offre-detail-header">
-              <div class="offre-name">Performance</div>
-              <div class="offre-detail-price">
-                <span class="price-num" data-mensuel="99" data-annuel="79">99€</span>
-                <span class="price-per">/mois</span>
-              </div>
-              <p class="offre-tagline">L'accompagnement complet pour des résultats concrets</p>
-            </div>
-            <ul class="offre-detail-features">
-              <li class="feat-yes">✓ Tout Starter inclus</li>
-              <li class="feat-yes">✓ Programme 100% sur mesure</li>
-              <li class="feat-yes">✓ Plan nutrition personnalisé</li>
-              <li class="feat-yes">✓ Bilan initial avec Sarah</li>
-              <li class="feat-yes">✓ Suivi hebdomadaire</li>
-              <li class="feat-yes">✓ 1 visio/mois (30 min)</li>
-              <li class="feat-yes">✓ Messagerie directe</li>
-              <li class="feat-yes">✓ Ajustements programme illimités</li>
-              <li class="feat-no">✗ Suivi quotidien</li>
-              <li class="feat-no">✗ Coaching Fitness Park La Défense</li>
-            </ul>
-            <div class="offre-detail-footer">
-              <button
-                class="btn btn-primary"
-                style="width:100%;justify-content:center;"
-                data-checkout="abonnement"
-                data-plan="performance">
-                Choisir Performance
-              </button>
-            </div>
-          </div>
-
-          <!-- Premium VIP -->
-          <div class="offre-detail-card" id="vip">
-            <div class="offre-detail-header">
-              <div class="offre-name gold">Premium VIP</div>
-              <div class="offre-detail-price">
-                <span class="price-num" data-mensuel="199" data-annuel="159">199€</span>
-                <span class="price-per">/mois</span>
-              </div>
-              <p class="offre-tagline">Le suivi d'exception pour une transformation totale</p>
-            </div>
-            <ul class="offre-detail-features">
-              <li class="feat-yes">✓ Tout Performance inclus</li>
-              <li class="feat-yes">✓ Suivi quotidien personnalisé</li>
-              <li class="feat-yes">✓ Visios illimitées avec Sarah</li>
-              <li class="feat-yes">✓ Coaching à Fitness Park La Défense</li>
-              <li class="feat-yes">✓ Plan nutrition avancé + recettes perso</li>
-              <li class="feat-yes">✓ Bilan mensuel complet</li>
-              <li class="feat-yes">✓ Priorité de réservation</li>
-              <li class="feat-yes">✓ Accès sessions Fitness Park</li>
-              <li class="feat-yes">✓ Crédit d'impôt 50%</li>
-              <li class="feat-yes">✓ Support 7j/7</li>
-            </ul>
-            <div class="offre-detail-footer">
-              <button
-                class="btn btn-gold-outline"
-                style="width:100%;justify-content:center;"
-                data-checkout="abonnement"
-                data-plan="vip">
-                Choisir VIP
-              </button>
-            </div>
-          </div>
-
         </div>
 
         <!-- Note bas -->
@@ -158,7 +60,7 @@
     </section>
 
     <!-- Comparatif tableau -->
-    <section class="section comparatif-section">
+    <section class="section comparatif-section" id="comparatif-section" style="display:none;">
       <div class="container">
         <div class="section-header">
           <span class="label">Comparatif</span>
