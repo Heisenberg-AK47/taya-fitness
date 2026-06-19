@@ -6,8 +6,8 @@
 <title>Questionnaire — Taya Fitness</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
-  :root{--bg:#111;--accent:#e8c547;--accent2:#d4af37;--font:'Inter',sans-serif;--btn-bg:var(--accent);--btn-text:#000;--btn-radius:50px;--cover-h:220px;--cover-pos:center center;--cover-r:16px;}
-  html,body{height:100%;font-family:var(--font);background:var(--bg);color:#fff;overflow:hidden;}
+  :root{--bg:#111;--accent:#e8c547;--accent2:#d4af37;--font:'Inter',sans-serif;--title-font:'Inter',sans-serif;--font-weight:400;--title-font-weight:700;--font-style:normal;--text-color:#fff;--title-color:#fff;--desc-color:rgba(255,255,255,0.65);--btn-bg:var(--accent);--btn-text:#000;--btn-radius:50px;--cover-h:220px;--cover-pos:center center;--cover-r:16px;}
+  html,body{height:100%;font-family:var(--font);font-weight:var(--font-weight);font-style:var(--font-style);background:var(--bg);color:var(--text-color);overflow:hidden;}
 
   #root{height:100%;display:flex;flex-direction:column;}
   .screen{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px;text-align:left;animation:fadeIn 0.35s ease;}
@@ -25,8 +25,8 @@
   .nav-btn:disabled{opacity:0.3;cursor:not-allowed;transform:none!important;}
 
   .q-step{color:var(--accent);font-size:12px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px;}
-  .q-title{font-size:clamp(20px,4vw,32px);font-weight:700;line-height:1.3;margin-bottom:10px;max-width:620px;}
-  .q-desc{font-size:15px;color:rgba(255,255,255,0.6);margin-bottom:28px;max-width:540px;line-height:1.6;white-space:pre-line;}
+  .q-title{font-size:clamp(20px,4vw,32px);font-weight:var(--title-font-weight);font-family:var(--title-font);color:var(--title-color);line-height:1.3;margin-bottom:10px;max-width:620px;}
+  .q-desc{font-size:15px;color:var(--desc-color);margin-bottom:28px;max-width:540px;line-height:1.6;white-space:pre-line;}
   .required-star{color:var(--accent);margin-left:4px;}
   .hint{font-size:12px;color:rgba(255,255,255,0.35);margin-top:10px;display:flex;align-items:center;gap:6px;}
   .hint kbd{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:2px 7px;font-family:inherit;font-size:11px;}
@@ -165,6 +165,15 @@ async function init() {
     root.style.setProperty('--cover-pos', coverPos);
     root.style.setProperty('--cover-r', coverR);
     document.body.style.background = bgColor;
+    if(s.title_font_family&&s.title_font_family!==s.font_family){loadFont(s.title_font_family);}
+    const titleFontCss=s.title_font_family?`'${s.title_font_family}',sans-serif`:'var(--font)';
+    root.style.setProperty('--title-font', titleFontCss);
+    root.style.setProperty('--font-weight', s.font_weight||'400');
+    root.style.setProperty('--title-font-weight', s.title_font_weight||'700');
+    root.style.setProperty('--font-style', s.font_italic?'italic':'normal');
+    root.style.setProperty('--text-color', s.text_color||'#ffffff');
+    root.style.setProperty('--title-color', s.title_color||'#ffffff');
+    root.style.setProperty('--desc-color', s.desc_color||'rgba(255,255,255,0.65)');
     loadFont(s.font_family);
     const qs = await api(`form_questions?form_id=eq.${form.id}&order=order_index`);
     questions = qs || [];
