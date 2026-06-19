@@ -1652,7 +1652,33 @@
                       ? h('div',{style:{background:C.soft,padding:'8px 12px',borderRadius:8,fontSize:11,color:C.muted}},`▶ ${sel.settings.media_url.slice(0,60)}`)
                       : sel.settings.media_type==='video'
                         ? h('video',{src:sel.settings.media_url,style:{width:'100%',maxHeight:120,borderRadius:8,objectFit:'cover'},controls:true,muted:true})
-                        : h('img',{src:sel.settings.media_url,style:{width:'100%',height:120,objectFit:'cover',borderRadius:8,display:'block'},onError:e=>e.target.style.display='none'})
+                        : h('div',{
+                            style:{position:'relative',width:'100%',height:150,borderRadius:8,overflow:'hidden',cursor:'grab',userSelect:'none',WebkitUserSelect:'none'},
+                            onMouseDown:e=>{
+                              e.preventDefault();
+                              const el=e.currentTarget;
+                              const posStr=(sel.settings&&sel.settings.media_position)||'50% 50%';
+                              const raw=posStr.replace(/%/g,'').split(/\s+/);
+                              const px0=parseFloat(raw[0])||50;
+                              const py0=parseFloat(raw[1])||50;
+                              const sx=e.clientX,sy=e.clientY;
+                              const rect=el.getBoundingClientRect();
+                              const senX=100/rect.width*0.7;
+                              const senY=100/rect.height*0.7;
+                              el.style.cursor='grabbing';
+                              const onMove=ev=>{
+                                const nx=Math.max(0,Math.min(100,px0-(ev.clientX-sx)*senX));
+                                const ny=Math.max(0,Math.min(100,py0-(ev.clientY-sy)*senY));
+                                upd({settings:{...(sel.settings||{}),media_position:`${nx.toFixed(1)}% ${ny.toFixed(1)}%`}});
+                              };
+                              const onUp=()=>{el.style.cursor='grab';document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};
+                              document.addEventListener('mousemove',onMove);
+                              document.addEventListener('mouseup',onUp);
+                            }
+                          },
+                          h('img',{src:sel.settings.media_url,style:{width:'100%',height:'100%',objectFit:'cover',objectPosition:(sel.settings&&sel.settings.media_position)||'50% 50%',display:'block',pointerEvents:'none'},onError:e=>e.target.parentNode.style.display='none'}),
+                          h('div',{style:{position:'absolute',bottom:5,right:8,fontSize:10,color:'rgba(255,255,255,0.65)',pointerEvents:'none',textShadow:'0 1px 3px rgba(0,0,0,0.8)'}},'✥ Glisser pour recadrer')
+                        )
                   )
                 ),
                 sel.type!=='info_screen'&&h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:16,padding:'10px 12px',background:C.soft,borderRadius:8}},
