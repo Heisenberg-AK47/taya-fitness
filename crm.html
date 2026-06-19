@@ -1811,13 +1811,35 @@
                 )
               ),
               fmeta.cover_url&&h('div',null,
-                h('div',{style:{position:'relative',width:'100%',height:fmeta.cover_height,borderRadius:fmeta.cover_radius,overflow:'hidden',marginBottom:12,background:C.bg}},
-                  h('img',{src:fmeta.cover_url,style:{width:'100%',height:'100%',objectFit:'cover',objectPosition:fmeta.cover_position,display:'block'},onError:e=>e.target.style.display='none'}),
-                  h('div',{style:{position:'absolute',inset:0,display:'grid',gridTemplateColumns:'repeat(3,1fr)',gridTemplateRows:'repeat(3,1fr)',gap:2,padding:6}},
-                    ...['top left','top center','top right','center left','center center','center right','bottom left','bottom center','bottom right'].map(pos=>
-                      h('button',{key:pos,onClick:()=>setFmeta(p=>({...p,cover_position:pos})),title:pos,style:{background:fmeta.cover_position===pos?'rgba(255,255,255,0.9)':'rgba(0,0,0,0.35)',borderRadius:4,border:fmeta.cover_position===pos?`2px solid ${C.gold}`:'2px solid transparent',cursor:'pointer',transition:'all 0.15s'}})
-                    )
-                  )
+                h('div',{
+                  style:{position:'relative',width:'100%',height:fmeta.cover_height,borderRadius:fmeta.cover_radius,overflow:'hidden',marginBottom:12,background:C.bg,cursor:'grab',userSelect:'none',WebkitUserSelect:'none'},
+                  onMouseDown:e=>{
+                    e.preventDefault();
+                    const el=e.currentTarget;
+                    const posStr=fmeta.cover_position||'50% 50%';
+                    const raw=posStr.replace(/%/g,'').split(/\s+/);
+                    const px0=parseFloat(raw[0])||50;
+                    const py0=parseFloat(raw[1])||50;
+                    const sx=e.clientX, sy=e.clientY;
+                    const rect=el.getBoundingClientRect();
+                    const senX=100/rect.width*0.7;
+                    const senY=100/rect.height*0.7;
+                    el.style.cursor='grabbing';
+                    const onMove=ev=>{
+                      const nx=Math.max(0,Math.min(100,px0-(ev.clientX-sx)*senX));
+                      const ny=Math.max(0,Math.min(100,py0-(ev.clientY-sy)*senY));
+                      setFmeta(p=>({...p,cover_position:`${nx.toFixed(1)}% ${ny.toFixed(1)}%`}));
+                    };
+                    const onUp=()=>{el.style.cursor='grab';document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};
+                    document.addEventListener('mousemove',onMove);
+                    document.addEventListener('mouseup',onUp);
+                  }
+                },
+                  h('img',{src:fmeta.cover_url,style:{width:'100%',height:'100%',objectFit:'cover',objectPosition:fmeta.cover_position,display:'block',pointerEvents:'none',userSelect:'none'},onError:e=>e.target.style.display='none'}),
+                  h('div',{style:{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',pointerEvents:'none'}},
+                    h('div',{style:{background:'rgba(0,0,0,0.45)',borderRadius:50,width:48,height:48,display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,backdropFilter:'blur(4px)',border:'1.5px solid rgba(255,255,255,0.2)',opacity:0.85}},'+')
+                  ),
+                  h('div',{style:{position:'absolute',bottom:8,left:'50%',transform:'translateX(-50%)',background:'rgba(0,0,0,0.6)',borderRadius:20,padding:'4px 12px',fontSize:11,color:'rgba(255,255,255,0.85)',backdropFilter:'blur(4px)',pointerEvents:'none',whiteSpace:'nowrap'}},'✥ Glisser pour recadrer')
                 ),
                 h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}},
                   h('div',null,
@@ -1834,9 +1856,6 @@
                       h('span',{style:{fontSize:12,color:C.muted,width:36,textAlign:'right'}},fmeta.cover_radius+'px')
                     )
                   )
-                ),
-                h('div',{style:{marginTop:10,fontSize:11,color:C.muted}},
-                  '💡 Clique sur la grille pour repositionner l\'image'
                 )
               )
             ),
