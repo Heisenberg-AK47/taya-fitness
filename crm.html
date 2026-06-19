@@ -1496,21 +1496,28 @@
 
       async function save(){
         setSaving(true);
-        await sb.from('forms').update({title,cover_url:fmeta.cover_url||null,homepage_title:fmeta.homepage_title||null,homepage_description:fmeta.homepage_description||null,homepage_button:fmeta.homepage_button||'Commencer',end_title:fmeta.end_title||null,end_description:fmeta.end_description||null,end_button:fmeta.end_button||'Terminer',settings:{...(form.settings||{}),bg_color:fmeta.bg_color,accent_color:fmeta.accent_color,font_family:fmeta.font_family,cover_height:fmeta.cover_height,cover_position:fmeta.cover_position,cover_radius:fmeta.cover_radius,btn_shape:fmeta.btn_shape,btn_color:fmeta.btn_color,btn_text_color:fmeta.btn_text_color},updated_at:new Date().toISOString()}).eq('id',form.id);
-        const updated=[];
-        for(let i=0;i<questions.length;i++){
-          const q={...questions[i]};
-          if(!q.id||String(q.id).startsWith('tmp-')){
-            const body={form_id:form.id,order_index:i,type:q.type,title:q.title,description:q.description||null,required:q.required||false,options:q.options||null,settings:q.settings||{}};
-            const{data:nq}=await sb.from('form_questions').insert(body).select('*').single();
-            updated.push(nq||{...q,id:'tmp-'+(i+Date.now())});
-          } else {
-            await sb.from('form_questions').update({order_index:i,type:q.type,title:q.title,description:q.description||null,required:q.required||false,options:q.options||null,settings:q.settings||{}}).eq('id',q.id);
-            updated.push(q);
+        try{
+          const{error:fe}=await sb.from('forms').update({title,cover_url:fmeta.cover_url||null,homepage_title:fmeta.homepage_title||null,homepage_description:fmeta.homepage_description||null,homepage_button:fmeta.homepage_button||'Commencer',end_title:fmeta.end_title||null,end_description:fmeta.end_description||null,end_button:fmeta.end_button||'Terminer',settings:{...(form.settings||{}),bg_color:fmeta.bg_color,accent_color:fmeta.accent_color,font_family:fmeta.font_family,cover_height:fmeta.cover_height,cover_position:fmeta.cover_position,cover_radius:fmeta.cover_radius,btn_shape:fmeta.btn_shape,btn_color:fmeta.btn_color,btn_text_color:fmeta.btn_text_color},updated_at:new Date().toISOString()}).eq('id',form.id);
+          if(fe)throw new Error('Formulaire: '+fe.message);
+          const updated=[];
+          for(let i=0;i<questions.length;i++){
+            const q={...questions[i]};
+            if(!q.id||String(q.id).startsWith('tmp-')){
+              const body={form_id:form.id,order_index:i,type:q.type,title:q.title,description:q.description||null,required:q.required||false,options:q.options||null,settings:q.settings||{}};
+              const{data:nq,error:ie}=await sb.from('form_questions').insert(body).select('*').single();
+              if(ie)throw new Error(`Question "${q.title}": ${ie.message}`);
+              updated.push(nq||{...q,id:'tmp-'+(i+Date.now())});
+            } else {
+              const{error:ue}=await sb.from('form_questions').update({order_index:i,type:q.type,title:q.title,description:q.description||null,required:q.required||false,options:q.options||null,settings:q.settings||{}}).eq('id',q.id);
+              if(ue)throw new Error(`Question "${q.title}": ${ue.message}`);
+              updated.push(q);
+            }
           }
-        }
-        setQuestions(updated);setSaving(false);
-        setMsg('✅ Sauvegardé !');setTimeout(()=>setMsg(''),3000);
+          setQuestions(updated);
+          setMsg('✅ Sauvegardé !');setTimeout(()=>setMsg(''),3000);
+        }catch(e){
+          setMsg('❌ Erreur: '+e.message);setTimeout(()=>setMsg(''),6000);
+        }finally{setSaving(false);}
       }
 
       function upd(ch){setQuestions(prev=>prev.map((q,i)=>i===selIdx?{...q,...ch}:q));}
@@ -1671,7 +1678,15 @@
                 ),
                 sel.type==='multi_fields'&&h('div',{style:{marginTop:8}},
                   h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:10}},'Champs du formulaire'),
-                  ...((sel.settings&&sel.settings.fields)||[]).map((f,fi)=>h('div',{key:fi,style:{display:'flex',gap:8,marginBottom:8,alignItems:'center'}},
+                  ...((sel.settings&&sel.settings.fields)||[]).map((f,fi)=>h('div',{
+                    key:fi,
+                    draggable:true,
+                    onDragStart:e=>e.dataTransfer.setData('text/plain',String(fi)),
+                    onDragOver:e=>e.preventDefault(),
+                    onDrop:e=>{e.preventDefault();const from=parseInt(e.dataTransfer.getData('text/plain'));if(from===fi)return;const fs=[...(sel.settings?.fields||[])];const[moved]=fs.splice(from,1);fs.splice(fi,0,moved);upd({settings:{...(sel.settings||{}),fields:fs}});},
+                    style:{display:'flex',gap:8,marginBottom:8,alignItems:'center'}
+                  },
+                    h('span',{style:{color:C.muted,fontSize:18,cursor:'grab',userSelect:'none',padding:'0 2px',flexShrink:0}},'⠿'),
                     h('input',{value:f.label||'',onChange:e=>{const fs=[...(sel.settings?.fields||[])];fs[fi]={...fs[fi],label:e.target.value};upd({settings:{...(sel.settings||{}),fields:fs}});},style:{...inp,flex:1,padding:'7px 10px',fontSize:13},placeholder:'Nom du champ'}),
                     h('select',{value:f.type||'text',onChange:e=>{const fs=[...(sel.settings?.fields||[])];fs[fi]={...fs[fi],type:e.target.value};upd({settings:{...(sel.settings||{}),fields:fs}});},style:{...inp,padding:'7px 10px',fontSize:12,flexShrink:0,width:110}},
                       ...FIELD_TYPES.map(ft=>h('option',{key:ft.v,value:ft.v},ft.l))
@@ -1712,8 +1727,8 @@
                   ...((sel.settings&&sel.settings.fields)||[]).map((f,fi)=>h('div',{key:fi,style:{display:'flex',flexDirection:'column',gap:4}},
                     h('div',{style:{fontSize:10,fontWeight:700,letterSpacing:'0.1em',color:C.gold,textTransform:'uppercase'}},f.label||'Champ'),
                     f.type==='textarea'
-                      ? h('textarea',{style:{...inp,width:'100%',height:48,resize:'none',opacity:0.5},placeholder:f.label||'...',disabled:true})
-                      : h('input',{style:{...inp,width:'100%',opacity:0.5},placeholder:f.label||'...',disabled:true})
+                      ? h('textarea',{style:{...inp,width:'100%',height:48,resize:'none',opacity:0.5},placeholder:'...',disabled:true})
+                      : h('input',{style:{...inp,width:'100%',opacity:0.5},placeholder:'...',disabled:true})
                   ))
                 )
               )

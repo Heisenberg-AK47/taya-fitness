@@ -340,8 +340,8 @@ function buildInputHtml(q) {
         <div class="mf-row">
           <label class="mf-label">${esc(f.label)}</label>
           ${f.type === 'textarea'
-            ? `<textarea class="mf-textarea" placeholder="${esc(f.label)}..." oninput="setMultiField('${q.id}','${escAttr(f.label)}',this.value)">${esc(curVal[f.label]||'')}</textarea>`
-            : `<input class="mf-input" type="${esc(f.type||'text')}" placeholder="${esc(f.label)}..." value="${esc(curVal[f.label]||'')}" oninput="setMultiField('${q.id}','${escAttr(f.label)}',this.value)"/>`
+            ? `<textarea class="mf-textarea" placeholder="" oninput="setMultiField('${q.id}','${escAttr(f.label)}',this.value)">${esc(curVal[f.label]||'')}</textarea>`
+            : `<input class="mf-input" type="${esc(f.type||'text')}" placeholder="" value="${esc(curVal[f.label]||'')}" oninput="setMultiField('${q.id}','${escAttr(f.label)}',this.value)"/>`
           }
         </div>`).join('')}</div>`;
     }
