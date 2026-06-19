@@ -1381,6 +1381,7 @@
       const [fmeta,setFmeta]=useState({cover_url:form.cover_url||'',homepage_title:form.homepage_title||'',homepage_description:form.homepage_description||'',homepage_button:form.homepage_button||'Commencer',end_title:form.end_title||'Merci !',end_description:form.end_description||'Vos réponses ont bien été enregistrées.',end_button:form.end_button||'Terminer',bg_color:(form.settings&&form.settings.bg_color)||'#0d1b2a',accent_color:(form.settings&&form.settings.accent_color)||'#ff6b4a',font_family:(form.settings&&form.settings.font_family)||'Inter',cover_height:(form.settings&&form.settings.cover_height)||220,cover_position:(form.settings&&form.settings.cover_position)||'center center',cover_radius:(form.settings&&form.settings.cover_radius)||16,btn_shape:(form.settings&&form.settings.btn_shape)||'pill',btn_color:(form.settings&&form.settings.btn_color)||'',btn_text_color:(form.settings&&form.settings.btn_text_color)||'#000000'});
       const TYPES=[
         {v:'info_screen',l:"Page d'info",icon:'ℹ️'},
+        {v:'multi_fields',l:'Multi-champs',icon:'📋'},
         {v:'short_answer',l:'Réponse courte',icon:'Aa'},
         {v:'long_answer',l:'Paragraphe',icon:'¶'},
         {v:'single_choice',l:'Choix unique',icon:'◎'},
@@ -1390,6 +1391,14 @@
         {v:'email',l:'Email',icon:'📧'},
         {v:'phone',l:'Téléphone',icon:'📞'},
         {v:'date',l:'Date',icon:'📅'},
+      ];
+      const FIELD_TYPES=[
+        {v:'text',l:'Texte'},
+        {v:'number',l:'Nombre'},
+        {v:'email',l:'Email'},
+        {v:'tel',l:'Téléphone'},
+        {v:'date',l:'Date'},
+        {v:'textarea',l:'Paragraphe'},
       ];
       const sel=questions[selIdx]||questions[0];
       const formUrl=`${baseUrl}/forms.html?slug=${form.slug}`;
@@ -1440,8 +1449,10 @@
 
       function addQ(type){
         const isInfo=type==='info_screen';
+        const isMF=type==='multi_fields';
         const hasOpts=['multiple_choice','single_choice'].includes(type);
-        const q={id:'tmp-'+Date.now(),type,title:isInfo?'Information':'Nouvelle question',description:'',required:!isInfo,options:hasOpts?['Option 1','Option 2']:null,settings:{}};
+        const defaultSettings=isMF?{fields:[{label:'Nom',type:'text'},{label:'Prénom',type:'text'},{label:'Âge',type:'number'},{label:'Email',type:'email'},{label:'Téléphone',type:'tel'}]}:{};
+        const q={id:'tmp-'+Date.now(),type,title:isInfo?'Information':isMF?'Informations':'Nouvelle question',description:'',required:!isInfo,options:hasOpts?['Option 1','Option 2']:null,settings:defaultSettings};
         const nq=[...questions,q];setQuestions(nq);setSelIdx(nq.length-1);setAddOpen(false);
       }
 
@@ -1567,6 +1578,17 @@
                 sel.type==='rating'&&h('div',{style:{display:'flex',gap:10,marginTop:8}},
                   h('div',null,h('label',{style:{fontSize:11,color:C.muted,display:'block',marginBottom:4}},'Min'),h('input',{type:'number',value:sel.settings?.min??1,onChange:e=>upd({settings:{...(sel.settings||{}),min:+e.target.value}}),style:{...inp,width:70,padding:'8px'}})),
                   h('div',null,h('label',{style:{fontSize:11,color:C.muted,display:'block',marginBottom:4}},'Max'),h('input',{type:'number',value:sel.settings?.max??5,onChange:e=>upd({settings:{...(sel.settings||{}),max:+e.target.value}}),style:{...inp,width:70,padding:'8px'}}))
+                ),
+                sel.type==='multi_fields'&&h('div',{style:{marginTop:8}},
+                  h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.15em',textTransform:'uppercase',color:C.gold,marginBottom:10}},'Champs du formulaire'),
+                  ...((sel.settings&&sel.settings.fields)||[]).map((f,fi)=>h('div',{key:fi,style:{display:'flex',gap:8,marginBottom:8,alignItems:'center'}},
+                    h('input',{value:f.label||'',onChange:e=>{const fs=[...(sel.settings?.fields||[])];fs[fi]={...fs[fi],label:e.target.value};upd({settings:{...(sel.settings||{}),fields:fs}});},style:{...inp,flex:1,padding:'7px 10px',fontSize:13},placeholder:'Nom du champ'}),
+                    h('select',{value:f.type||'text',onChange:e=>{const fs=[...(sel.settings?.fields||[])];fs[fi]={...fs[fi],type:e.target.value};upd({settings:{...(sel.settings||{}),fields:fs}});},style:{...inp,padding:'7px 10px',fontSize:12,flexShrink:0,width:110}},
+                      ...FIELD_TYPES.map(ft=>h('option',{key:ft.v,value:ft.v},ft.l))
+                    ),
+                    h('button',{onClick:()=>{const fs=(sel.settings?.fields||[]).filter((_,i)=>i!==fi);upd({settings:{...(sel.settings||{}),fields:fs}});},style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:18,padding:'4px',lineHeight:1,flexShrink:0}},'×')
+                  )),
+                  h('button',{onClick:()=>{const fs=[...(sel.settings?.fields||[]),{label:'',type:'text'}];upd({settings:{...(sel.settings||{}),fields:fs}});},style:{background:'transparent',border:`1px dashed ${C.border}`,color:C.muted,borderRadius:8,padding:'8px 16px',cursor:'pointer',fontSize:13,width:'100%',marginTop:4}},'+ Ajouter un champ')
                 )
               ),
               h('div',{style:{...card,padding:20,opacity:0.85}},
@@ -1595,6 +1617,14 @@
                 ),
                 sel.type==='info_screen'&&h('div',{style:{marginTop:8}},
                   h('button',{style:{...btn,opacity:0.5},disabled:true},'Continuer →')
+                ),
+                sel.type==='multi_fields'&&h('div',{style:{display:'flex',flexDirection:'column',gap:16,marginTop:4}},
+                  ...((sel.settings&&sel.settings.fields)||[]).map((f,fi)=>h('div',{key:fi,style:{display:'flex',flexDirection:'column',gap:4}},
+                    h('div',{style:{fontSize:10,fontWeight:700,letterSpacing:'0.1em',color:C.gold,textTransform:'uppercase'}},f.label||'Champ'),
+                    f.type==='textarea'
+                      ? h('textarea',{style:{...inp,width:'100%',height:48,resize:'none',opacity:0.5},placeholder:f.label||'...',disabled:true})
+                      : h('input',{style:{...inp,width:'100%',opacity:0.5},placeholder:f.label||'...',disabled:true})
+                  ))
                 )
               )
             )

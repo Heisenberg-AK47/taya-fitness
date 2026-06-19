@@ -93,6 +93,16 @@
 
   /* Branding */
   .brand{position:fixed;top:18px;left:22px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.2);letter-spacing:0.08em;}
+
+  /* Multi-fields */
+  .mf-group{display:flex;flex-direction:column;gap:22px;width:100%;max-width:540px;}
+  .mf-row{display:flex;flex-direction:column;gap:5px;}
+  .mf-label{font-size:12px;font-weight:700;color:var(--accent);letter-spacing:0.12em;text-transform:uppercase;}
+  .mf-input{background:transparent;border:none;border-bottom:2px solid rgba(255,255,255,0.15);color:#fff;font-size:17px;font-family:inherit;width:100%;padding:8px 0;outline:none;transition:border-color 0.2s;}
+  .mf-input:focus{border-bottom-color:var(--accent);}
+  .mf-input::placeholder{color:rgba(255,255,255,0.2);}
+  .mf-textarea{background:rgba(255,255,255,0.04);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;color:#fff;font-size:15px;font-family:inherit;width:100%;padding:10px 14px;outline:none;resize:vertical;min-height:70px;transition:border-color 0.2s;}
+  .mf-textarea:focus{border-color:var(--accent);}
 </style>
 </head>
 <body>
@@ -266,7 +276,7 @@ function renderStep() {
     const stepLabel = `${ansIdx + 1} / ${total}`;
     const required = q.required ? '<span class="required-star">*</span>' : '';
     const inputHtml = buildInputHtml(q);
-    const showHint = ['short_answer','long_answer','email','phone'].includes(q.type);
+    const showHint = ['short_answer','long_answer','email','phone','multi_fields'].includes(q.type);
     root.innerHTML = `
       <div class="progress-bar" style="width:${progress}%"></div>
       <div class="brand">TAYA FITNESS</div>
@@ -323,6 +333,18 @@ function buildInputHtml(q) {
         <div class="scale-labels"><span>${min}</span><span>${max}</span></div>
       </div>`;
     }
+    case 'multi_fields': {
+      const fields = (q.settings && q.settings.fields) || [];
+      const curVal = (typeof cur === 'object' && cur !== null && !Array.isArray(cur)) ? cur : {};
+      return `<div class="mf-group">${fields.map(f => `
+        <div class="mf-row">
+          <label class="mf-label">${esc(f.label)}</label>
+          ${f.type === 'textarea'
+            ? `<textarea class="mf-textarea" placeholder="${esc(f.label)}..." oninput="setMultiField('${q.id}','${escAttr(f.label)}',this.value)">${esc(curVal[f.label]||'')}</textarea>`
+            : `<input class="mf-input" type="${esc(f.type||'text')}" placeholder="${esc(f.label)}..." value="${esc(curVal[f.label]||'')}" oninput="setMultiField('${q.id}','${escAttr(f.label)}',this.value)"/>`
+          }
+        </div>`).join('')}</div>`;
+    }
     default:
       return `<input class="tf-input" type="text" placeholder="Votre réponse..." value="${esc(cur||'')}" oninput="setAnswer('${q.id}',this.value)" onkeydown="if(event.key==='Enter')goNext()" id="main-input"/>`;
   }
@@ -338,6 +360,10 @@ function focusInput(q) {
 function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function escAttr(s) { return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 function setAnswer(id, val) { answers[id] = val; }
+function setMultiField(qid, label, value) {
+  const cur = (typeof answers[qid] === 'object' && answers[qid] !== null && !Array.isArray(answers[qid])) ? answers[qid] : {};
+  answers[qid] = {...cur, [label]: value};
+}
 
 function selectSingle(id, opt) {
   answers[id] = opt;
@@ -355,6 +381,11 @@ function selectMulti(id, opt) {
 function validate(q) {
   if (!q.required) return true;
   if (q.type === 'info_screen' || q.type === '__end' || q._isHome) return true;
+  if (q.type === 'multi_fields') {
+    const ans = answers[q.id];
+    if (!ans || typeof ans !== 'object') return false;
+    return Object.values(ans).some(v => v && String(v).trim() !== '');
+  }
   const ans = answers[q.id];
   if (ans === undefined || ans === null || ans === '') return false;
   if (Array.isArray(ans) && ans.length === 0) return false;
@@ -393,6 +424,13 @@ async function submitResponses() {
   for (const q of realQs) {
     if (q.type === 'email' && answers[q.id]) respondent_email = answers[q.id];
     if (q.type === 'short_answer' && answers[q.id] && !respondent_name) respondent_name = answers[q.id];
+    if (q.type === 'multi_fields' && answers[q.id] && typeof answers[q.id] === 'object') {
+      const fields = q.settings?.fields || [];
+      const nomF = fields.find(f => /nom|pr[eé]nom|name/i.test(f.label));
+      if (nomF && answers[q.id][nomF.label] && !respondent_name) respondent_name = answers[q.id][nomF.label];
+      const emailF = fields.find(f => /email|mail|@/i.test(f.label));
+      if (emailF && answers[q.id][emailF.label] && !respondent_email) respondent_email = answers[q.id][emailF.label];
+    }
   }
   const cleanAnswers = {};
   for (const q of realQs) {
