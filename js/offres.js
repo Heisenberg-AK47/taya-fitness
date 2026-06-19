@@ -7,6 +7,7 @@ import { initFooter } from './footer.js';
 import { supabase } from './supabase.js';
 
 const CHECKOUT_URL = 'https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/stripe-checkout';
+const MODES = { en_salle: '🏋️ En salle', a_domicile: '🏠 À domicile', en_ligne: '💻 En ligne' };
 
 let isAnnuel = false;
 let currentPlans = [];
@@ -33,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// ── Chargement et rendu des plans ────────────────────────────────────────────
+// ── Chargement ────────────────────────────────────────────────────────────────
 
 async function loadPlans() {
   const { data: plans, error } = await supabase
@@ -52,6 +53,8 @@ async function loadPlans() {
   renderPlans(currentPlans);
 }
 
+// ── Rendu des cartes ──────────────────────────────────────────────────────────
+
 function renderPlans(plans) {
   const grid = document.getElementById('plans-grid');
   if (!grid) return;
@@ -64,48 +67,90 @@ function renderPlans(plans) {
   }
 
   grid.innerHTML = plans.map(plan => {
-    const slug = plan.name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, '-');
-    const priceM = plan.price;
-    const priceA = Math.round(plan.price * 0.8);
+    const slug = plan.name.toLowerCase()
+      .replace(/[àáâã]/g,'a').replace(/[éèêë]/g,'e').replace(/[îï]/g,'i')
+      .replace(/[ôõ]/g,'o').replace(/[ùûü]/g,'u').replace(/ç/g,'c')
+      .replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+
     const isFeatured = plan.is_best_seller;
-    const cycle = plan.billing_cycle === 'yearly' ? '/an' : '/mois';
-    const features = (plan.features || []);
+    const accent = plan.color || '#e8c547';
     const btnClass = isFeatured ? 'btn btn-primary' : 'btn btn-gold-outline';
-    const accentColor = plan.color || '#e8c547';
+
+    // Prix selon le type
+    let priceHtml = '';
+    if (plan.plan_type === 'pack') {
+      priceHtml = `<span class="price-num">${plan.price}€</span><span class="price-per"> total</span>`;
+      if (plan.sessions_count) priceHtml += `<span class="price-per"> · ${plan.sessions_count} séances</span>`;
+    } else if (plan.plan_type === 'single') {
+      priceHtml = `<span class="price-num">${plan.price}€</span><span class="price-per">/séance</span>`;
+    } else {
+      // Abonnement mensuel/annuel
+      const priceM = plan.price;
+      const priceA = plan.annual_price || Math.round(plan.price * 0.8);
+      priceHtml = `<span class="price-num" data-mensuel="${priceM}" data-annuel="${priceA}">${isAnnuel ? priceA : priceM}€</span><span class="price-per">/mois</span>`;
+      if (plan.annual_price) {
+        priceHtml += `<div style="font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px;">ou ${plan.annual_price}€/mois en annuel (économisez ${Math.round((plan.price - plan.annual_price) * 12)}€/an)</div>`;
+      }
+    }
+
+    // Modes coaching
+    const modesHtml = (plan.coaching_modes || [])
+      .map(m => `<span style="display:inline-block;font-size:11px;background:rgba(255,255,255,0.07);border-radius:20px;padding:3px 10px;margin:2px 2px 4px 0;color:rgba(255,255,255,0.6);">${MODES[m] || m}</span>`)
+      .join('');
+
+    // Features (inclus + liste)
+    const appIncludes = [
+      plan.includes_app ? '📱 Application mobile' : null,
+      plan.includes_nutrition ? '🥗 Suivi nutritionnel personnalisé' : null,
+      plan.includes_recipes ? '🍽️ Recettes diet adaptées' : null,
+    ].filter(Boolean);
+    const allFeatures = [...appIncludes, ...(plan.features || [])];
+
+    // Note durée
+    let durationNote = '';
+    if (plan.plan_type === 'subscription' && plan.duration_months) {
+      durationNote = `<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px;">Engagement minimum : ${plan.duration_months} mois</div>`;
+    } else if (plan.plan_type === 'pack' && plan.duration_months) {
+      durationNote = `<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px;">Valable ${plan.duration_months} mois</div>`;
+    } else if (plan.plan_type === 'subscription') {
+      durationNote = `<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px;">Sans engagement · Résiliation à tout moment</div>`;
+    }
+
+    // Note parrainage
+    const referralHtml = plan.referral_enabled ? `
+      <div style="margin-top:12px;padding:9px 12px;background:rgba(232,197,71,0.07);border:1px solid rgba(232,197,71,0.2);border-radius:10px;font-size:12px;color:rgba(255,255,255,0.65);">
+        🤝 <strong>Parrainage</strong> · Parraine un ami → tu gagnes <strong>${plan.referral_credit || '?'}€</strong>, ton filleul économise <strong>${plan.referral_discount || '?'}€</strong>
+      </div>` : '';
 
     return `
       <div class="offre-detail-card${isFeatured ? ' featured' : ''}" id="${slug}"
-           style="${isFeatured ? `--plan-accent:${accentColor};border-color:${accentColor};` : ''}">
-        ${isFeatured ? `<div class="popular-badge" style="background:${accentColor};color:#000;">⭐ Best-seller</div>` : ''}
+           ${isFeatured ? `style="border-color:${accent};"` : ''}>
+        ${isFeatured ? `<div class="popular-badge" style="background:${accent};color:#000;">⭐ Best-seller</div>` : ''}
         <div class="offre-detail-header">
           <div class="offre-name${isFeatured ? ' gold' : ''}">${escHtml(plan.name)}</div>
-          <div class="offre-detail-price">
-            <span class="price-num" data-mensuel="${priceM}" data-annuel="${priceA}">${isAnnuel ? priceA : priceM}€</span>
-            <span class="price-per">${cycle}</span>
-          </div>
+          ${modesHtml ? `<div style="margin:6px 0 8px;">${modesHtml}</div>` : ''}
+          <div class="offre-detail-price">${priceHtml}</div>
+          ${durationNote}
           ${plan.description ? `<p class="offre-tagline">${escHtml(plan.description)}</p>` : ''}
         </div>
-        ${features.length ? `
+        ${allFeatures.length ? `
         <ul class="offre-detail-features">
-          ${features.map(f => `<li class="feat-yes">✓ ${escHtml(f)}</li>`).join('')}
+          ${allFeatures.map(f => `<li class="feat-yes">✓ ${escHtml(f)}</li>`).join('')}
         </ul>` : ''}
+        ${referralHtml}
         <div class="offre-detail-footer">
           <button
             class="${btnClass}"
             style="width:100%;justify-content:center;"
             data-checkout="abonnement"
-            data-plan="${slug}"
-            data-plan-name="${escHtml(plan.name)}">
+            data-plan="${slug}">
             Choisir ${escHtml(plan.name)}
           </button>
         </div>
       </div>`;
   }).join('');
 
-  // Réactiver les boutons de checkout après rendu
   initCheckoutButtons();
-
-  // Afficher le comparatif si des plans existent
   const comp = document.getElementById('comparatif-section');
   if (comp) comp.style.display = '';
 }
@@ -125,7 +170,7 @@ function initBillingToggle() {
     isAnnuel = toggle.checked;
     labelM.classList.toggle('active', !isAnnuel);
     labelA.classList.toggle('active',  isAnnuel);
-    document.querySelectorAll('.price-num').forEach(el => {
+    document.querySelectorAll('.price-num[data-mensuel]').forEach(el => {
       el.textContent = `${isAnnuel ? el.dataset.annuel : el.dataset.mensuel}€`;
     });
   });
@@ -135,35 +180,24 @@ function initBillingToggle() {
 
 function initCheckoutButtons() {
   document.querySelectorAll('[data-checkout="abonnement"]').forEach(btn => {
-    // Éviter de doubler les listeners
     btn.replaceWith(btn.cloneNode(true));
   });
-
   document.querySelectorAll('[data-checkout="abonnement"]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const plan = btn.dataset.plan;
       const originalText = btn.textContent;
       btn.disabled = true;
       btn.textContent = 'Chargement...';
-
       try {
         const { data: { user } } = await supabase.auth.getUser();
-
         const res = await fetch(CHECKOUT_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            type: 'abonnement',
-            plan,
-            user_id:    user?.id    || '',
-            user_email: user?.email || '',
-          }),
+          body: JSON.stringify({ type: 'abonnement', plan, user_id: user?.id || '', user_email: user?.email || '' }),
         });
-
         const data = await res.json();
         if (!res.ok || !data.url) throw new Error(data.error || 'Erreur');
         window.location.href = data.url;
-
       } catch (err) {
         console.error('Checkout error:', err);
         showToast('Une erreur est survenue. Veuillez réessayer.', 'error');
@@ -178,7 +212,6 @@ function initCheckoutButtons() {
 
 function handleMessages() {
   const params = new URLSearchParams(window.location.search);
-
   if (params.get('abonnement') === 'success') {
     const plan = params.get('plan') || '';
     showToast(`🎉 Abonnement ${plan} activé ! Bienvenue dans Taya Fitness.`, 'success');
@@ -191,16 +224,10 @@ function handleMessages() {
 }
 
 function showToast(message, type = 'info') {
-  const colors    = { success: '#3ecf8e', error: '#ff4d6a', info: '#ff6b4a' };
+  const colors     = { success: '#3ecf8e', error: '#ff4d6a', info: '#ff6b4a' };
   const textColors = { success: '#0d1b2a', error: '#fff',    info: '#fff'    };
   const toast = document.createElement('div');
-  toast.style.cssText = `
-    position:fixed;bottom:32px;left:50%;transform:translateX(-50%);
-    background:${colors[type]};color:${textColors[type]};
-    padding:16px 28px;border-radius:12px;font-weight:600;
-    font-size:0.95rem;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.3);
-    white-space:nowrap;max-width:90vw;text-align:center;
-  `;
+  toast.style.cssText = `position:fixed;bottom:32px;left:50%;transform:translateX(-50%);background:${colors[type]};color:${textColors[type]};padding:16px 28px;border-radius:12px;font-weight:600;font-size:0.95rem;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.3);white-space:nowrap;max-width:90vw;text-align:center;`;
   toast.textContent = message;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 5000);

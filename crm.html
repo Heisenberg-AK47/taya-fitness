@@ -1202,7 +1202,7 @@
       const [aboForm,setAboForm]=useState({user_id:'',plan:'',statut:'active',current_period_start:'',current_period_end:''});
       const [saving,setSaving]=useState(false);
       const [msg,setMsg]=useState('');
-      const [planForm,setPlanForm]=useState({name:'',price:'',billing_cycle:'monthly',description:'',features:'',color:'#e8c547',is_best_seller:false});
+      const [planForm,setPlanForm]=useState({name:'',price:'',billing_cycle:'monthly',annual_price:'',plan_type:'subscription',coaching_modes:[],sessions_count:'',duration_months:'',description:'',features:'',color:'#e8c547',is_best_seller:false,includes_app:false,includes_nutrition:false,includes_recipes:false,referral_enabled:false,referral_discount:'',referral_credit:''});
 
       function loadData(){
         setLoading(true);
@@ -1219,13 +1219,13 @@
       const filtered=abos.filter(a=>filter==='all'||a.statut===filter);
       const counts={all:abos.length,active:abos.filter(a=>a.statut==='active').length,cancelled:abos.filter(a=>a.statut==='cancelled').length,past_due:abos.filter(a=>a.statut==='past_due').length};
 
-      function openNewPlan(){setPlanForm({name:'',price:'',billing_cycle:'monthly',description:'',features:'',color:'#e8c547',is_best_seller:false});setEditingPlan(null);setShowPlanModal(true);}
-      function openEditPlan(pl){setPlanForm({...pl,features:(pl.features||[]).join('\n'),price:String(pl.price)});setEditingPlan(pl);setShowPlanModal(true);}
+      function openNewPlan(){setPlanForm({name:'',price:'',billing_cycle:'monthly',annual_price:'',plan_type:'subscription',coaching_modes:[],sessions_count:'',duration_months:'',description:'',features:'',color:'#e8c547',is_best_seller:false,includes_app:false,includes_nutrition:false,includes_recipes:false,referral_enabled:false,referral_discount:'',referral_credit:''});setEditingPlan(null);setShowPlanModal(true);}
+      function openEditPlan(pl){setPlanForm({...pl,features:(pl.features||[]).join('\n'),price:String(pl.price||''),annual_price:String(pl.annual_price||''),sessions_count:String(pl.sessions_count||''),duration_months:String(pl.duration_months||''),referral_discount:String(pl.referral_discount||''),referral_credit:String(pl.referral_credit||''),coaching_modes:pl.coaching_modes||[]});setEditingPlan(pl);setShowPlanModal(true);}
 
       async function savePlan(){
         if(!planForm.name.trim())return;
         setSaving(true);
-        const body={name:planForm.name.trim(),price:parseFloat(planForm.price)||0,billing_cycle:planForm.billing_cycle,description:planForm.description||null,features:planForm.features.split('\n').map(s=>s.trim()).filter(Boolean),color:planForm.color,is_best_seller:!!planForm.is_best_seller,updated_at:new Date().toISOString()};
+        const body={name:planForm.name.trim(),price:parseFloat(planForm.price)||0,billing_cycle:planForm.billing_cycle,annual_price:planForm.annual_price?parseFloat(planForm.annual_price):null,plan_type:planForm.plan_type||'subscription',coaching_modes:planForm.coaching_modes||[],sessions_count:planForm.sessions_count?parseInt(planForm.sessions_count):null,duration_months:planForm.duration_months?parseInt(planForm.duration_months):null,description:planForm.description||null,features:planForm.features.split('\n').map(s=>s.trim()).filter(Boolean),color:planForm.color,is_best_seller:!!planForm.is_best_seller,includes_app:!!planForm.includes_app,includes_nutrition:!!planForm.includes_nutrition,includes_recipes:!!planForm.includes_recipes,referral_enabled:!!planForm.referral_enabled,referral_discount:planForm.referral_discount?parseFloat(planForm.referral_discount):0,referral_credit:planForm.referral_credit?parseFloat(planForm.referral_credit):0,updated_at:new Date().toISOString()};
         if(editingPlan){
           const{error}=await sb.from('subscription_plans').update(body).eq('id',editingPlan.id);
           if(error){setMsg('❌ '+error.message);setTimeout(()=>setMsg(''),4000);}
@@ -1262,47 +1262,140 @@
       const planColorMap={};subPlans.forEach(p=>{planColorMap[p.name]=p.color||C.gold;});
 
       // ── Plan Modal ──
+      const MODES=[['en_salle','🏋️ En salle'],['a_domicile','🏠 À domicile'],['en_ligne','💻 En ligne']];
+      const toggleMode=m=>{const ms=planForm.coaching_modes||[];setPlanForm(p=>({...p,coaching_modes:ms.includes(m)?ms.filter(x=>x!==m):[...ms,m]}));};
       const planModal=showPlanModal&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:e=>{if(e.target===e.currentTarget)setShowPlanModal(false);}},
-        h('div',{style:{background:C.card,borderRadius:20,padding:28,width:'100%',maxWidth:480,maxHeight:'90vh',overflowY:'auto'}},
+        h('div',{style:{background:C.card,borderRadius:20,padding:28,width:'100%',maxWidth:560,maxHeight:'92vh',overflowY:'auto'}},
           h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}},
             h('h2',{style:{fontSize:18,fontWeight:700,color:C.white,margin:0}},editingPlan?'Modifier la formule':'Nouvelle formule'),
             h('button',{onClick:()=>setShowPlanModal(false),style:{background:'transparent',border:'none',color:C.muted,fontSize:22,cursor:'pointer'}},'✕')
           ),
           msg&&h('div',{style:{padding:'10px 14px',borderRadius:8,background:msg.startsWith('❌')?'rgba(224,85,85,0.15)':'rgba(74,222,128,0.15)',color:msg.startsWith('❌')?'#e05555':C.green,marginBottom:14,fontSize:13}},msg),
+
+          // ── Section 1: Identité
+          h('div',{style:{fontSize:10,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,marginBottom:10}},'Identité'),
           h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}},
             h('div',null,
-              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Nom de la formule *'),
-              h('input',{value:planForm.name,onChange:e=>setPlanForm(p=>({...p,name:e.target.value})),placeholder:'ex: Programme Elite',style:{...inp,width:'100%'}})
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Nom *'),
+              h('input',{value:planForm.name,onChange:e=>setPlanForm(p=>({...p,name:e.target.value})),placeholder:'ex: Pack Premium 3 mois',style:{...inp,width:'100%'}})
             ),
             h('div',null,
-              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Prix (€)'),
-              h('input',{type:'number',value:planForm.price,onChange:e=>setPlanForm(p=>({...p,price:e.target.value})),placeholder:'99',style:{...inp,width:'100%'}})
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Description courte'),
+              h('input',{value:planForm.description||'',onChange:e=>setPlanForm(p=>({...p,description:e.target.value})),placeholder:'ex: Idéal pour progresser vite',style:{...inp,width:'100%'}})
             )
           ),
-          h('div',{style:{marginBottom:12}},
-            h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Facturation'),
-            h('div',{style:{display:'flex',gap:8}},
-              ...['monthly','yearly'].map(v=>h('button',{key:v,onClick:()=>setPlanForm(p=>({...p,billing_cycle:v})),style:{flex:1,padding:'8px',borderRadius:8,border:`1.5px solid ${planForm.billing_cycle===v?C.gold:C.border}`,background:planForm.billing_cycle===v?`${C.gold}22`:C.soft,color:planForm.billing_cycle===v?C.gold:C.muted,cursor:'pointer',fontSize:12,fontWeight:600}},v==='monthly'?'Mensuel':'Annuel'))
+
+          // ── Section 2: Type d'offre
+          h('div',{style:{fontSize:10,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,marginBottom:10}},'Type d'offre'),
+          h('div',{style:{display:'flex',gap:8,marginBottom:12}},
+            ...([['subscription','🔄 Abonnement'],['pack','📦 Pack'],['single','1️⃣ Séance à l'unité']]).map(([v,l])=>
+              h('button',{key:v,onClick:()=>setPlanForm(p=>({...p,plan_type:v})),style:{flex:1,padding:'9px 6px',borderRadius:8,border:`1.5px solid ${planForm.plan_type===v?C.gold:C.border}`,background:planForm.plan_type===v?`${C.gold}22`:C.soft,color:planForm.plan_type===v?C.gold:C.muted,cursor:'pointer',fontSize:11,fontWeight:600,textAlign:'center'}},l)
             )
           ),
-          h('div',{style:{marginBottom:12}},
-            h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Description courte'),
-            h('input',{value:planForm.description||'',onChange:e=>setPlanForm(p=>({...p,description:e.target.value})),placeholder:'ex: Idéal pour les débutants motivés',style:{...inp,width:'100%'}})
+
+          // ── Section 3: Mode de coaching
+          h('div',{style:{fontSize:10,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,marginBottom:10}},'Mode de coaching'),
+          h('div',{style:{display:'flex',gap:8,marginBottom:12}},
+            ...MODES.map(([v,l])=>{const sel=(planForm.coaching_modes||[]).includes(v);return h('button',{key:v,onClick:()=>toggleMode(v),style:{flex:1,padding:'9px 6px',borderRadius:8,border:`1.5px solid ${sel?C.blue:C.border}`,background:sel?`${C.blue}22`:C.soft,color:sel?C.blue:C.muted,cursor:'pointer',fontSize:11,fontWeight:600,textAlign:'center'}},l);})
           ),
-          h('div',{style:{marginBottom:12}},
-            h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Inclus (une ligne par élément)'),
-            h('textarea',{value:planForm.features||'',onChange:e=>setPlanForm(p=>({...p,features:e.target.value})),placeholder:'Accès à tous les programmes\nSupport par messagerie\n2 séances live/mois',style:{...inp,width:'100%',height:90,resize:'vertical',fontSize:12}})
-          ),
-          h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:20}},
+
+          // ── Section 4: Tarification
+          h('div',{style:{fontSize:10,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,marginBottom:10}},'Tarification'),
+          planForm.plan_type==='subscription'?h('div',null,
+            h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:12}},
+              h('div',null,
+                h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Prix mensuel (€)'),
+                h('input',{type:'number',value:planForm.price,onChange:e=>setPlanForm(p=>({...p,price:e.target.value})),placeholder:'99',style:{...inp,width:'100%'}})
+              ),
+              h('div',null,
+                h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Prix annuel (€/mois)'),
+                h('input',{type:'number',value:planForm.annual_price||'',onChange:e=>setPlanForm(p=>({...p,annual_price:e.target.value})),placeholder:'79',style:{...inp,width:'100%'}})
+              ),
+              h('div',null,
+                h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Durée minimum'),
+                h('select',{value:planForm.duration_months||'',onChange:e=>setPlanForm(p=>({...p,duration_months:e.target.value})),style:{...inp,width:'100%'}},
+                  h('option',{value:''},'Sans engagement'),
+                  ...[1,2,3,6,12].map(n=>h('option',{key:n,value:n},`${n} mois`))
+                )
+              )
+            )
+          ):planForm.plan_type==='pack'?h('div',null,
+            h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:12}},
+              h('div',null,
+                h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Prix total (€)'),
+                h('input',{type:'number',value:planForm.price,onChange:e=>setPlanForm(p=>({...p,price:e.target.value})),placeholder:'399',style:{...inp,width:'100%'}})
+              ),
+              h('div',null,
+                h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Nombre de séances'),
+                h('input',{type:'number',value:planForm.sessions_count||'',onChange:e=>setPlanForm(p=>({...p,sessions_count:e.target.value})),placeholder:'12',style:{...inp,width:'100%'}})
+              ),
+              h('div',null,
+                h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Durée (mois)'),
+                h('select',{value:planForm.duration_months||'',onChange:e=>setPlanForm(p=>({...p,duration_months:e.target.value})),style:{...inp,width:'100%'}},
+                  h('option',{value:''},'—'),
+                  ...[1,2,3,6,12].map(n=>h('option',{key:n,value:n},`${n} mois`))
+                )
+              )
+            )
+          ):h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:12}},
             h('div',null,
-              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Couleur du badge'),
-              h('input',{type:'color',value:planForm.color||'#e8c547',onChange:e=>setPlanForm(p=>({...p,color:e.target.value})),style:{width:44,height:32,borderRadius:6,border:`1px solid ${C.border}`,cursor:'pointer',background:'transparent',padding:2}})
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Prix à l'unité (€)'),
+              h('input',{type:'number',value:planForm.price,onChange:e=>setPlanForm(p=>({...p,price:e.target.value})),placeholder:'50',style:{...inp,width:'100%'}})
             ),
-            h('label',{style:{display:'flex',alignItems:'center',gap:8,cursor:'pointer',marginTop:16}},
-              h('input',{type:'checkbox',checked:!!planForm.is_best_seller,onChange:e=>setPlanForm(p=>({...p,is_best_seller:e.target.checked})),style:{cursor:'pointer',accentColor:C.gold}}),
-              h('span',{style:{fontSize:13,color:C.white,fontWeight:600}},'⭐ Best-seller')
+            h('div',null,
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Durée (h)'),
+              h('input',{type:'number',value:planForm.duration_months||'',onChange:e=>setPlanForm(p=>({...p,duration_months:e.target.value})),placeholder:'1',style:{...inp,width:'100%'}})
             )
           ),
+
+          // ── Section 5: Avantages inclus
+          h('div',{style:{fontSize:10,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,marginBottom:10}},'Avantages inclus'),
+          h('div',{style:{display:'flex',gap:8,marginBottom:12}},
+            ...[
+              ['includes_app','📱 App mobile',planForm.includes_app],
+              ['includes_nutrition','🥗 Suivi nutritionnel',planForm.includes_nutrition],
+              ['includes_recipes','🍽️ Recettes diet',planForm.includes_recipes],
+            ].map(([field,label,val])=>h('button',{key:field,onClick:()=>setPlanForm(p=>({...p,[field]:!p[field]})),style:{flex:1,padding:'9px 4px',borderRadius:8,border:`1.5px solid ${val?C.green:C.border}`,background:val?`${C.green}22`:C.soft,color:val?C.green:C.muted,cursor:'pointer',fontSize:11,fontWeight:600,textAlign:'center'}},label))
+          ),
+          h('div',{style:{marginBottom:12}},
+            h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Autres avantages (une ligne = un avantage)'),
+            h('textarea',{value:planForm.features||'',onChange:e=>setPlanForm(p=>({...p,features:e.target.value})),placeholder:'Programme sur mesure\nSuivi hebdomadaire\n1 visio/mois',style:{...inp,width:'100%',height:80,resize:'vertical',fontSize:12}})
+          ),
+
+          // ── Section 6: Parrainage
+          h('div',{style:{fontSize:10,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,marginBottom:10}},'Parrainage'),
+          h('div',{style:{marginBottom:planForm.referral_enabled?10:16}},
+            h('label',{style:{display:'flex',alignItems:'center',gap:10,cursor:'pointer'}},
+              h('input',{type:'checkbox',checked:!!planForm.referral_enabled,onChange:e=>setPlanForm(p=>({...p,referral_enabled:e.target.checked})),style:{cursor:'pointer',accentColor:C.gold,width:16,height:16}}),
+              h('span',{style:{fontSize:13,color:C.white}},'Activer le parrainage pour cette formule')
+            )
+          ),
+          planForm.referral_enabled&&h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:12,padding:12,background:C.soft,borderRadius:10,border:`1px solid ${C.border}`}},
+            h('div',null,
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Réduction filleul (€)'),
+              h('input',{type:'number',value:planForm.referral_discount||'',onChange:e=>setPlanForm(p=>({...p,referral_discount:e.target.value})),placeholder:'10',style:{...inp,width:'100%'}}),
+              h('div',{style:{fontSize:10,color:C.muted,marginTop:4}},'Offert au nouveau client parrainé')
+            ),
+            h('div',null,
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Crédit parrain (€)'),
+              h('input',{type:'number',value:planForm.referral_credit||'',onChange:e=>setPlanForm(p=>({...p,referral_credit:e.target.value})),placeholder:'20',style:{...inp,width:'100%'}}),
+              h('div',{style:{fontSize:10,color:C.muted,marginTop:4}},'Offert au client qui parraine')
+            )
+          ),
+
+          // ── Section 7: Apparence
+          h('div',{style:{fontSize:10,fontWeight:700,letterSpacing:'0.12em',textTransform:'uppercase',color:C.gold,marginBottom:10}},'Apparence'),
+          h('div',{style:{display:'flex',alignItems:'center',gap:20,marginBottom:20}},
+            h('div',null,
+              h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Couleur badge'),
+              h('input',{type:'color',value:planForm.color||'#e8c547',onChange:e=>setPlanForm(p=>({...p,color:e.target.value})),style:{width:44,height:36,borderRadius:6,border:`1px solid ${C.border}`,cursor:'pointer',background:'transparent',padding:2}})
+            ),
+            h('label',{style:{display:'flex',alignItems:'center',gap:8,cursor:'pointer'}},
+              h('input',{type:'checkbox',checked:!!planForm.is_best_seller,onChange:e=>setPlanForm(p=>({...p,is_best_seller:e.target.checked})),style:{cursor:'pointer',accentColor:C.gold,width:16,height:16}}),
+              h('span',{style:{fontSize:13,color:C.white,fontWeight:600}},'⭐ Best-seller (mise en avant)')
+            )
+          ),
+
           h('div',{style:{display:'flex',gap:10}},
             h('button',{onClick:()=>setShowPlanModal(false),style:{flex:1,padding:'11px',borderRadius:10,border:`1px solid ${C.border}`,background:'transparent',color:C.muted,cursor:'pointer'}},'Annuler'),
             h('button',{onClick:savePlan,disabled:saving||!planForm.name.trim(),style:{...btn,flex:2,opacity:saving||!planForm.name.trim()?0.5:1}},saving?'Enregistrement...':'💾 Enregistrer')
@@ -1310,6 +1403,7 @@
         )
       );
 
+      // ── Abo Modal ──
       // ── Abo Modal ──
       const aboModal=showAboModal&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:e=>{if(e.target===e.currentTarget)setShowAboModal(false);}},
         h('div',{style:{background:C.card,borderRadius:20,padding:28,width:'100%',maxWidth:420}},
@@ -1382,25 +1476,40 @@
                 h('button',{onClick:openNewPlan,style:btn},'+ Créer ma première formule')
               )
             : h('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))',gap:16}},
-                ...subPlans.map(pl=>h('div',{key:pl.id,style:{background:C.card,borderRadius:16,padding:22,border:`1px solid ${pl.is_best_seller?pl.color||C.gold:C.border}`,position:'relative'}},
-                  pl.is_best_seller&&h('div',{style:{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:pl.color||C.gold,color:'#000',fontSize:10,fontWeight:800,padding:'3px 12px',borderRadius:20,whiteSpace:'nowrap',letterSpacing:'0.05em'}},'⭐ BEST-SELLER'),
-                  h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:12}},
-                    h('div',null,
-                      h('div',{style:{fontSize:16,fontWeight:700,color:C.white}},pl.name),
-                      pl.description&&h('div',{style:{fontSize:12,color:C.muted,marginTop:2}},pl.description)
+                ...subPlans.map(pl=>{
+                  const typeLabel={subscription:'Abonnement',pack:'Pack',single:'Séance'}[pl.plan_type]||'';
+                  const modeLabel=(pl.coaching_modes||[]).map(m=>({'en_salle':'🏋️','a_domicile':'🏠','en_ligne':'💻'}[m]||m)).join(' ');
+                  const priceLabel=pl.plan_type==='subscription'?`${pl.price}€/mois`+( pl.annual_price?` · ${pl.annual_price}€/mois (annuel)`:''):pl.plan_type==='pack'?`${pl.price}€`+(pl.sessions_count?` · ${pl.sessions_count} séances`:''):`${pl.price}€/séance`;
+                  return h('div',{key:pl.id,style:{background:C.card,borderRadius:16,padding:22,border:`1px solid ${pl.is_best_seller?pl.color||C.gold:C.border}`,position:'relative'}},
+                    pl.is_best_seller&&h('div',{style:{position:'absolute',top:-11,left:'50%',transform:'translateX(-50%)',background:pl.color||C.gold,color:'#000',fontSize:10,fontWeight:800,padding:'3px 12px',borderRadius:20,whiteSpace:'nowrap',letterSpacing:'0.05em'}},'⭐ BEST-SELLER'),
+                    h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}},
+                      h('div',null,
+                        h('div',{style:{fontSize:16,fontWeight:700,color:C.white}},pl.name),
+                        pl.description&&h('div',{style:{fontSize:12,color:C.muted,marginTop:2}},pl.description)
+                      ),
+                      h('div',{style:{textAlign:'right'}},
+                        h('span',{style:{...badge(pl.color||C.gold),fontSize:10}},typeLabel),
+                        modeLabel&&h('div',{style:{fontSize:13,marginTop:4}},modeLabel)
+                      )
                     ),
-                    h('span',{style:{...badge(pl.color||C.gold),fontSize:11}},`${pl.price}€${CYCLE_LABEL[pl.billing_cycle]||''}`)
-                  ),
-                  (pl.features||[]).length>0&&h('ul',{style:{margin:'0 0 16px 0',paddingLeft:18,listStyle:'none'}},
-                    ...(pl.features||[]).slice(0,5).map((f,i)=>h('li',{key:i,style:{fontSize:12,color:'rgba(255,255,255,0.7)',marginBottom:4,display:'flex',alignItems:'center',gap:6}},
-                      h('span',{style:{color:pl.color||C.gold,fontSize:14}},'✓'),f
-                    ))
-                  ),
-                  h('div',{style:{display:'flex',gap:8}},
-                    h('button',{onClick:()=>openEditPlan(pl),style:{flex:1,padding:'8px',borderRadius:8,border:`1px solid ${C.border}`,background:'transparent',color:C.white,cursor:'pointer',fontSize:12}},'✏️ Modifier'),
-                    h('button',{onClick:()=>deletePlan(pl.id),style:{padding:'8px 12px',borderRadius:8,border:'none',background:'rgba(224,85,85,0.15)',color:'#e05555',cursor:'pointer',fontSize:12}},'✕')
-                  )
-                ))
+                    h('div',{style:{fontSize:13,fontWeight:600,color:pl.color||C.gold,marginBottom:10}},priceLabel),
+                    h('div',{style:{display:'flex',gap:6,flexWrap:'wrap',marginBottom:10}},
+                      pl.includes_app&&h('span',{style:{fontSize:11,background:'rgba(255,255,255,0.08)',borderRadius:20,padding:'3px 8px',color:C.muted}},'📱 App'),
+                      pl.includes_nutrition&&h('span',{style:{fontSize:11,background:'rgba(255,255,255,0.08)',borderRadius:20,padding:'3px 8px',color:C.muted}},'🥗 Nutrition'),
+                      pl.includes_recipes&&h('span',{style:{fontSize:11,background:'rgba(255,255,255,0.08)',borderRadius:20,padding:'3px 8px',color:C.muted}},'🍽️ Recettes'),
+                      pl.referral_enabled&&h('span',{style:{fontSize:11,background:'rgba(255,255,255,0.08)',borderRadius:20,padding:'3px 8px',color:C.muted}},'🤝 Parrainage')
+                    ),
+                    (pl.features||[]).length>0&&h('ul',{style:{margin:'0 0 12px 0',paddingLeft:0,listStyle:'none'}},
+                      ...(pl.features||[]).slice(0,4).map((f,i)=>h('li',{key:i,style:{fontSize:12,color:'rgba(255,255,255,0.6)',marginBottom:3,display:'flex',alignItems:'center',gap:6}},
+                        h('span',{style:{color:pl.color||C.gold}},'✓'),f
+                      ))
+                    ),
+                    h('div',{style:{display:'flex',gap:8}},
+                      h('button',{onClick:()=>openEditPlan(pl),style:{flex:1,padding:'8px',borderRadius:8,border:`1px solid ${C.border}`,background:'transparent',color:C.white,cursor:'pointer',fontSize:12}},'✏️ Modifier'),
+                      h('button',{onClick:()=>deletePlan(pl.id),style:{padding:'8px 12px',borderRadius:8,border:'none',background:'rgba(224,85,85,0.15)',color:'#e05555',cursor:'pointer',fontSize:12}},'✕')
+                    )
+                  );
+                })
               )
         ):h('div',null,
           h('div',{style:{display:'flex',gap:10,marginBottom:24}},
