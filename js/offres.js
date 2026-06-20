@@ -68,7 +68,6 @@ function renderPlans(plans) {
         <li>✓ Bilan de forme & objectifs</li>
         <li>✓ 1 séance complète en salle</li>
         <li>✓ Plan d'action personnalisé</li>
-        <li>✓ Déductible si tu t'abonnes</li>
       </ul>
     </div>
     <div class="decouverte-right">
