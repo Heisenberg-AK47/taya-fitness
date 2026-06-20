@@ -150,3 +150,29 @@ function initNewsletter() {
     }
   });
 }
+
+/* ── Stripe Checkout ─────────────────────────────────────── */
+const CHECKOUT_URL = 'https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/stripe-checkout';
+
+window.checkoutPlan = async function(plan, evt) {
+  const btn = evt?.currentTarget || evt?.target;
+  if (btn) { btn.disabled = true; btn.textContent = 'Chargement...'; }
+  const billing = document.getElementById('home-toggle-annuel')?.checked ? 'annual' : 'monthly';
+  try {
+    const res = await fetch(CHECKOUT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'abonnement', plan, billing })
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Erreur checkout');
+    }
+  } catch (err) {
+    console.error(err);
+    if (btn) { btn.disabled = false; btn.textContent = 'Réessayer'; }
+    alert('Une erreur est survenue. Merci de réessayer.');
+  }
+};
