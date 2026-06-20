@@ -98,14 +98,6 @@ function renderPlans(plans) {
     const modesHtml = (plan.coaching_modes || [])
       .map(m => '<span style="display:inline-block;font-size:11px;background:rgba(255,255,255,0.07);border-radius:20px;padding:3px 10px;margin:2px 2px 4px 0;color:rgba(255,255,255,0.6);">' + (MODES[m] || m) + '</span>')
       .join('');
-  // Injecter le toggle après la bannière découverte
-  const decBanner = grid.querySelector('.decouverte-banner');
-  if (decBanner) {
-    const toggleEl = document.createElement('div');
-    toggleEl.innerHTML = '<div class="billing-toggle-inline"><span class="toggle-label active" id="label-mensuel">Mensuel</span><label class="toggle-switch"><input type="checkbox" id="toggle-annuel"><span class="toggle-track"></span></label><span class="toggle-label" id="label-annuel">Annuel <span class="save-badge">-20%</span></span></div>';
-    decBanner.after(toggleEl.firstChild);
-  }
-
     const appIncludes = [
       plan.includes_app ? '📱 Application mobile' : null,
       plan.includes_nutrition ? '🥗 Suivi nutritionnel personnalisé' : null,
@@ -153,6 +145,14 @@ function renderPlans(plans) {
     </div>`;
   }).join('');
 
+  // Injecter le toggle après la bannière découverte
+  const decBanner = grid.querySelector('.decouverte-banner');
+  if (decBanner) {
+    const toggleEl = document.createElement('div');
+    toggleEl.innerHTML = '<div class="billing-toggle-inline"><span class="toggle-label active" id="label-mensuel">Mensuel</span><label class="toggle-switch"><input type="checkbox" id="toggle-annuel"><span class="toggle-track"></span></label><span class="toggle-label" id="label-annuel">Annuel <span class="save-badge">-20%</span></span></div>';
+    decBanner.after(toggleEl.firstChild);
+    initBillingToggle();
+  }
   initCheckoutButtons();
   const comp = document.getElementById('comparatif-section');
   if (comp) comp.style.display = '';
