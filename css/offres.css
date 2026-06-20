@@ -81,6 +81,7 @@
 /* ── Toggle facturation ──────────────────────────────────── */
 /* ── Toggle inline au-dessus des cartes ─────────────────── */
 .billing-toggle-inline {
+  grid-column: 1 / -1;
   margin-bottom: 32px;
   display: flex;
   align-items: center;
