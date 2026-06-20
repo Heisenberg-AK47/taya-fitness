@@ -300,6 +300,14 @@
   padding: 4px 12px;
   margin: 8px 0 10px;
 }
+.plan-location {
+  font-size: 0.78rem;
+  color: var(--white-muted);
+  text-align: center;
+  padding: 8px 12px;
+  margin-top: 4px;
+}
+
 
 /* ── Crédit d'impôt mis en valeur ────────────────────────── */
 .feat-credit-impot {
