@@ -4,8 +4,8 @@
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Offres de coaching — Taya Fitness | Starter, Performance, VIP</title>
-  <meta name="description" content="Choisissez votre offre de coaching Taya Fitness. 3 formules d'abonnement : Starter 49€, Performance 99€, Premium VIP 199€. Sans engagement, résiliation à tout moment." />
+  <title>Offres de coaching — Taya Fitness | Essentiel, Progression, Transformation</title>
+  <meta name="description" content="Choisissez votre offre de coaching Taya Fitness. 3 formules : Essentiel 239,99€, Progression 439,99€, Transformation 599,99€. Coaching personnalisé à Fitness Park La Défense." />
   <link rel="canonical" href="https://www.tayafitness.com/offres" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,92 +15,95 @@
   <link rel="stylesheet" href="/css/offres.css" />
 </head>
 <body>
-  <div id="navbar-placeholder"></div>
-  <main>
+<div id="navbar-placeholder"></div>
+<main>
 
-    <section class="page-hero">
-      <div class="container">
-        <span class="label">Abonnements</span>
-        <h1>Choisis ton offre</h1>
-        <p>Sans engagement · Résiliation à tout moment · Crédit d'impôt 50% éligible</p>
+<section class="page-hero">
+  <div class="container">
+    <span class="label">Abonnements</span>
+    <h1>Choisis ton offre</h1>
+    <p>Sans engagement · Résiliation à tout moment · Crédit d'impôt 50% éligible</p>
+  </div>
+</section>
+
+<!-- Toggle mensuel/annuel -->
+<section class="billing-toggle-section">
+  <div class="container">
+    <div class="billing-toggle">
+      <span class="toggle-label active" id="label-mensuel">Mensuel</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-annuel" />
+        <span class="toggle-track"></span>
+      </label>
+      <span class="toggle-label" id="label-annuel">Annuel <span class="save-badge">-20%</span></span>
+    </div>
+  </div>
+</section>
+
+<!-- Cartes offres -->
+<section class="section offres-detail-section">
+  <div class="container">
+    <div class="offres-detail-grid" id="plans-grid">
+      <div class="plans-loading" style="grid-column:1/-1;text-align:center;padding:60px 0;color:rgba(255,255,255,0.4);font-size:14px;">
+        Chargement des formules…
       </div>
-    </section>
+    </div>
 
-    <!-- Toggle mensuel/annuel -->
-    <section class="billing-toggle-section">
-      <div class="container">
-        <div class="billing-toggle">
-          <span class="toggle-label active" id="label-mensuel">Mensuel</span>
-          <label class="toggle-switch">
-            <input type="checkbox" id="toggle-annuel" />
-            <span class="toggle-track"></span>
-          </label>
-          <span class="toggle-label" id="label-annuel">Annuel <span class="save-badge">-20%</span></span>
-        </div>
-      </div>
-    </section>
+    <!-- Note bas -->
+    <div class="offres-note-box">
+      <p>💳 <strong>Paiement sécurisé par Stripe</strong> · Sans engagement · Résiliation en 1 clic</p>
+      <p>🏠 <strong>Crédit d'impôt 50%</strong> applicable sur toutes les séances à Fitness Park La Défense</p>
+      <p>❓ <strong>Besoin d'aide pour choisir ?</strong> <a href="/contact">Contactez Sarah →</a></p>
+    </div>
 
-    <!-- Cartes offres -->
-    <section class="section offres-detail-section">
-      <div class="container">
-        <div class="offres-detail-grid" id="plans-grid">
-          <div class="plans-loading" style="grid-column:1/-1;text-align:center;padding:60px 0;color:rgba(255,255,255,0.4);font-size:14px;">
-            Chargement des formules…
-          </div>
-        </div>
+  </div>
+</section>
 
-        <!-- Note bas -->
-        <div class="offres-note-box">
-          <p>💳 <strong>Paiement sécurisé par Stripe</strong> · Sans engagement · Résiliation en 1 clic</p>
-          <p>🏠 <strong>Crédit d'impôt 50%</strong> applicable sur les séances à Fitness Park La Défense (offre VIP)</p>
-          <p>❓ <strong>Besoin d'aide pour choisir ?</strong> <a href="/contact">Contactez Sarah →</a></p>
-        </div>
+<!-- Comparatif tableau -->
+<section class="section comparatif-section" id="comparatif-section" style="display:none;">
+  <div class="container">
+    <div class="section-header">
+      <span class="label">Comparatif</span>
+      <h2>Tout ce qui est inclus</h2>
+      <div class="gold-divider"></div>
+    </div>
+    <div class="comparatif-table-wrap">
+      <table class="comparatif-table">
+        <thead>
+          <tr>
+            <th>Fonctionnalité</th>
+            <th>ESSENTIEL</th>
+            <th class="featured-col">PROGRESSION ⭐</th>
+            <th>TRANSFORMATION</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Séances en salle</td><td>1/semaine</td><td class="featured-col">2/semaine</td><td>3/semaine</td></tr>
+          <tr><td>Coaching Fitness Park La Défense</td><td>✓</td><td class="featured-col">✓</td><td>✓</td></tr>
+          <tr><td>Programme sur mesure</td><td>✓</td><td class="featured-col">✓</td><td>✓</td></tr>
+          <tr><td>Suivi de progression</td><td>✓</td><td class="featured-col">✓</td><td>✓</td></tr>
+          <tr><td>Crédit d'impôt 50%</td><td>✓</td><td class="featured-col">✓</td><td>✓</td></tr>
+          <tr><td>Suivi par Sarah</td><td>—</td><td class="featured-col">Hebdomadaire</td><td>Quotidien</td></tr>
+          <tr><td>Plan nutrition</td><td>—</td><td class="featured-col">Base</td><td>Personnalisé</td></tr>
+          <tr><td>Messagerie directe</td><td>—</td><td class="featured-col">✓</td><td>✓</td></tr>
+          <tr><td>Ajustements de programme</td><td>—</td><td class="featured-col">✓</td><td>✓</td></tr>
+          <tr><td>Accompagnement prioritaire</td><td>—</td><td class="featured-col">—</td><td>✓</td></tr>
+          <tr><td>Bilan mensuel</td><td>—</td><td class="featured-col">—</td><td>✓</td></tr>
+          <tr><td>Visio coaching</td><td>—</td><td class="featured-col">—</td><td>1/mois</td></tr>
+          <tr>
+            <td><strong>Prix mensuel</strong></td>
+            <td><strong>239,99€</strong></td>
+            <td class="featured-col"><strong style="color:var(--gold)">439,99€</strong></td>
+            <td><strong>599,99€</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
 
-      </div>
-    </section>
-
-    <!-- Comparatif tableau -->
-    <section class="section comparatif-section" id="comparatif-section" style="display:none;">
-      <div class="container">
-        <div class="section-header">
-          <span class="label">Comparatif</span>
-          <h2>Tout ce qui est inclus</h2>
-          <div class="gold-divider"></div>
-        </div>
-        <div class="comparatif-table-wrap">
-          <table class="comparatif-table">
-            <thead>
-              <tr>
-                <th>Fonctionnalité</th>
-                <th>Starter</th>
-                <th class="featured-col">Performance</th>
-                <th>VIP</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Application mobile</td><td>✓</td><td class="featured-col">✓</td><td>✓</td></tr>
-              <tr><td>Programme d'entraînement</td><td>Générique</td><td class="featured-col">Sur mesure</td><td>Sur mesure</td></tr>
-              <tr><td>Plan nutrition</td><td>Base</td><td class="featured-col">Personnalisé</td><td>Avancé</td></tr>
-              <tr><td>Suivi de progression</td><td>✓</td><td class="featured-col">✓</td><td>✓</td></tr>
-              <tr><td>Suivi par Sarah</td><td>—</td><td class="featured-col">Hebdo</td><td>Quotidien</td></tr>
-              <tr><td>Visios coaching</td><td>—</td><td class="featured-col">1/mois</td><td>Illimités</td></tr>
-              <tr><td>Messagerie directe</td><td>—</td><td class="featured-col">✓</td><td>✓</td></tr>
-              <tr><td>Coaching Fitness Park La Défense</td><td>—</td><td class="featured-col">—</td><td>✓</td></tr>
-              <tr><td>Crédit d'impôt 50%</td><td>—</td><td class="featured-col">—</td><td>✓</td></tr>
-              <tr>
-                <td><strong>Prix mensuel</strong></td>
-                <td><strong>49€</strong></td>
-                <td class="featured-col"><strong style="color:var(--gold)">99€</strong></td>
-                <td><strong>199€</strong></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-  </main>
-  <div id="footer-placeholder"></div>
-  <script type="module" src="/js/offres.js"></script>
+</main>
+<div id="footer-placeholder"></div>
+<script type="module" src="/js/offres.js"></script>
 </body>
 </html>
