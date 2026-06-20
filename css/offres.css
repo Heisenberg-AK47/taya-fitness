@@ -233,6 +233,50 @@
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 1024px) {
-  .offres-detail-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto 48px; }
+  .offres-detail-grid { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto 48px; }
   .offre-detail-card.featured { transform: none; }
+  .offre-detail-card.featured:hover { transform: translateY(-4px); }
+}
+
+@media (max-width: 768px) {
+  .page-hero { padding: calc(var(--nav-height) + 40px) 0 40px; }
+  .page-hero h1 { font-size: 2rem; }
+
+  .billing-toggle-section { padding: 18px 0; }
+
+  .offres-detail-grid { max-width: 100%; gap: 16px; }
+
+  .offre-detail-card { padding: 28px 20px; }
+  .offre-detail-card.featured { box-shadow: 0 0 30px rgba(201,168,76,0.1); }
+
+  .price-num { font-size: 2.2rem; }
+
+  .offre-detail-features li { font-size: 0.83rem; padding: 8px 0; }
+
+  .offres-note-box { padding: 18px 20px; }
+  .offres-note-box p { font-size: 0.83rem; }
+
+  /* Tableau comparatif : scroll horizontal + colonnes compactes */
+  .comparatif-table-wrap { -webkit-overflow-scrolling: touch; border-radius: var(--radius); border: 1px solid var(--black-border); }
+  .comparatif-table { min-width: 560px; font-size: 0.80rem; }
+  .comparatif-table th,
+  .comparatif-table td { padding: 10px 12px; }
+  .comparatif-table th:first-child,
+  .comparatif-table td:first-child { min-width: 140px; font-size: 0.78rem; }
+
+  .section-header h2 { font-size: 1.6rem; }
+}
+
+@media (max-width: 480px) {
+  .page-hero h1 { font-size: 1.75rem; }
+
+  .offre-detail-card { padding: 24px 16px; }
+  .price-num { font-size: 2rem; }
+  .popular-badge { font-size: 0.68rem; padding: 5px 14px; }
+
+  .offres-note-box { padding: 16px; gap: 8px; }
+
+  .comparatif-table { min-width: 480px; }
+  .comparatif-table th,
+  .comparatif-table td { padding: 8px 10px; }
 }
