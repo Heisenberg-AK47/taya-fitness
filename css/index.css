@@ -125,15 +125,61 @@
 }
 
 @media (max-width: 768px) {
-  .hero-cta { flex-direction: column; }
+  /* Hero */
+  .hero-content { padding: 80px 0 60px; }
+  .hero-cta { flex-direction: column; gap: 12px; }
+  .hero-cta .btn { width: 100%; text-align: center; justify-content: center; }
   .hero-stats { gap: 20px; }
+  .hero-stats .stat-number { font-size: 1.5rem; }
+
+  /* Sections générales */
   .why-grid { grid-template-columns: 1fr; }
+  .why-card { padding: 28px 20px; }
+
+  /* Offres sur la home */
+  .offres-grid { max-width: 100%; gap: 16px; }
+  .offre-card { padding: 28px 20px; }
+  .price-amount { font-size: 2.2rem; }
+  .offre-header { margin-bottom: 20px; }
+  .offre-features li { font-size: 0.84rem; padding: 8px 0; }
+
+  /* Coach */
   .temoignages-grid { grid-template-columns: 1fr; }
   .newsletter-box { padding: 40px 24px; }
   .newsletter-form { flex-direction: column; }
-  .coach-badge-float { right: 0; }
+  .newsletter-form .btn { width: 100%; justify-content: center; }
+  .coach-badge-float { right: 0; bottom: -12px; }
+
+  /* Galerie */
   .gallery-grid { grid-template-columns: 1fr 1fr; grid-template-rows: repeat(4, 160px); }
   .gallery-item:first-child { grid-row: span 1; }
+}
+
+@media (max-width: 480px) {
+  /* Hero encore plus compact */
+  .hero-content { padding: 70px 0 50px; }
+  .hero-label { font-size: 0.68rem; }
+  .hero-subtitle { font-size: 0.95rem; }
+  .hero-stats { flex-wrap: wrap; gap: 16px; }
+  .stat-sep { display: none; }
+
+  /* Cards offres home */
+  .offre-card { padding: 24px 16px; }
+  .price-amount { font-size: 2rem; }
+  .offre-features { margin-bottom: 24px; }
+
+  /* Why cards */
+  .why-card { padding: 24px 16px; }
+  .why-icon { font-size: 1.8rem; margin-bottom: 12px; }
+
+  /* Newsletter */
+  .newsletter-box { padding: 32px 16px; }
+
+  /* Galerie en colonne unique */
+  .gallery-grid { grid-template-columns: 1fr; grid-template-rows: repeat(8, 200px); }
+
+  /* Témoignages */
+  .temoignage { padding: 24px 20px; }
 }
 
 .billing-toggle { display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 48px; }
