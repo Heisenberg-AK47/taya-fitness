@@ -5,15 +5,15 @@ PROGRAMME-DETAIL.CSS
 /* ── Hero ────────────────────────────────────────────────── */
 .detail-hero {
   background: var(--black-soft);
-  padding: calc(var(--nav-height) + 48px) 0 56px;
+  padding: calc(var(--nav-height) + 20px) 0 28px;
   border-bottom: 1px solid var(--black-border);
 }
 
 .detail-hero-grid {
   display: grid;
   grid-template-columns: 1fr 380px;
-  gap: 56px;
-  align-items: start;
+  gap: 40px;
+  align-items: stretch;
 }
 
 .detail-breadcrumb {
@@ -67,12 +67,34 @@ PROGRAMME-DETAIL.CSS
   gap: 2px;
 }
 .detail-stat strong {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-family: var(--font-title);
   color: var(--gold);
   font-weight: 700;
 }
 .detail-stat small { font-size: 0.75rem; color: var(--white-muted); }
+/* ── Hero benefit highlights ─────────────────────────────── */
+.hero-benefits-mini {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hero-benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--white-muted);
+  line-height: 1.4;
+}
+.hbi-icon {
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
 
 /* ── Carte achat ─────────────────────────────────────────── */
 .detail-buy-card {
@@ -136,7 +158,7 @@ PROGRAMME-DETAIL.CSS
 .detail-results-bar {
   background: linear-gradient(90deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);
   border-bottom: 1px solid rgba(201,168,76,0.15);
-  padding: 24px 0;
+  padding: 16px 0;
 }
 .results-grid {
   display: flex;
