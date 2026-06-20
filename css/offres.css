@@ -83,7 +83,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  align-items: start;
+  align-items: stretch;
   margin-bottom: 48px;
 }
 
@@ -96,6 +96,7 @@
   transition: border-color 0.3s, transform 0.3s;
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .offre-detail-card:hover { border-color: rgba(201,168,76,0.3); }
@@ -231,6 +232,137 @@
 
 .comparatif-table tbody tr:hover { background: rgba(255,255,255,0.02); }
 
+
+/* ── Engagement badge ────────────────────────────────────── */
+.engagement-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 100px;
+  padding: 4px 12px;
+  margin: 8px 0 10px;
+}
+
+/* ── Crédit d'impôt mis en valeur ────────────────────────── */
+.feat-credit-impot {
+  background: rgba(62,207,142,0.06);
+  border-radius: 8px;
+  padding: 9px 10px !important;
+  margin: 2px -10px;
+  color: rgba(255,255,255,0.85) !important;
+  border-bottom: none !important;
+  border: 1px solid rgba(62,207,142,0.15) !important;
+}
+.feat-credit-impot + li { border-top: 1px solid var(--black-border); }
+
+.credit-tag {
+  display: inline-block;
+  background: rgba(62,207,142,0.15);
+  color: #3ecf8e;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 100px;
+  margin-left: 6px;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+/* ── Séance découverte ───────────────────────────────────── */
+.decouverte-banner {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+  background: linear-gradient(135deg, rgba(201,168,76,0.08) 0%, rgba(201,168,76,0.03) 100%);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: var(--radius-lg);
+  padding: 32px 40px;
+  margin-bottom: 8px;
+  position: relative;
+  overflow: hidden;
+}
+.decouverte-banner::before {
+  content: '';
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(201,168,76,0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+.decouverte-badge {
+  display: inline-block;
+  background: rgba(201,168,76,0.15);
+  color: var(--gold);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-bottom: 10px;
+}
+.decouverte-left h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 6px;
+  font-family: var(--font-title);
+}
+.decouverte-left p {
+  font-size: 0.88rem;
+  color: var(--white-muted);
+  margin-bottom: 14px;
+  max-width: 420px;
+}
+.decouverte-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.decouverte-list li {
+  font-size: 0.82rem;
+  color: var(--white-muted);
+}
+.decouverte-right {
+  text-align: center;
+  flex-shrink: 0;
+  min-width: 200px;
+}
+.decouverte-price {
+  font-family: var(--font-title);
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.decouverte-price span {
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--white-muted);
+}
+.decouverte-note {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 14px;
+}
+.decouverte-btn {
+  width: 100%;
+  justify-content: center;
+  padding: 13px 20px;
+  font-size: 0.9rem;
+}
+
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .offres-detail-grid { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto 48px; }
@@ -244,7 +376,10 @@
 
   .billing-toggle-section { padding: 18px 0; }
 
-  .offres-detail-grid { max-width: 100%; gap: 16px; }
+  .offres-detail-grid { max-width: 100%; gap: 16px; align-items: start; }
+  .decouverte-banner { flex-direction: column; padding: 24px 20px; gap: 24px; }
+  .decouverte-right { width: 100%; }
+  .decouverte-btn { max-width: 280px; margin: 0 auto; display: flex; }
 
   .offre-detail-card { padding: 28px 20px; }
   .offre-detail-card.featured { box-shadow: 0 0 30px rgba(201,168,76,0.1); }
