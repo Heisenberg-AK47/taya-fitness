@@ -203,7 +203,7 @@ function renderDetail(p, modules, reviews, hasAccess) {
         </div>
 
         <div class="hero-benefits-mini">
-          ${content.benefices.slice(0, 3).map(b => `<div class="hero-benefit-item"><span class="hbi-icon">✓</span><span>${escHtml(b)}</span></div>`).join('')}
+          ${content.benefices.slice(0, 3).map(b => `<div class="hero-benefit-item"><span class="hbi-icon">✓</span><span>${esc(b)}</span></div>`).join('')}
         </div>
       </div>
 
