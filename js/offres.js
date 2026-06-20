@@ -73,7 +73,7 @@ function renderPlans(plans) {
     </div>
     <div class="decouverte-right">
       <div class="decouverte-price">69€ <span>/ séance unique</span></div>
-      <p class="decouverte-note">Crédit d'impôt 50% applicable · Paiement sécurisé</p>
+      <p class="decouverte-note">Paiement sécurisé</p>
       <button class="btn btn-primary decouverte-btn" data-checkout="decouverte" data-plan="seance-decouverte">
         Réserver ma séance
       </button>
@@ -98,6 +98,13 @@ function renderPlans(plans) {
     const modesHtml = (plan.coaching_modes || [])
       .map(m => '<span style="display:inline-block;font-size:11px;background:rgba(255,255,255,0.07);border-radius:20px;padding:3px 10px;margin:2px 2px 4px 0;color:rgba(255,255,255,0.6);">' + (MODES[m] || m) + '</span>')
       .join('');
+  // Injecter le toggle après la bannière découverte
+  const decBanner = grid.querySelector('.decouverte-banner');
+  if (decBanner) {
+    const toggleEl = document.createElement('div');
+    toggleEl.innerHTML = '<div class="billing-toggle-inline"><span class="toggle-label active" id="label-mensuel">Mensuel</span><label class="toggle-switch"><input type="checkbox" id="toggle-annuel"><span class="toggle-track"></span></label><span class="toggle-label" id="label-annuel">Annuel <span class="save-badge">-20%</span></span></div>';
+    decBanner.after(toggleEl.firstChild);
+  }
 
     const appIncludes = [
       plan.includes_app ? '📱 Application mobile' : null,
@@ -110,7 +117,8 @@ function renderPlans(plans) {
     const engagementMois = isAnnuel ? 12 : (plan.duration_months || 3);
     const durationNote = `<div class="engagement-badge">
       🔒 Engagement ${engagementMois} mois minimum
-    </div>`;
+    </div>
+    <div class="plan-location">📍 Fitness Park La Défense · Stade de France</div>`;
 
     const referralHtml = plan.referral_enabled ? `
       <div style="margin-top:12px;padding:9px 12px;background:rgba(232,197,71,0.07);border:1px solid rgba(232,197,71,0.2);border-radius:10px;font-size:12px;color:rgba(255,255,255,0.65);">
