@@ -63,7 +63,7 @@ function renderPlans(plans) {
     <div class="decouverte-left">
       <span class="decouverte-badge">✨ Séance découverte</span>
       <h3>Essaie avant de t'engager</h3>
-      <p>Une séance de coaching personnalisé à Fitness Park La Défense avec Sarah. Sans engagement, sans surprise.</p>
+      <p>Une séance de coaching personnalisé avec Sarah à La Défense ou au Stade de France. Sans engagement, sans surprise.</p>
       <ul class="decouverte-list">
         <li>✓ Bilan de forme & objectifs</li>
         <li>✓ 1 séance complète en salle</li>
@@ -109,7 +109,7 @@ function renderPlans(plans) {
     const durationNote = `<div class="engagement-badge">
       🔒 Engagement ${engagementMois} mois minimum
     </div>
-    <div class="plan-location">📍 Fitness Park La Défense · Stade de France</div>`;
+    <div class="plan-location">📍 Stade de France · La Défense</div>`;
 
     const referralHtml = plan.referral_enabled ? `
       <div style="margin-top:12px;padding:9px 12px;background:rgba(232,197,71,0.07);border:1px solid rgba(232,197,71,0.2);border-radius:10px;font-size:12px;color:rgba(255,255,255,0.65);">
@@ -129,7 +129,7 @@ function renderPlans(plans) {
       </div>
       ${allFeatures.length ? `
       <ul class="offre-detail-features">
-        ${allFeatures.map(f => {
+        ${allFeatures.filter(f => !f.includes('Fitness Park')).map(f => {
           const isCredit = f.toLowerCase().includes('impôt') || f.toLowerCase().includes('impot') || f.toLowerCase().includes('crédit');
           return '<li class="feat-yes' + (isCredit ? ' feat-credit-impot' : '') + '">✓ ' + escHtml(f) + (isCredit ? ' <span class="credit-tag">-50%</span>' : '') + '</li>';
         }).join('')}
