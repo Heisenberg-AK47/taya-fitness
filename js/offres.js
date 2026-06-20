@@ -203,7 +203,7 @@ function initCheckoutButtons() {
         const res = await fetch(CHECKOUT_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type, plan, user_id: user?.id || '', user_email: user?.email || '' }),
+          body: JSON.stringify({ type, plan, billing: document.querySelector('#toggle-annuel')?.checked ? 'annual' : 'monthly', user_id: user?.id || '', user_email: user?.email || '' }),
         });
         const data = await res.json();
         if (!res.ok || !data.url) throw new Error(data.error || 'Erreur');
