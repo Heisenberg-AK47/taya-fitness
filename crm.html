@@ -258,7 +258,7 @@
             sb.from('abonnements').select('plan').eq('statut','active'),
             sb.from('profiles').select('full_name,email,created_at').order('created_at',{ascending:false}).limit(5),
           ]);
-          const prix={starter:49,performance:99,vip:199};
+          const prix={essentiel:49,progression:99,transformation:199};
           const mrr=(ab||[]).reduce((s,a)=>s+(prix[a.plan]||0),0);
           setStats({clients:cl||0,actifs:ac||0,revenus:mrr,newsletter:nl||0});
           setRecent(rc||[]);
@@ -1837,7 +1837,7 @@
               Section('📋 Identité',[
                 h('div',{style:{marginBottom:12}},
                   h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Nom de la formule *'),
-                  h('input',{value:planForm.name,onChange:e=>setPlanForm(p=>({...p,name:e.target.value})),placeholder:'ex: Programme Performance 3 mois',style:{...inp,width:'100%',fontSize:14,fontWeight:600}})
+                  h('input',{value:planForm.name,onChange:e=>setPlanForm(p=>({...p,name:e.target.value})),placeholder:'ex: Programme PROGRESSION 3 mois',style:{...inp,width:'100%',fontSize:14,fontWeight:600}})
                 ),
                 h('div',null,
                   h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Description (apparaît lors du paiement et sur le portail client)'),
@@ -1996,7 +1996,7 @@
               Section('👥 Action automatique après achat',[
                 h('div',null,
                   h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Assigner l\'acheteur aux groupes clients (séparés par des virgules)'),
-                  h('input',{value:planForm.client_groups||'',onChange:e=>setPlanForm(p=>({...p,client_groups:e.target.value})),placeholder:'Musculation, Premium, VIP...',style:{...inp,width:'100%'}}),
+                  h('input',{value:planForm.client_groups||'',onChange:e=>setPlanForm(p=>({...p,client_groups:e.target.value})),placeholder:'Musculation, Premium, TRANSFORMATION...',style:{...inp,width:'100%'}}),
                   h('div',{style:{fontSize:11,color:C.muted,marginTop:6}},'Après souscription, le client sera automatiquement rattaché aux groupes indiqués.')
                 )
               ])
@@ -2195,9 +2195,9 @@
         sb.from('abonnements').select('plan,statut').eq('statut','active')
           .then(({data})=>{setAbos(data||[]);setLoading(false);});
       },[]);
-      const px={starter:49,performance:99,vip:199};
+      const px={essentiel:49,progression:99,transformation:199};
       const mrr=abos.reduce((s,a)=>s+(px[a.plan]||0),0);
-      const cnt={starter:0,performance:0,vip:0};
+      const cnt={essentiel:0,progression:0,transformation:0};
       abos.forEach(a=>{if(cnt[a.plan]!==undefined)cnt[a.plan]++;});
       return h('div',null,
         h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:24,color:C.white}},'Revenus'),
@@ -2214,7 +2214,7 @@
           ),
           h('div',{style:card},
             h('h3',{style:{fontSize:16,fontWeight:600,marginBottom:20,color:C.white}},'Répartition par plan'),
-            ...['starter','performance','vip'].map(plan=>h('div',{key:plan,style:{marginBottom:16}},
+            ...['essentiel','progression','transformation'].map(plan=>h('div',{key:plan,style:{marginBottom:16}},
               h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:6}},
                 h('span',{style:{fontSize:14,textTransform:'capitalize',color:C.white}},plan),
                 h('span',{style:{fontSize:14,color:C.muted}},`${cnt[plan]} × ${px[plan]}€ = `,h('strong',{style:{color:C.gold}},`${cnt[plan]*px[plan]}€/mois`))
