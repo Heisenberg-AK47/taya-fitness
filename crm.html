@@ -2230,55 +2230,410 @@
 
     // ── Emails ───────────────────────────────────────────────────────────────
     function Emails() {
-      const [subs,setSubs]=useState([]);
-      const [subject,setSubject]=useState('');
-      const [body,setBody]=useState('');
-      const [sending,setSending]=useState(false);
+      const [tab,setTab]=useState('campagnes');
+      const [campaigns,setCampaigns]=useState([]);
+      const [automations,setAutomations]=useState([]);
+      const [logs,setLogs]=useState([]);
+      const [view,setView]=useState(null); // null=list, 'new', obj=edit
+      const [autoView,setAutoView]=useState(null);
+      const [loading,setLoading]=useState(false);
       const [msg,setMsg]=useState('');
-      useEffect(()=>{
-        sb.from('newsletter').select('email,created_at').order('created_at',{ascending:false}).then(({data})=>setSubs(data||[]));
-      },[]);
-      async function send(e){
-        e.preventDefault();setSending(true);
-        await sb.from('email_log').insert({subject,body,recipients:subs.length,statut:'sent',created_at:new Date().toISOString()});
-        setMsg(`Campagne "${subject}" enregistrée — ${subs.length} destinataires`);
-        setSubject('');setBody('');setSending(false);
-        setTimeout(()=>setMsg(''),5000);
+      const [msgOk,setMsgOk]=useState(true);
+      const [sending,setSending]=useState(false);
+      const [edTab,setEdTab]=useState('edit');
+      const [testEmail,setTestEmail]=useState('');
+      const [showTest,setShowTest]=useState(false);
+      const [recipientCount,setRecipientCount]=useState(null);
+      const SUPABASE_URL='https://esylzsacjkimcqxllhwd.supabase.co';
+      const PLANS_URL='https://taya-fitness.vercel.app/plans';
+
+      const EC0={nom:'',sujet:'',contenu_html:'',type:'newsletter',audience:'tous',audience_groupe:'',planifie_at:'',recurrence:''};
+      const [EC,setEC]=useState(EC0);
+      const EA0={nom:'',declencheur:'nouveau_client',actif:true,sujet:'',contenu_html:'',delai_heures:0};
+      const [EA,setEA]=useState(EA0);
+
+      useEffect(()=>{load();},[]);
+
+      async function load(){
+        setLoading(true);
+        const [c,a,l]=await Promise.all([
+          sb.from('email_campaigns').select('*').order('created_at',{ascending:false}),
+          sb.from('email_automations').select('*').order('created_at',{ascending:false}),
+          sb.from('email_logs').select('id,email,nom,statut,sent_at,campaign_id,automation_id').order('sent_at',{ascending:false}).limit(200),
+        ]);
+        setCampaigns(c.data||[]);setAutomations(a.data||[]);setLogs(l.data||[]);setLoading(false);
       }
-      return h('div',null,
-        h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:8,color:C.white}},'Campagnes mail'),
-        h('p',{style:{color:C.muted,fontSize:14,marginBottom:24}},`${subs.length} abonnés à la newsletter`),
-        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24}},
+
+      function showMsg(m,ok=true){setMsg(m);setMsgOk(ok);setTimeout(()=>setMsg(''),5000);}
+
+      async function countRecipients(audience,groupe){
+        let q=sb.from('clients').select('id',{count:'exact',head:true}).not('email','is',null).neq('email','');
+        if(audience==='actifs')q=q.eq('statut','actif');
+        else if(audience==='inactifs')q=q.eq('statut','inactif');
+        else if(audience==='abonnes')q=q.not('plan_nom','is',null);
+        else if(audience==='prospects')q=q.is('plan_nom',null);
+        else if(audience==='groupe'&&groupe)q=q.contains('groupes',[groupe]);
+        const {count}=await q;
+        setRecipientCount(count||0);
+      }
+
+      async function saveCampaign(sendNow=false){
+        if(!EC.nom||!EC.sujet||!EC.contenu_html){showMsg('Remplis tous les champs obligatoires',false);return;}
+        setSending(true);
+        const payload={...EC,statut:sendNow?'en_cours':'brouillon',updated_at:new Date().toISOString()};
+        let id;
+        if(view&&view.id){
+          const {data}=await sb.from('email_campaigns').update(payload).eq('id',view.id).select().single();
+          id=data?.id;
+        } else {
+          const {data}=await sb.from('email_campaigns').insert({...payload,statut:sendNow?'en_cours':'brouillon'}).select().single();
+          id=data?.id;
+        }
+        if(sendNow&&id){
+          const {data:{session}}=await sb.auth.getSession();
+          const r=await fetch(`${SUPABASE_URL}/functions/v1/send-email`,{
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
+            body:JSON.stringify({action:'send_campaign',campaign_id:id})
+          });
+          const res=await r.json();
+          if(res.error){showMsg('❌ '+res.error,false);}
+          else{showMsg(`✅ Campagne envoyée — ${res.sent} emails, ${res.errors} erreurs`);}
+        } else {
+          showMsg('✅ Campagne enregistrée en brouillon');
+        }
+        setSending(false);setView(null);setEC(EC0);setEdTab('edit');load();
+      }
+
+      async function deleteCampaign(id){
+        if(!confirm('Supprimer cette campagne ?'))return;
+        await sb.from('email_campaigns').delete().eq('id',id);load();
+      }
+
+      async function sendTest(){
+        if(!testEmail){showMsg('Entre un email de test',false);return;}
+        setSending(true);
+        const {data:{session}}=await sb.auth.getSession();
+        const r=await fetch(`${SUPABASE_URL}/functions/v1/send-email`,{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`},
+          body:JSON.stringify({action:'test',to:testEmail,subject:`[TEST] ${EC.sujet}`,html:EC.contenu_html})
+        });
+        const res=await r.json();
+        setSending(false);setShowTest(false);
+        if(res.error)showMsg('❌ '+res.error,false);
+        else showMsg(`✅ Email de test envoyé à ${testEmail}`);
+      }
+
+      async function saveAutomation(){
+        if(!EA.nom||!EA.sujet||!EA.contenu_html){showMsg('Remplis tous les champs',false);return;}
+        if(autoView&&autoView.id){
+          await sb.from('email_automations').update({...EA,updated_at:new Date().toISOString()}).eq('id',autoView.id);
+        } else {
+          await sb.from('email_automations').insert(EA);
+        }
+        showMsg('✅ Automation sauvegardée');setAutoView(null);setEA(EA0);load();
+      }
+
+      async function toggleAutomation(id,actif){
+        await sb.from('email_automations').update({actif:!actif}).eq('id',id);load();
+      }
+
+      async function deleteAutomation(id){
+        if(!confirm('Supprimer cette automation ?'))return;
+        await sb.from('email_automations').delete().eq('id',id);load();
+      }
+
+      function insertVar(v){setEC(p=>({...p,contenu_html:p.contenu_html+v}));}
+
+      const labelAudience={tous:'Tous les clients',actifs:'Clients actifs',inactifs:'Clients inactifs',abonnes:'Avec abonnement',prospects:'Sans abonnement',groupe:'Groupe spécifique'};
+      const labelTrigger={nouveau_client:'Nouveau client inscrit',inactif_30j:'Inactif 30 jours',inactif_60j:'Inactif 60 jours',fin_abonnement:'Fin d\'abonnement',anniversaire:'Anniversaire'};
+      const labelType={one_shot:'Envoi unique',newsletter:'Newsletter',relance:'Relance prospect',automation:'Automation'};
+      const labelStatut={brouillon:'Brouillon',planifie:'Planifié',en_cours:'En cours',envoye:'Envoyé',annule:'Annulé'};
+      const statutColor={brouillon:C.muted,planifie:C.blue,en_cours:C.gold,envoye:C.green,annule:C.red};
+      const logColor={envoye:C.green,ouvert:C.blue,clique:C.gold,bounce:C.red,erreur:C.red};
+
+      const tabStyle=(t)=>({padding:'10px 20px',background:tab===t?C.gold:'transparent',color:tab===t?'#fff':C.muted,border:'none',borderRadius:8,cursor:'pointer',fontWeight:600,fontSize:13,transition:'all .2s'});
+
+      // ─── CAMPAIGN EDITOR ───
+      if(view!==null){
+        return h('div',{style:{maxWidth:1000,margin:'0 auto'}},
+          h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:28}},
+            h('button',{onClick:()=>{setView(null);setEC(EC0);setEdTab('edit');},style:{background:'none',border:'none',color:C.muted,cursor:'pointer',fontSize:22}},'←'),
+            h('h1',{style:{fontSize:22,fontWeight:700,color:C.white,margin:0}},view&&view.id?'Modifier la campagne':'Nouvelle campagne')
+          ),
+          msg&&h('div',{style:{padding:'12px 16px',background:msgOk?'rgba(62,207,142,.12)':'rgba(255,77,106,.12)',borderRadius:8,marginBottom:16,color:msgOk?C.green:C.red,fontSize:13}},msg),
+          h('div',{style:{display:'grid',gridTemplateColumns:'1fr 320px',gap:24}},
+            // LEFT COLUMN
+            h('div',null,
+              h('div',{style:{...card,marginBottom:16}},
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Nom de la campagne *'),
+                h('input',{style:{...inp,marginBottom:16},value:EC.nom,onChange:e=>setEC(p=>({...p,nom:e.target.value})),placeholder:'Ex: Newsletter juin 2025'}),
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Objet de l\'email *'),
+                h('input',{style:inp,value:EC.sujet,onChange:e=>setEC(p=>({...p,sujet:e.target.value})),placeholder:'Ex: 🔥 Nouveaux programmes disponibles !'})
+              ),
+              h('div',{style:card},
+                h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}},
+                  h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold}},'Contenu HTML *'),
+                  h('div',{style:{display:'flex',gap:8}},
+                    h('button',{onClick:()=>setEdTab('edit'),style:{...tabStyle('edit'),padding:'6px 14px'}},'✏️ Éditeur'),
+                    h('button',{onClick:()=>setEdTab('preview'),style:{...tabStyle('preview'),padding:'6px 14px'}},'👁 Aperçu')
+                  )
+                ),
+                h('div',{style:{display:'flex',gap:6,flexWrap:'wrap',marginBottom:12}},
+                  h('span',{style:{fontSize:11,color:C.muted,alignSelf:'center'}},'Variables :'),
+                  ['{{nom}}','{{prenom}}','{{email}}','{{plans_url}}'].map(v=>
+                    h('button',{key:v,onClick:()=>insertVar(v),style:{background:C.soft,border:`1px solid ${C.border}`,borderRadius:6,padding:'3px 10px',color:C.white,cursor:'pointer',fontSize:11}},v)
+                  )
+                ),
+                edTab==='edit'
+                  ? h('textarea',{style:{...inp,resize:'vertical',fontFamily:'monospace',fontSize:13},rows:22,value:EC.contenu_html,onChange:e=>setEC(p=>({...p,contenu_html:e.target.value})),placeholder:'<h1>Bonjour {{nom}} !</h1>\n<p>Votre message ici...</p>\n\n<a href="{{plans_url}}">Voir nos formules →</a>'})
+                  : h('div',{style:{background:'#fff',borderRadius:8,padding:4,minHeight:400}},
+                      h('iframe',{srcDoc:EC.contenu_html||'<p style="color:#999;padding:20px">Aucun contenu à prévisualiser</p>',style:{width:'100%',height:400,border:'none',borderRadius:8},title:'aperçu'})
+                    )
+              )
+            ),
+            // RIGHT COLUMN
+            h('div',null,
+              h('div',{style:{...card,marginBottom:16}},
+                h('div',{style:{fontSize:13,fontWeight:600,color:C.white,marginBottom:16}},'📊 Audience'),
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Destinataires'),
+                h('select',{style:{...inp,marginBottom:12},value:EC.audience,onChange:e=>{setEC(p=>({...p,audience:e.target.value}));countRecipients(e.target.value,EC.audience_groupe);}},
+                  Object.entries(labelAudience).map(([k,v])=>h('option',{key:k,value:k},v))
+                ),
+                EC.audience==='groupe'&&h('input',{style:{...inp,marginBottom:12},value:EC.audience_groupe,onChange:e=>{setEC(p=>({...p,audience_groupe:e.target.value}));countRecipients('groupe',e.target.value);},placeholder:'Nom du groupe ex: Musculation'}),
+                recipientCount!==null&&h('div',{style:{padding:'8px 12px',background:C.soft,borderRadius:8,fontSize:13,color:C.white}},
+                  `👥 ${recipientCount} destinataire${recipientCount>1?'s':''}`
+                )
+              ),
+              h('div',{style:{...card,marginBottom:16}},
+                h('div',{style:{fontSize:13,fontWeight:600,color:C.white,marginBottom:16}},'⚙️ Paramètres'),
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Type'),
+                h('select',{style:{...inp,marginBottom:12},value:EC.type,onChange:e=>setEC(p=>({...p,type:e.target.value}))},
+                  Object.entries(labelType).map(([k,v])=>h('option',{key:k,value:k},v))
+                ),
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Récurrence'),
+                h('select',{style:{...inp,marginBottom:12},value:EC.recurrence,onChange:e=>setEC(p=>({...p,recurrence:e.target.value}))},
+                  h('option',{value:''},'Aucune (envoi unique)'),
+                  h('option',{value:'hebdomadaire'},'Hebdomadaire'),
+                  h('option',{value:'mensuelle'},'Mensuelle'),
+                  h('option',{value:'trimestrielle'},'Trimestrielle')
+                ),
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Planifier pour'),
+                h('input',{type:'datetime-local',style:{...inp},value:EC.planifie_at,onChange:e=>setEC(p=>({...p,planifie_at:e.target.value}))})
+              ),
+              h('div',{style:{...card}},
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold,marginBottom:12}},'Actions'),
+                h('button',{onClick:()=>saveCampaign(false),disabled:sending,style:{...btn,width:'100%',marginBottom:10,background:C.soft,color:C.white}},'💾 Enregistrer brouillon'),
+                h('button',{onClick:()=>setShowTest(true),disabled:sending||!EC.sujet,style:{...btn,width:'100%',marginBottom:10,background:`linear-gradient(135deg,${C.blue},#2d7ae0)`}},'🧪 Envoyer un test'),
+                h('button',{onClick:()=>saveCampaign(true),disabled:sending||!EC.contenu_html,style:{...btn,width:'100%'}},sending?'Envoi en cours...':'🚀 Envoyer maintenant'),
+                showTest&&h('div',{style:{marginTop:16,padding:16,background:C.soft,borderRadius:8}},
+                  h('div',{style:{fontSize:12,color:C.muted,marginBottom:8}},'Email de test :'),
+                  h('input',{style:{...inp,marginBottom:10},value:testEmail,onChange:e=>setTestEmail(e.target.value),placeholder:'toi@exemple.com',type:'email'}),
+                  h('div',{style:{display:'flex',gap:8}},
+                    h('button',{onClick:sendTest,disabled:sending,style:{...btn,flex:1,padding:'10px 12px',fontSize:13}},sending?'Envoi...':'Envoyer'),
+                    h('button',{onClick:()=>setShowTest(false),style:{...btn,background:C.soft,color:C.muted,flex:1,padding:'10px 12px',fontSize:13}},'Annuler')
+                  )
+                )
+              )
+            )
+          )
+        );
+      }
+
+      // ─── AUTOMATION EDITOR ───
+      if(autoView!==null){
+        return h('div',{style:{maxWidth:800,margin:'0 auto'}},
+          h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:28}},
+            h('button',{onClick:()=>{setAutoView(null);setEA(EA0);},style:{background:'none',border:'none',color:C.muted,cursor:'pointer',fontSize:22}},'←'),
+            h('h1',{style:{fontSize:22,fontWeight:700,color:C.white,margin:0}},autoView&&autoView.id?'Modifier l\'automation':'Nouvelle automation')
+          ),
+          msg&&h('div',{style:{padding:'12px 16px',background:msgOk?'rgba(62,207,142,.12)':'rgba(255,77,106,.12)',borderRadius:8,marginBottom:16,color:msgOk?C.green:C.red}},msg),
           h('div',{style:card},
-            h('h3',{style:{fontSize:16,fontWeight:600,marginBottom:20,color:C.white}},'Nouvelle campagne'),
-            h('form',{onSubmit:send},
-              h('div',{style:{marginBottom:16}},
-                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.18em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Objet'),
-                h('input',{style:inp,value:subject,onChange:e=>setSubject(e.target.value),placeholder:'Ex: Nouveaux programmes 🔥',required:true})
+            h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:16}},
+              h('div',null,
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Nom'),
+                h('input',{style:inp,value:EA.nom,onChange:e=>setEA(p=>({...p,nom:e.target.value})),placeholder:'Ex: Email de bienvenu'})
               ),
-              h('div',{style:{marginBottom:16}},
-                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.18em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Message'),
-                h('textarea',{style:{...inp,resize:'vertical'},rows:8,value:body,onChange:e=>setBody(e.target.value),placeholder:'Bonjour,\n\nÉcris ton message ici...',required:true})
+              h('div',null,
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Déclencheur'),
+                h('select',{style:inp,value:EA.declencheur,onChange:e=>setEA(p=>({...p,declencheur:e.target.value}))},
+                  Object.entries(labelTrigger).map(([k,v])=>h('option',{key:k,value:k},v))
+                )
+              )
+            ),
+            h('div',{style:{display:'grid',gridTemplateColumns:'1fr 120px',gap:16,marginBottom:16}},
+              h('div',null,
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Objet de l\'email'),
+                h('input',{style:inp,value:EA.sujet,onChange:e=>setEA(p=>({...p,sujet:e.target.value})),placeholder:'Ex: Bienvenue chez Taya Fitness 🔥'})
               ),
-              msg&&h('div',{style:{color:C.green,fontSize:13,marginBottom:12}},msg),
-              h('button',{style:btn,disabled:sending||subs.length===0},sending?'Envoi...':'Envoyer la campagne')
+              h('div',null,
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold,marginBottom:6}},'Délai (h)'),
+                h('input',{type:'number',style:inp,value:EA.delai_heures,onChange:e=>setEA(p=>({...p,delai_heures:parseInt(e.target.value)||0})),min:0})
+              )
+            ),
+            h('div',{style:{marginBottom:12}},
+              h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}},
+                h('div',{style:{fontSize:11,fontWeight:700,letterSpacing:'0.16em',textTransform:'uppercase',color:C.gold}},'Contenu HTML'),
+                h('div',{style:{display:'flex',gap:6}},
+                  ['{{nom}}','{{plans_url}}'].map(v=>h('button',{key:v,onClick:()=>setEA(p=>({...p,contenu_html:p.contenu_html+v})),style:{background:C.soft,border:`1px solid ${C.border}`,borderRadius:6,padding:'3px 10px',color:C.white,cursor:'pointer',fontSize:11}},v))
+                )
+              ),
+              h('textarea',{style:{...inp,resize:'vertical',fontFamily:'monospace',fontSize:13},rows:16,value:EA.contenu_html,onChange:e=>setEA(p=>({...p,contenu_html:e.target.value})),placeholder:'<h1>Bonjour {{nom}} !</h1>\n<p>Votre message...</p>\n<a href="{{plans_url}}">Voir les formules →</a>'})
+            ),
+            h('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:20}},
+              h('label',{style:{display:'flex',alignItems:'center',gap:8,cursor:'pointer',color:C.white,fontSize:14}},
+                h('input',{type:'checkbox',checked:EA.actif,onChange:e=>setEA(p=>({...p,actif:e.target.checked}))}),
+                'Automation active'
+              )
+            ),
+            h('div',{style:{display:'flex',gap:12}},
+              h('button',{onClick:saveAutomation,style:btn},'💾 Sauvegarder'),
+              h('button',{onClick:()=>{setAutoView(null);setEA(EA0);},style:{...btn,background:C.soft,color:C.white}},'Annuler')
+            )
+          )
+        );
+      }
+
+      // ─── MAIN VIEW ───
+      const sentTotal=campaigns.filter(c=>c.statut==='envoye').reduce((s,c)=>s+(c.nb_envoyes||0),0);
+      const activeAutos=automations.filter(a=>a.actif).length;
+      const logsToday=logs.filter(l=>l.sent_at&&l.sent_at.startsWith(new Date().toISOString().slice(0,10))).length;
+
+      return h('div',null,
+        h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24}},
+          h('div',null,
+            h('h1',{style:{fontSize:24,fontWeight:700,color:C.white,margin:0}},'Campagnes mail'),
+            h('p',{style:{color:C.muted,fontSize:14,marginTop:4,marginBottom:0}},'Newsletters, automations et relances')
+          ),
+          tab==='campagnes'&&h('button',{onClick:()=>{setEC(EC0);setView('new');setEdTab('edit');countRecipients('tous','');},style:btn},'+ Nouvelle campagne'),
+          tab==='automations'&&h('button',{onClick:()=>{setEA(EA0);setAutoView('new');},style:btn},'+ Nouvelle automation')
+        ),
+
+        // Stats cards
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,marginBottom:24}},
+          [
+            {label:'EMAILS ENVOYÉS',val:sentTotal,icon:'📤',col:C.blue},
+            {label:'CAMPAGNES',val:campaigns.length,icon:'📋',col:C.gold},
+            {label:'AUTOMATIONS ACTIVES',val:activeAutos,icon:'⚡',col:C.green},
+            {label:'ENVOIS AUJOURD\'HUI',val:logsToday,icon:'📅',col:C.purple},
+          ].map(({label,val,icon,col})=>h('div',{key:label,style:{...card,textAlign:'center'}},
+            h('div',{style:{fontSize:28,marginBottom:4}},icon),
+            h('div',{style:{fontSize:32,fontWeight:800,color:col}},''+val),
+            h('div',{style:{fontSize:10,letterSpacing:'0.16em',textTransform:'uppercase',color:C.muted,marginTop:4}},label)
+          ))
+        ),
+
+        // Tabs
+        h('div',{style:{display:'flex',gap:8,marginBottom:24,background:C.card,padding:6,borderRadius:10,width:'fit-content'}},
+          ['campagnes','automations','logs'].map(t=>
+            h('button',{key:t,onClick:()=>setTab(t),style:{...tabStyle(t),textTransform:'capitalize'}},
+              t==='campagnes'?'📋 Campagnes':t==='automations'?'⚡ Automations':'📜 Logs'
+            )
+          )
+        ),
+
+        msg&&h('div',{style:{padding:'12px 16px',background:msgOk?'rgba(62,207,142,.12)':'rgba(255,77,106,.12)',borderRadius:8,marginBottom:16,color:msgOk?C.green:C.red}},msg),
+
+        // ── CAMPAGNES TAB ──
+        tab==='campagnes'&&h('div',null,
+          loading?h('div',{style:{color:C.muted,textAlign:'center',padding:40}},'Chargement...'):
+          campaigns.length===0
+            ?h('div',{style:{...card,textAlign:'center',padding:48}},
+                h('div',{style:{fontSize:48,marginBottom:16}},'📧'),
+                h('div',{style:{color:C.white,fontSize:16,fontWeight:600,marginBottom:8}},'Aucune campagne'),
+                h('div',{style:{color:C.muted,fontSize:14,marginBottom:24}},'Crée ta première campagne email'),
+                h('button',{onClick:()=>{setEC(EC0);setView('new');countRecipients('tous','');},style:btn},'+ Créer une campagne')
+              )
+            :h('div',{style:{display:'flex',flexDirection:'column',gap:12}},
+                campaigns.map(c=>h('div',{key:c.id,style:{...card,display:'flex',alignItems:'center',gap:16}},
+                  h('div',{style:{flex:1}},
+                    h('div',{style:{display:'flex',alignItems:'center',gap:10,marginBottom:4}},
+                      h('span',{style:{fontWeight:700,fontSize:15,color:C.white}},c.nom),
+                      h('span',{style:{background:statutColor[c.statut]+'22',color:statutColor[c.statut],borderRadius:20,padding:'2px 10px',fontSize:11,fontWeight:600}},labelStatut[c.statut]||c.statut),
+                      c.recurrence&&h('span',{style:{background:C.blue+'22',color:C.blue,borderRadius:20,padding:'2px 10px',fontSize:11}},'🔄 '+c.recurrence)
+                    ),
+                    h('div',{style:{color:C.muted,fontSize:13,marginBottom:6}},c.sujet),
+                    h('div',{style:{display:'flex',gap:16,fontSize:12,color:C.muted}},
+                      h('span',null,'👥 '+labelAudience[c.audience]||c.audience),
+                      c.nb_envoyes>0&&h('span',{style:{color:C.green}},'✅ '+c.nb_envoyes+' envoyés'),
+                      c.planifie_at&&h('span',null,'📅 '+new Date(c.planifie_at).toLocaleString('fr-FR')),
+                      c.envoye_at&&h('span',null,'Envoyé le '+new Date(c.envoye_at).toLocaleDateString('fr-FR'))
+                    )
+                  ),
+                  h('div',{style:{display:'flex',gap:8,flexShrink:0}},
+                    c.statut==='brouillon'&&h('button',{onClick:()=>{setEC({nom:c.nom,sujet:c.sujet,contenu_html:c.contenu_html||'',type:c.type,audience:c.audience,audience_groupe:c.audience_groupe||'',planifie_at:c.planifie_at||'',recurrence:c.recurrence||''});setView(c);setEdTab('edit');countRecipients(c.audience,c.audience_groupe);},style:{...btn,padding:'8px 16px',fontSize:12}},'✏️ Modifier'),
+                    h('button',{onClick:()=>deleteCampaign(c.id),style:{...btn,background:'rgba(255,77,106,.15)',color:C.red,padding:'8px 12px',fontSize:12}},'🗑️')
+                  )
+                ))
+              )
+        ),
+
+        // ── AUTOMATIONS TAB ──
+        tab==='automations'&&h('div',null,
+          h('div',{style:{...card,marginBottom:20,background:'rgba(255,107,53,.06)',border:`1px solid ${C.gold}33`}},
+            h('div',{style:{display:'flex',gap:12}},
+              h('span',{style:{fontSize:24}},'💡'),
+              h('div',null,
+                h('div',{style:{fontWeight:600,color:C.white,marginBottom:4}},'Comment fonctionnent les automations ?'),
+                h('div',{style:{color:C.muted,fontSize:13,lineHeight:1.6}},'Les automations s\'envoient automatiquement selon un déclencheur. L\'email de bienvenu est envoyé dès qu\'un nouveau client est ajouté. Personnalise le template HTML avec les variables {{nom}}, {{plans_url}}.')
+              )
             )
           ),
-          h('div',{style:card},
-            h('h3',{style:{fontSize:16,fontWeight:600,marginBottom:16,color:C.white}},'Abonnés récents'),
-            h('div',{style:{maxHeight:400,overflowY:'auto'}},
-              ...subs.slice(0,30).map((s,i)=>h('div',{key:i,style:{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:`1px solid ${C.border}`,fontSize:13}},
-                h('span',{style:{color:C.white}},s.email),
-                h('span',{style:{color:C.muted}},new Date(s.created_at).toLocaleDateString('fr-FR'))
-              )),
-              subs.length===0&&h('p',{style:{color:C.muted,fontSize:14}},'Aucun abonné.')
+          loading?h('div',{style:{color:C.muted,textAlign:'center',padding:40}},'Chargement...'):
+          automations.map(a=>h('div',{key:a.id,style:{...card,marginBottom:12,display:'flex',alignItems:'center',gap:16}},
+            h('div',{style:{width:48,height:48,borderRadius:12,background:a.actif?C.green+'22':C.muted+'22',display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,flexShrink:0}},
+              a.declencheur==='nouveau_client'?'👋':a.declencheur.includes('inactif')?'😴':'📅'
+            ),
+            h('div',{style:{flex:1}},
+              h('div',{style:{display:'flex',alignItems:'center',gap:10,marginBottom:4}},
+                h('span',{style:{fontWeight:700,color:C.white}},''+a.nom),
+                h('span',{style:{background:a.actif?C.green+'22':C.muted+'22',color:a.actif?C.green:C.muted,borderRadius:20,padding:'2px 10px',fontSize:11,fontWeight:600}},a.actif?'Active':'Inactive')
+              ),
+              h('div',{style:{color:C.muted,fontSize:13,marginBottom:4}},labelTrigger[a.declencheur]||a.declencheur),
+              h('div',{style:{display:'flex',gap:16,fontSize:12,color:C.muted}},
+                h('span',null,'📧 '+a.sujet),
+                a.delai_heures>0&&h('span',null,'⏱ Délai : '+a.delai_heures+'h'),
+                h('span',{style:{color:C.green}},'✅ '+( a.nb_envoyes||0)+' envoyés')
+              )
+            ),
+            h('div',{style:{display:'flex',gap:8,flexShrink:0}},
+              h('button',{onClick:()=>toggleAutomation(a.id,a.actif),style:{...btn,padding:'8px 16px',fontSize:12,background:a.actif?'rgba(255,77,106,.15)':'rgba(62,207,142,.15)',color:a.actif?C.red:C.green}},a.actif?'Désactiver':'Activer'),
+              h('button',{onClick:()=>{setEA({nom:a.nom,declencheur:a.declencheur,actif:a.actif,sujet:a.sujet,contenu_html:a.contenu_html,delai_heures:a.delai_heures||0});setAutoView(a);},style:{...btn,padding:'8px 16px',fontSize:12}},'✏️'),
+              h('button',{onClick:()=>deleteAutomation(a.id),style:{...btn,background:'rgba(255,77,106,.15)',color:C.red,padding:'8px 12px',fontSize:12}},'🗑️')
+            )
+          ))
+        ),
+
+        // ── LOGS TAB ──
+        tab==='logs'&&h('div',null,
+          h('div',{style:{...card}},
+            h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}},
+              h('span',{style:{fontWeight:600,color:C.white}},'Historique des envois'),
+              h('span',{style:{color:C.muted,fontSize:13}},logs.length+' entrées')
+            ),
+            logs.length===0?h('div',{style:{color:C.muted,textAlign:'center',padding:40}},'Aucun log d\'envoi'):
+            h('div',{style:{maxHeight:600,overflowY:'auto'}},
+              h('table',{style:{width:'100%',borderCollapse:'collapse',fontSize:13}},
+                h('thead',null,h('tr',null,
+                  ['Date','Email','Nom','Statut','Campagne/Auto'].map(col=>h('th',{key:col,style:{textAlign:'left',padding:'8px 12px',color:C.muted,fontSize:11,textTransform:'uppercase',letterSpacing:'0.1em',borderBottom:`1px solid ${C.border}`}},col))
+                )),
+                h('tbody',null,...logs.map((l,i)=>h('tr',{key:l.id,style:{borderBottom:`1px solid ${C.border}22`}},
+                  h('td',{style:{padding:'8px 12px',color:C.muted}},l.sent_at?new Date(l.sent_at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—'),
+                  h('td',{style:{padding:'8px 12px',color:C.white}},l.email),
+                  h('td',{style:{padding:'8px 12px',color:C.muted}},l.nom||'—'),
+                  h('td',{style:{padding:'8px 12px'}},h('span',{style:{background:(logColor[l.statut]||C.muted)+'22',color:logColor[l.statut]||C.muted,borderRadius:20,padding:'2px 10px',fontSize:11,fontWeight:600}},l.statut)),
+                  h('td',{style:{padding:'8px 12px',color:C.muted,fontSize:12}},l.campaign_id?'Campagne':'Automation')
+                )))
+              )
             )
           )
         )
       );
     }
 
-    // ── Tâches ───────────────────────────────────────────────────────────────
+
+        // ── Tâches ───────────────────────────────────────────────────────────────
     function Taches() {
       const [taches,setTaches]=useState([]);
       const [titre,setTitre]=useState('');
