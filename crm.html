@@ -328,72 +328,461 @@
 
     // ── Clients Azeoo ─────────────────────────────────────────────────────────
     function ClientsAzeoo() {
+      const ADMIN = ['fumeysarah@yahoo.fr','contact@sergepaulmier.com','contact@tayafitness.com'];
+      const [clients,setClients] = useState([]);
+      const [groupes,setGroupes] = useState([]);
+      const [programmes,setProgrammes] = useState([]);
+      const [plans,setPlans] = useState([]);
+      const [loading,setLoading] = useState(true);
       const [search,setSearch] = useState('');
-      const [filterObj,setFilterObj] = useState('');
-      const [filterGrp,setFilterGrp] = useState('');
-      const goalColors = {'Lose Weight':C.blue,'Build Muscle':C.green,'Sculpt Your Body':C.gold,'Get Fit':C.purple};
-      const niveauColors = {'Advanced':C.green,'Intermediate':C.gold,'Beginner':C.blue,'—':C.muted};
-      const filtered = AZEOO_CLIENTS.filter(c=>{
-        const s = search.toLowerCase();
-        return (!s || c.nom.toLowerCase().includes(s) || c.email.toLowerCase().includes(s))
-          && (!filterObj || c.objectif===filterObj)
-          && (!filterGrp || c.groupe===filterGrp);
-      });
-      const groupes = [...new Set(AZEOO_CLIENTS.map(c=>c.groupe))].sort();
-      const objectifs = [...new Set(AZEOO_CLIENTS.map(c=>c.objectif).filter(o=>o!=='—'))].sort();
+      const [filterStatut,setFilterStatut] = useState('');
+      const [filterGroupe,setFilterGroupe] = useState('');
+      const [isAdmin,setIsAdmin] = useState(false);
+      const [msg,setMsg] = useState('');
+      const [saving,setSaving] = useState(false);
+      const [page,setPage] = useState(1);
+      const PER_PAGE = 20;
 
-      return h('div',null,
-        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:24}},
-          h('div',null,
-            h('h1',{style:{fontSize:24,fontWeight:700,color:C.white}},'Clients Azeoo'),
-            h('p',{style:{color:C.muted,fontSize:14,marginTop:4}},`${AZEOO_CLIENTS.length} clients · importés depuis tayafitness.azeoo.com`)
+      // Views: null=list, 'new'=create, client=detail, 'groups'=groups modal
+      const [view,setView] = useState(null);
+      const [selectedClient,setSelectedClient] = useState(null);
+      const [showGroupsModal,setShowGroupsModal] = useState(false);
+      const [showAssignProg,setShowAssignProg] = useState(false);
+      const [showAssignPlan,setShowAssignPlan] = useState(false);
+      const [clientNotes,setClientNotes] = useState([]);
+      const [newNote,setNewNote] = useState('');
+      const [newGroupName,setNewGroupName] = useState('');
+      const [newGroupColor,setNewGroupColor] = useState('#e8c547');
+
+      const EMPTY_CLIENT = {prenom:'',nom:'',email:'',telephone:'',genre:'',objectif:'',niveau:'',groupes:[],statut:'actif',note_interne:'',app:'',plan_nom:'',programme_id:''};
+      const [cForm,setCForm] = useState(EMPTY_CLIENT);
+
+      const goalColors = {'Lose Weight':C.blue,'Build Muscle':C.green,'Sculpt Your Body':C.gold,'Get Fit':C.purple};
+      const niveauColors = {Advanced:C.green,Intermediate:C.gold,Beginner:C.blue};
+
+      function loadData(){
+        setLoading(true);
+        Promise.all([
+          sb.from('clients').select('*').order('created_at',{ascending:false}),
+          sb.from('client_groupes').select('*').order('nom'),
+          sb.from('programmes').select('id,titre').order('titre'),
+          sb.from('subscription_plans').select('id,name,price,billing_cycle').order('price')
+        ]).then(([{data:cl},{data:gr},{data:pr},{data:pl}])=>{
+          setClients(cl||[]);setGroupes(gr||[]);setProgrammes(pr||[]);setPlans(pl||[]);setLoading(false);
+        });
+      }
+
+      useEffect(()=>{
+        sb.auth.getSession().then(({data:{session}})=>{if(session?.user)setIsAdmin(ADMIN.includes(session.user.email));});
+        loadData();
+      },[]);
+
+      const filtered = clients.filter(c=>{
+        const s=search.toLowerCase();
+        const fullName=`${c.prenom||''} ${c.nom||''}`.toLowerCase();
+        return(!s||fullName.includes(s)||(c.email||'').toLowerCase().includes(s)||(c.telephone||'').includes(s))
+          &&(!filterStatut||c.statut===filterStatut)
+          &&(!filterGroupe||(c.groupes||[]).includes(filterGroupe));
+      });
+      const totalPages=Math.ceil(filtered.length/PER_PAGE)||1;
+      const paginated=filtered.slice((page-1)*PER_PAGE,page*PER_PAGE);
+
+      function initials(c){
+        const p=(c.prenom||'').trim();const n=(c.nom||'').trim();
+        return((p[0]||'')+(n[0]||'')).toUpperCase()||'?';
+      }
+      function fullName(c){return `${c.prenom||''} ${c.nom||''}`.trim()||c.email||'—';}
+
+      function openNew(){setCForm({...EMPTY_CLIENT});setView('new');setMsg('');}
+      function openEdit(c){setCForm({...EMPTY_CLIENT,...c,groupes:c.groupes||[]});setView('edit');setSelectedClient(c);setMsg('');}
+      function openDetail(c){setSelectedClient(c);setView('detail');loadNotes(c.id);setMsg('');}
+
+      async function loadNotes(clientId){
+        const{data}=await sb.from('notes').select('*').eq('client_id',clientId).order('created_at',{ascending:false});
+        setClientNotes(data||[]);
+      }
+
+      async function saveClient(){
+        if(!cForm.email&&!cForm.nom){setMsg('❌ Email ou nom requis');return;}
+        setSaving(true);
+        const body={prenom:cForm.prenom||null,nom:cForm.nom||null,email:cForm.email||null,telephone:cForm.telephone||null,genre:cForm.genre||null,objectif:cForm.objectif||null,niveau:cForm.niveau||null,groupes:cForm.groupes||[],statut:cForm.statut||'actif',note_interne:cForm.note_interne||null,app:cForm.app||null,plan_nom:cForm.plan_nom||null,programme_id:cForm.programme_id||null,updated_at:new Date().toISOString()};
+        if(view==='edit'&&selectedClient){
+          const{error}=await sb.from('clients').update(body).eq('id',selectedClient.id);
+          if(error){setMsg('❌ '+error.message);}else{setMsg('✅ Client mis à jour');loadData();setTimeout(()=>{setView(null);setSelectedClient(null);},800);}
+        } else {
+          const{error}=await sb.from('clients').insert({...body,type:'particulier',source:'crm'});
+          if(error){setMsg('❌ '+error.message);}else{setMsg('✅ Client ajouté');loadData();setTimeout(()=>setView(null),800);}
+        }
+        setSaving(false);
+      }
+
+      async function deleteClient(id){
+        if(!confirm('Supprimer ce client ?'))return;
+        await sb.from('clients').delete().eq('id',id);
+        setView(null);setSelectedClient(null);loadData();
+      }
+
+      async function updateClientField(id,field,value){
+        await sb.from('clients').update({[field]:value,updated_at:new Date().toISOString()}).eq('id',id);
+        setClients(prev=>prev.map(c=>c.id===id?{...c,[field]:value}:c));
+        if(selectedClient?.id===id)setSelectedClient(prev=>({...prev,[field]:value}));
+      }
+
+      async function toggleGroupe(clientId,grpNom){
+        const client=clients.find(c=>c.id===clientId);
+        if(!client)return;
+        const grps=client.groupes||[];
+        const newGrps=grps.includes(grpNom)?grps.filter(g=>g!==grpNom):[...grps,grpNom];
+        await updateClientField(clientId,'groupes',newGrps);
+      }
+
+      async function addNote(){
+        if(!newNote.trim()||!selectedClient)return;
+        const{data}=await sb.from('notes').insert({client_id:selectedClient.id,contenu:newNote.trim(),type:'note'}).select().single();
+        if(data){setClientNotes(prev=>[data,...prev]);setNewNote('');}
+      }
+
+      async function deleteNote(id){
+        await sb.from('notes').delete().eq('id',id);
+        setClientNotes(prev=>prev.filter(n=>n.id!==id));
+      }
+
+      async function addGroupe(){
+        if(!newGroupName.trim())return;
+        const{data,error}=await sb.from('client_groupes').insert({nom:newGroupName.trim(),couleur:newGroupColor}).select().single();
+        if(!error&&data){setGroupes(prev=>[...prev,data]);setNewGroupName('');}
+        else if(error)setMsg('❌ '+error.message);
+      }
+
+      async function deleteGroupe(id){
+        await sb.from('client_groupes').delete().eq('id',id);
+        setGroupes(prev=>prev.filter(g=>g.id!==id));
+      }
+
+      // ── Section helper
+      const Sec=(title,children)=>h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:20,marginBottom:14}},
+        title&&h('div',{style:{fontSize:12,fontWeight:700,color:C.white,marginBottom:14,paddingBottom:10,borderBottom:`1px solid ${C.border}`}},title),
+        ...children
+      );
+
+      // ── Groups management modal
+      const GroupsModal=()=>h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:e=>{if(e.target===e.currentTarget)setShowGroupsModal(false);}},
+        h('div',{style:{background:C.card,borderRadius:20,padding:28,width:'100%',maxWidth:480,maxHeight:'80vh',display:'flex',flexDirection:'column'}},
+          h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}},
+            h('h2',{style:{fontSize:18,fontWeight:700,color:C.white,margin:0}},'Gérer les groupes'),
+            h('button',{onClick:()=>setShowGroupsModal(false),style:{background:'transparent',border:'none',color:C.muted,fontSize:22,cursor:'pointer'}},'✕')
           ),
-          h('div',{style:{fontSize:12,color:C.muted,background:`${C.blue}22`,padding:'6px 12px',borderRadius:8}},`✅ Sync. le ${new Date().toLocaleDateString('fr-FR')}`)
-        ),
-        // Filters
-        h('div',{style:{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}},
-          h('input',{style:{...inp,width:240},placeholder:'🔍 Rechercher...',value:search,onChange:e=>setSearch(e.target.value)}),
-          h('select',{style:{...inp,width:180},value:filterObj,onChange:e=>setFilterObj(e.target.value)},
-            h('option',{value:''},'Tous objectifs'),
-            ...objectifs.map(o=>h('option',{key:o,value:o},o))
+          h('div',{style:{overflowY:'auto',flex:1,marginBottom:16}},
+            groupes.length===0?h('div',{style:{textAlign:'center',color:C.muted,padding:24}},'Aucun groupe')
+            :groupes.map(g=>h('div',{key:g.id,style:{display:'flex',alignItems:'center',gap:12,padding:'10px 12px',borderRadius:10,background:C.soft,marginBottom:8,border:`1px solid ${C.border}`}},
+              h('div',{style:{width:14,height:14,borderRadius:'50%',background:g.couleur,flexShrink:0}}),
+              h('span',{style:{fontSize:13,color:C.white,flex:1,fontWeight:600}},g.nom),
+              h('span',{style:{fontSize:11,color:C.muted}},`${clients.filter(c=>(c.groupes||[]).includes(g.nom)).length} clients`),
+              h('button',{onClick:()=>deleteGroupe(g.id),style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:14}},'🗑')
+            ))
           ),
-          h('select',{style:{...inp,width:160},value:filterGrp,onChange:e=>setFilterGrp(e.target.value)},
-            h('option',{value:''},'Tous groupes'),
-            ...groupes.map(g=>h('option',{key:g,value:g},g))
-          )
-        ),
-        // Stats row
-        h('div',{style:{display:'flex',gap:10,marginBottom:20,flexWrap:'wrap'}},
-          ...Object.entries({'Lose Weight':C.blue,'Build Muscle':C.green,'Sculpt Your Body':C.gold,'Get Fit':C.purple}).map(([obj,color])=>{
-            const n=AZEOO_CLIENTS.filter(c=>c.objectif===obj).length;
-            return h('div',{key:obj,style:{background:`${color}15`,border:`1px solid ${color}33`,borderRadius:8,padding:'8px 14px',fontSize:12}},
-              h('span',{style:{color}},'● '),
-              h('span',{style:{color:C.white,fontWeight:600}},obj),
-              h('span',{style:{color:C.muted,marginLeft:6}},n)
-            );
-          })
-        ),
-        // Table
-        h('div',{style:card},
-          h('table',{style:{width:'100%',borderCollapse:'collapse'}},
-            h('thead',null,h('tr',null,
-              ...['Client','Email','App','Groupe','Objectif','Niveau'].map(l=>h('th',{key:l,style:th},l))
-            )),
-            h('tbody',null,...filtered.map((c,i)=>h('tr',{key:i,style:{background:i%2?'rgba(255,255,255,0.01)':'transparent'}},
-              h('td',{style:td},h('div',{style:{fontWeight:500}},c.nom)),
-              h('td',{style:{...td,color:C.muted,fontSize:12}},c.email),
-              h('td',{style:{...td,fontSize:12}},
-                c.app.includes('Apple') && h('span',{style:{marginRight:4}},'🍎'),
-                c.app.includes('Android') && h('span',null,'🤖')
-              ),
-              h('td',{style:td},c.groupe!=='—'?h('span',{style:badge(C.purple)},c.groupe):'—'),
-              h('td',{style:td},c.objectif!=='—'?h('span',{style:badge(goalColors[c.objectif]||C.muted)},c.objectif):'—'),
-              h('td',{style:td},c.niveau!=='—'?h('span',{style:badge(niveauColors[c.niveau]||C.muted)},c.niveau):'—')
-            )))
+          h('div',{style:{borderTop:`1px solid ${C.border}`,paddingTop:16}},
+            h('div',{style:{display:'flex',gap:8,alignItems:'center'}},
+              h('input',{type:'color',value:newGroupColor,onChange:e=>setNewGroupColor(e.target.value),style:{width:36,height:36,borderRadius:6,border:`1px solid ${C.border}`,cursor:'pointer',padding:2,background:'transparent',flexShrink:0}}),
+              h('input',{value:newGroupName,onChange:e=>setNewGroupName(e.target.value),onKeyDown:e=>e.key==='Enter'&&addGroupe(),placeholder:'Nom du groupe...',style:{...inp,flex:1}}),
+              h('button',{onClick:addGroupe,disabled:!newGroupName.trim(),style:{...btn,opacity:!newGroupName.trim()?0.5:1,flexShrink:0}},'Créer')
+            )
           )
         )
       );
+
+      // ── CLIENT EDITOR (new/edit)
+      if(view==='new'||view==='edit'){
+        const isEdit=view==='edit';
+        return h('div',null,
+          h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}},
+            h('div',{style:{display:'flex',alignItems:'center',gap:12}},
+              h('button',{onClick:()=>setView(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'6px 12px',cursor:'pointer',fontSize:13}},'← Clients'),
+              h('h1',{style:{fontSize:20,fontWeight:700,color:C.white,margin:0}},isEdit?fullName(selectedClient)||'Modifier le client':'Nouveau client')
+            ),
+            h('div',{style:{display:'flex',gap:10}},
+              isEdit&&h('button',{onClick:()=>deleteClient(selectedClient.id),style:{background:'rgba(224,85,85,0.12)',border:'none',color:'#e05555',borderRadius:10,padding:'10px 16px',cursor:'pointer',fontSize:13,fontWeight:600}},'Supprimer'),
+              h('button',{onClick:saveClient,disabled:saving,style:{...btn,opacity:saving?0.5:1}},saving?'Enregistrement...':'💾 Enregistrer')
+            )
+          ),
+          msg&&h('div',{style:{padding:'10px 14px',borderRadius:8,background:msg.startsWith('❌')?'rgba(224,85,85,0.15)':'rgba(74,222,128,0.15)',color:msg.startsWith('❌')?'#e05555':C.green,marginBottom:16,fontSize:13}},msg),
+          h('div',{style:{display:'grid',gridTemplateColumns:'1fr 300px',gap:14,alignItems:'start'}},
+            h('div',null,
+              Sec('👤 Identité',[
+                h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}},
+                  h('div',null,h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Prénom'),h('input',{value:cForm.prenom||'',onChange:e=>setCForm(p=>({...p,prenom:e.target.value})),placeholder:'Prénom',style:{...inp,width:'100%'}})),
+                  h('div',null,h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Nom'),h('input',{value:cForm.nom||'',onChange:e=>setCForm(p=>({...p,nom:e.target.value})),placeholder:'Nom',style:{...inp,width:'100%'}}))
+                ),
+                h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:12}},
+                  h('div',null,h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Email *'),h('input',{type:'email',value:cForm.email||'',onChange:e=>setCForm(p=>({...p,email:e.target.value})),placeholder:'email@exemple.com',style:{...inp,width:'100%'}})),
+                  h('div',null,h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Téléphone'),h('input',{value:cForm.telephone||'',onChange:e=>setCForm(p=>({...p,telephone:e.target.value})),placeholder:'+33 6 ...',style:{...inp,width:'100%'}}))
+                ),
+                h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}},
+                  h('div',null,h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Genre'),
+                    h('select',{value:cForm.genre||'',onChange:e=>setCForm(p=>({...p,genre:e.target.value})),style:{...inp,width:'100%'}},
+                      h('option',{value:''},'Non précisé'),h('option',{value:'femme'},'Femme'),h('option',{value:'homme'},'Homme')
+                    )
+                  ),
+                  h('div',null,h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Application'),
+                    h('select',{value:cForm.app||'',onChange:e=>setCForm(p=>({...p,app:e.target.value})),style:{...inp,width:'100%'}},
+                      h('option',{value:''},'—'),h('option',{value:'Apple'},'🍎 Apple'),h('option',{value:'Android'},'🤖 Android'),h('option',{value:'Apple/Android'},'🍎🤖 Les deux')
+                    )
+                  )
+                )
+              ]),
+              Sec('🏋️ Objectif & Niveau',[
+                h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}},
+                  h('div',null,h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Objectif'),
+                    h('select',{value:cForm.objectif||'',onChange:e=>setCForm(p=>({...p,objectif:e.target.value})),style:{...inp,width:'100%'}},
+                      h('option',{value:''},'—'),h('option',{value:'Lose Weight'},'Lose Weight'),h('option',{value:'Build Muscle'},'Build Muscle'),h('option',{value:'Sculpt Your Body'},'Sculpt Your Body'),h('option',{value:'Get Fit'},'Get Fit')
+                    )
+                  ),
+                  h('div',null,h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Niveau'),
+                    h('select',{value:cForm.niveau||'',onChange:e=>setCForm(p=>({...p,niveau:e.target.value})),style:{...inp,width:'100%'}},
+                      h('option',{value:''},'—'),h('option',{value:'Beginner'},'Débutant'),h('option',{value:'Intermediate'},'Intermédiaire'),h('option',{value:'Advanced'},'Avancé')
+                    )
+                  )
+                )
+              ]),
+              Sec('👥 Groupes',[
+                h('div',{style:{display:'flex',gap:8,flexWrap:'wrap'}},
+                  ...groupes.map(g=>{
+                    const sel=(cForm.groupes||[]).includes(g.nom);
+                    return h('button',{key:g.id,onClick:()=>setCForm(p=>({...p,groupes:sel?(p.groupes||[]).filter(x=>x!==g.nom):[...(p.groupes||[]),g.nom]})),style:{padding:'6px 14px',borderRadius:20,border:`1.5px solid ${sel?g.couleur:C.border}`,background:sel?g.couleur+'22':C.soft,color:sel?g.couleur:C.muted,cursor:'pointer',fontSize:12,fontWeight:600}},g.nom);
+                  }),
+                  h('button',{onClick:()=>setShowGroupsModal(true),style:{padding:'6px 14px',borderRadius:20,border:`1px dashed ${C.border}`,background:'transparent',color:C.muted,cursor:'pointer',fontSize:12}},'+ Gérer')
+                )
+              ]),
+              Sec('📝 Note interne',[
+                h('textarea',{value:cForm.note_interne||'',onChange:e=>setCForm(p=>({...p,note_interne:e.target.value})),placeholder:'Note visible uniquement par vous...',style:{...inp,width:'100%',height:80,resize:'vertical'}})
+              ])
+            ),
+            h('div',null,
+              Sec('📊 Statut',[
+                h('div',{style:{display:'flex',gap:8}},
+                  ...['actif','inactif','archive'].map(v=>h('button',{key:v,onClick:()=>setCForm(p=>({...p,statut:v})),style:{flex:1,padding:'9px 4px',borderRadius:8,border:`1.5px solid ${cForm.statut===v?(v==='actif'?C.green:v==='inactif'?C.gold:C.muted):C.border}`,background:cForm.statut===v?(v==='actif'?C.green+'22':v==='inactif'?C.gold+'22':'rgba(255,255,255,0.05)'):'transparent',color:cForm.statut===v?(v==='actif'?C.green:v==='inactif'?C.gold:C.muted):C.muted,cursor:'pointer',fontSize:11,fontWeight:600,textAlign:'center',textTransform:'capitalize'}},v))
+                )
+              ]),
+              Sec('💎 Abonnement',[
+                h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Formule attribuée'),
+                h('select',{value:cForm.plan_nom||'',onChange:e=>setCForm(p=>({...p,plan_nom:e.target.value})),style:{...inp,width:'100%'}},
+                  h('option',{value:''},'Aucun abonnement'),
+                  ...plans.map(pl=>h('option',{key:pl.id,value:pl.name},`${pl.name} — ${pl.price}€/${pl.billing_cycle==='monthly'?'mois':'an'}`))
+                )
+              ]),
+              Sec('🏋️ Programme',[
+                h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},'Programme assigné'),
+                h('select',{value:cForm.programme_id||'',onChange:e=>setCForm(p=>({...p,programme_id:e.target.value})),style:{...inp,width:'100%'}},
+                  h('option',{value:''},'Aucun programme'),
+                  ...programmes.map(pr=>h('option',{key:pr.id,value:pr.id},pr.titre))
+                )
+              ])
+            )
+          ),
+          showGroupsModal&&h(GroupsModal,null)
+        );
+      }
+
+      // ── CLIENT DETAIL VIEW
+      if(view==='detail'&&selectedClient){
+        const c=selectedClient;
+        const progName=c.programme_id?programmes.find(p=>p.id===c.programme_id)?.titre:null;
+        return h('div',null,
+          h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24,flexWrap:'wrap',gap:12}},
+            h('div',{style:{display:'flex',alignItems:'center',gap:12}},
+              h('button',{onClick:()=>setView(null),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'6px 12px',cursor:'pointer',fontSize:13}},'← Clients'),
+              h('div',{style:{width:40,height:40,borderRadius:'50%',background:`${C.gold}33`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:15,fontWeight:700,color:C.gold}},initials(c)),
+              h('div',null,
+                h('div',{style:{fontSize:18,fontWeight:700,color:C.white}},fullName(c)),
+                h('div',{style:{fontSize:12,color:C.muted}},c.email||'—')
+              )
+            ),
+            h('div',{style:{display:'flex',gap:8}},
+              isAdmin&&h('button',{onClick:()=>openEdit(c),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'✏️ Éditer'),
+              isAdmin&&h('button',{onClick:()=>deleteClient(c.id),style:{background:'transparent',border:`1px solid ${C.red}33`,color:C.red,borderRadius:8,padding:'7px 14px',cursor:'pointer',fontSize:13}},'🗑')
+            )
+          ),
+          msg&&h('div',{style:{padding:'10px 14px',borderRadius:8,background:msg.startsWith('❌')?'rgba(224,85,85,0.15)':'rgba(74,222,128,0.15)',color:msg.startsWith('❌')?'#e05555':C.green,marginBottom:14,fontSize:13}},msg),
+          h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:14,marginBottom:14}},
+            // Info card
+            h('div',{style:{...card}},
+              h('div',{style:{fontSize:11,fontWeight:700,color:C.muted,marginBottom:14,textTransform:'uppercase',letterSpacing:'0.08em'}},'Informations'),
+              ...[
+                ['Email',c.email||'—'],['Téléphone',c.telephone||'—'],['Genre',c.genre||'—'],['App',c.app||'—'],
+                ['Inscrit le',c.created_at?new Date(c.created_at).toLocaleDateString('fr-FR'):'—']
+              ].map(([l,v])=>h('div',{key:l,style:{display:'flex',justifyContent:'space-between',marginBottom:8,fontSize:13}},
+                h('span',{style:{color:C.muted}},l),h('span',{style:{color:C.white,fontWeight:500}},v)
+              ))
+            ),
+            // Fitness card
+            h('div',{style:{...card}},
+              h('div',{style:{fontSize:11,fontWeight:700,color:C.muted,marginBottom:14,textTransform:'uppercase',letterSpacing:'0.08em'}},'Fitness'),
+              h('div',{style:{marginBottom:12}},
+                h('div',{style:{fontSize:11,color:C.muted,marginBottom:4}},'Objectif'),
+                c.objectif?h('span',{style:{background:`${goalColors[c.objectif]||C.muted}22`,color:goalColors[c.objectif]||C.muted,fontSize:12,fontWeight:700,padding:'4px 12px',borderRadius:100}},c.objectif):h('span',{style:{color:C.muted,fontSize:12}},'Non défini')
+              ),
+              h('div',{style:{marginBottom:12}},
+                h('div',{style:{fontSize:11,color:C.muted,marginBottom:4}},'Niveau'),
+                c.niveau?h('span',{style:{background:`${niveauColors[c.niveau]||C.muted}22`,color:niveauColors[c.niveau]||C.muted,fontSize:12,fontWeight:700,padding:'4px 12px',borderRadius:100}},c.niveau==='Beginner'?'Débutant':c.niveau==='Intermediate'?'Intermédiaire':'Avancé'):h('span',{style:{color:C.muted,fontSize:12}},'Non défini')
+              ),
+              h('div',null,
+                h('div',{style:{fontSize:11,color:C.muted,marginBottom:6}},'Programme assigné'),
+                h('select',{value:c.programme_id||'',onChange:e=>updateClientField(c.id,'programme_id',e.target.value||null),style:{...inp,width:'100%',fontSize:12}},
+                  h('option',{value:''},'Aucun programme'),
+                  ...programmes.map(pr=>h('option',{key:pr.id,value:pr.id},pr.titre))
+                )
+              )
+            ),
+            // Subscription card
+            h('div',{style:{...card}},
+              h('div',{style:{fontSize:11,fontWeight:700,color:C.muted,marginBottom:14,textTransform:'uppercase',letterSpacing:'0.08em'}},'Abonnement & Statut'),
+              h('div',{style:{marginBottom:12}},
+                h('div',{style:{fontSize:11,color:C.muted,marginBottom:6}},'Formule'),
+                h('select',{value:c.plan_nom||'',onChange:e=>updateClientField(c.id,'plan_nom',e.target.value||null),style:{...inp,width:'100%',fontSize:12}},
+                  h('option',{value:''},'Aucun abonnement'),
+                  ...plans.map(pl=>h('option',{key:pl.id,value:pl.name},pl.name))
+                )
+              ),
+              h('div',{style:{marginBottom:12}},
+                h('div',{style:{fontSize:11,color:C.muted,marginBottom:6}},'Statut'),
+                h('div',{style:{display:'flex',gap:6}},
+                  ...['actif','inactif','archive'].map(v=>h('button',{key:v,onClick:()=>updateClientField(c.id,'statut',v),style:{flex:1,padding:'6px 4px',borderRadius:6,border:`1px solid ${c.statut===v?(v==='actif'?C.green:v==='inactif'?C.gold:C.border):C.border}`,background:c.statut===v?(v==='actif'?C.green+'22':v==='inactif'?C.gold+'22':'rgba(255,255,255,0.05)'):'transparent',color:c.statut===v?(v==='actif'?C.green:v==='inactif'?C.gold:C.white):C.muted,cursor:'pointer',fontSize:10,fontWeight:600,textTransform:'capitalize'}},v))
+                )
+              ),
+              h('div',null,
+                h('div',{style:{fontSize:11,color:C.muted,marginBottom:6}},'Groupes'),
+                h('div',{style:{display:'flex',gap:6,flexWrap:'wrap'}},
+                  ...groupes.map(g=>{
+                    const sel=(c.groupes||[]).includes(g.nom);
+                    return h('button',{key:g.id,onClick:()=>toggleGroupe(c.id,g.nom),style:{padding:'4px 10px',borderRadius:20,border:`1px solid ${sel?g.couleur:C.border}`,background:sel?g.couleur+'22':'transparent',color:sel?g.couleur:C.muted,cursor:'pointer',fontSize:11,fontWeight:600}},g.nom);
+                  })
+                )
+              )
+            )
+          ),
+
+          // Notes section
+          h('div',{style:{...card}},
+            h('div',{style:{fontSize:12,fontWeight:700,color:C.white,marginBottom:14,paddingBottom:10,borderBottom:`1px solid ${C.border}`}},'📝 Notes'),
+            h('div',{style:{display:'flex',gap:10,marginBottom:16}},
+              h('textarea',{value:newNote,onChange:e=>setNewNote(e.target.value),placeholder:'Ajouter une note...',onKeyDown:e=>{if(e.key==='Enter'&&e.ctrlKey)addNote();},style:{...inp,flex:1,height:60,resize:'vertical'}}),
+              h('button',{onClick:addNote,disabled:!newNote.trim(),style:{...btn,flexShrink:0,alignSelf:'flex-start',opacity:!newNote.trim()?0.5:1}},'Ajouter')
+            ),
+            clientNotes.length===0?h('div',{style:{textAlign:'center',color:C.muted,padding:'20px 0',fontSize:13}},'Aucune note pour ce client')
+            :h('div',{style:{display:'flex',flexDirection:'column',gap:8}},
+              ...clientNotes.map(n=>h('div',{key:n.id,style:{background:C.soft,borderRadius:10,padding:'10px 14px',border:`1px solid ${C.border}`,display:'flex',gap:10}},
+                h('div',{style:{flex:1}},
+                  h('div',{style:{fontSize:13,color:C.white,lineHeight:1.5}},n.contenu),
+                  h('div',{style:{fontSize:10,color:C.muted,marginTop:4}},new Date(n.created_at).toLocaleDateString('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}))
+                ),
+                h('button',{onClick:()=>deleteNote(n.id),style:{background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:12,flexShrink:0}},'🗑')
+              ))
+            )
+          )
+        );
+      }
+
+      // ── LIST VIEW
+      const statCounts={total:clients.length,actif:clients.filter(c=>c.statut==='actif').length,inactif:clients.filter(c=>c.statut==='inactif').length};
+      return h('div',null,
+        // Header
+        h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:24,flexWrap:'wrap',gap:12}},
+          h('div',null,
+            h('h1',{style:{fontSize:24,fontWeight:700,color:C.white}},'Clients'),
+            h('p',{style:{color:C.muted,fontSize:14,marginTop:4}},`Gérez votre base clients, leurs groupes, programmes et abonnements`)
+          ),
+          h('div',{style:{display:'flex',gap:8}},
+            isAdmin&&h('button',{onClick:()=>setShowGroupsModal(true),style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:10,padding:'10px 16px',cursor:'pointer',fontSize:13,fontWeight:600}},'👥 Gérer les groupes'),
+            isAdmin&&h('button',{onClick:openNew,style:{...btn}},'+ Ajouter un client')
+          )
+        ),
+
+        // Stats bar
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:20}},
+          h('div',{style:{...card,textAlign:'center',padding:16}},h('div',{style:{fontSize:24,fontWeight:800,color:C.white}},statCounts.total),h('div',{style:{fontSize:11,color:C.muted,marginTop:4,textTransform:'uppercase',letterSpacing:'0.06em'}},'Total clients')),
+          h('div',{style:{...card,textAlign:'center',padding:16}},h('div',{style:{fontSize:24,fontWeight:800,color:C.green}},statCounts.actif),h('div',{style:{fontSize:11,color:C.muted,marginTop:4,textTransform:'uppercase',letterSpacing:'0.06em'}},'Actifs')),
+          h('div',{style:{...card,textAlign:'center',padding:16}},h('div',{style:{fontSize:24,fontWeight:800,color:C.gold}},statCounts.inactif),h('div',{style:{fontSize:11,color:C.muted,marginTop:4,textTransform:'uppercase',letterSpacing:'0.06em'}},'Inactifs')),
+          h('div',{style:{...card,textAlign:'center',padding:16}},h('div',{style:{fontSize:24,fontWeight:800,color:C.purple}},clients.filter(c=>c.plan_nom).length),h('div',{style:{fontSize:11,color:C.muted,marginTop:4,textTransform:'uppercase',letterSpacing:'0.06em'}},'Avec abonnement'))
+        ),
+
+        // Filters
+        h('div',{style:{display:'flex',gap:10,marginBottom:20,flexWrap:'wrap',alignItems:'center'}},
+          h('div',{style:{position:'relative',flex:1,minWidth:200}},
+            h('span',{style:{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:C.muted,fontSize:14}},'🔍'),
+            h('input',{style:{...inp,width:'100%',paddingLeft:36},placeholder:'Rechercher un client...',value:search,onChange:e=>{setSearch(e.target.value);setPage(1);}})
+          ),
+          h('select',{style:{...inp,width:140},value:filterStatut,onChange:e=>{setFilterStatut(e.target.value);setPage(1);}},
+            h('option',{value:''},'État : Tous'),h('option',{value:'actif'},'Actif'),h('option',{value:'inactif'},'Inactif'),h('option',{value:'archive'},'Archivé')
+          ),
+          h('select',{style:{...inp,width:160},value:filterGroupe,onChange:e=>{setFilterGroupe(e.target.value);setPage(1);}},
+            h('option',{value:''},'Groupe : Tous'),
+            ...groupes.map(g=>h('option',{key:g.id,value:g.nom},g.nom))
+          ),
+          h('span',{style:{fontSize:12,color:C.muted,whiteSpace:'nowrap'}},`${filtered.length} client${filtered.length!==1?'s':''}`)
+        ),
+
+        // Table
+        loading?h('div',{style:{textAlign:'center',color:C.muted,padding:60}},'Chargement...')
+        :h('div',{style:card},
+          filtered.length===0?h('div',{style:{textAlign:'center',padding:48,color:C.muted}},
+            h('div',{style:{fontSize:36,marginBottom:12}},'👥'),
+            h('div',{style:{fontWeight:600,color:C.white,marginBottom:8}},'Aucun client trouvé'),
+            h('div',{style:{fontSize:13}},'Modifiez vos filtres ou ajoutez un nouveau client'),
+            isAdmin&&h('button',{onClick:openNew,style:{...btn,marginTop:16,fontSize:13}},'+ Ajouter un client')
+          )
+          :h('table',{style:{width:'100%',borderCollapse:'collapse'}},
+            h('thead',null,h('tr',null,
+              ...['Client','Groupes','Objectif','Programme','Abonnement','Statut',''].map(l=>h('th',{key:l,style:th},l))
+            )),
+            h('tbody',null,...paginated.map((c,i)=>{
+              const progName=c.programme_id?programmes.find(p=>p.id===c.programme_id)?.titre:null;
+              return h('tr',{key:c.id,style:{background:i%2?'rgba(255,255,255,0.01)':'transparent',cursor:'pointer'},
+                onClick:()=>openDetail(c),
+                onMouseEnter:e=>e.currentTarget.style.background='rgba(255,255,255,0.04)',
+                onMouseLeave:e=>e.currentTarget.style.background=i%2?'rgba(255,255,255,0.01)':'transparent'
+              },
+                h('td',{style:td},
+                  h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+                    h('div',{style:{width:36,height:36,borderRadius:'50%',background:`${C.gold}22`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,color:C.gold,flexShrink:0}},initials(c)),
+                    h('div',null,
+                      h('div',{style:{fontWeight:600,color:C.white,fontSize:13}},fullName(c)),
+                      h('div',{style:{fontSize:11,color:C.muted}},c.email||''),
+                      c.app&&h('span',{style:{fontSize:10,color:C.muted}},c.app.includes('Apple')?'🍎':'',' ',c.app.includes('Android')?'🤖':'')
+                    )
+                  )
+                ),
+                h('td',{style:td},
+                  h('div',{style:{display:'flex',gap:4,flexWrap:'wrap'}},
+                    ...(c.groupes||[]).map(g=>{
+                      const grp=groupes.find(x=>x.nom===g);
+                      return h('span',{key:g,style:{background:grp?grp.couleur+'22':'rgba(255,255,255,0.08)',color:grp?grp.couleur:C.muted,fontSize:10,fontWeight:600,padding:'2px 8px',borderRadius:20,border:`1px solid ${grp?grp.couleur+'44':C.border}`}},g);
+                    }),
+                    (c.groupes||[]).length===0&&h('span',{style:{color:C.muted,fontSize:12}},'—')
+                  )
+                ),
+                h('td',{style:td},c.objectif?h('span',{style:{background:`${goalColors[c.objectif]||C.muted}22`,color:goalColors[c.objectif]||C.muted,fontSize:11,fontWeight:600,padding:'3px 10px',borderRadius:20}},c.objectif):h('span',{style:{color:C.muted,fontSize:12}},'—')),
+                h('td',{style:{...td,fontSize:12,color:C.muted}},progName||h('span',{style:{color:C.muted,fontSize:12}},'—')),
+                h('td',{style:td},c.plan_nom?h('span',{style:{background:`${C.purple}22`,color:C.purple,fontSize:11,fontWeight:600,padding:'3px 10px',borderRadius:20}},c.plan_nom):h('span',{style:{color:C.muted,fontSize:12}},'—')),
+                h('td',{style:td},h('span',{style:{background:c.statut==='actif'?`${C.green}22`:c.statut==='inactif'?`${C.gold}22`:'rgba(255,255,255,0.06)',color:c.statut==='actif'?C.green:c.statut==='inactif'?C.gold:C.muted,fontSize:11,fontWeight:600,padding:'3px 10px',borderRadius:20}},c.statut||'actif')),
+                h('td',{style:{...td,textAlign:'right'}},
+                  h('button',{onClick:e=>{e.stopPropagation();openEdit(c);},style:{background:'transparent',border:`1px solid ${C.border}`,color:C.muted,borderRadius:6,padding:'4px 8px',cursor:'pointer',fontSize:11}},'✏️')
+                )
+              );
+            }))
+          )
+        ),
+
+        // Pagination
+        filtered.length>PER_PAGE&&h('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',gap:10,marginTop:16}},
+          h('button',{onClick:()=>setPage(p=>Math.max(1,p-1)),disabled:page===1,style:{background:'transparent',border:`1px solid ${C.border}`,color:page===1?C.border:C.muted,borderRadius:8,padding:'6px 14px',cursor:page===1?'not-allowed':'pointer'}},'←'),
+          h('span',{style:{fontSize:13,color:C.muted}},`${page} / ${totalPages}`),
+          h('button',{onClick:()=>setPage(p=>Math.min(totalPages,p+1)),disabled:page===totalPages,style:{background:'transparent',border:`1px solid ${C.border}`,color:page===totalPages?C.border:C.muted,borderRadius:8,padding:'6px 14px',cursor:page===totalPages?'not-allowed':'pointer'}},'→')
+        ),
+
+        showGroupsModal&&h(GroupsModal,null)
+      );
     }
+
 
     // ── Programmes ────────────────────────────────────────────────────────────
     function Programmes() {
