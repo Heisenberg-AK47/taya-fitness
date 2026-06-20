@@ -18,24 +18,16 @@
 <div id="navbar-placeholder"></div>
 <main>
 
-<section class="page-hero">
-  <div class="container">
-    <span class="label">Abonnements</span>
-    <h1>Choisis ton offre</h1>
-    <p>Sans engagement · Résiliation à tout moment · Crédit d'impôt 50% éligible</p>
-  </div>
-</section>
-
-<!-- Toggle mensuel/annuel -->
-<section class="billing-toggle-section">
-  <div class="container">
-    <div class="billing-toggle">
-      <span class="toggle-label active" id="label-mensuel">Mensuel</span>
-      <label class="toggle-switch">
-        <input type="checkbox" id="toggle-annuel" />
-        <span class="toggle-track"></span>
-      </label>
-      <span class="toggle-label" id="label-annuel">Annuel <span class="save-badge">-20%</span></span>
+<!-- Hero vidéo offres -->
+<section class="offres-video-hero">
+  <video class="offres-hero-video" autoplay muted loop playsinline>
+    <source src="https://esylzsacjkimcqxllhwd.supabase.co/storage/v1/object/public/media/Videos/Mon%20Offre.mp4" type="video/mp4">
+  </video>
+  <div class="offres-video-overlay">
+    <div class="container">
+      <span class="label">Abonnements</span>
+      <h1>Choisis ton offre</h1>
+      <p>Sans engagement · Résiliation à tout moment · Crédit d'impôt 50% éligible</p>
     </div>
   </div>
 </section>
@@ -43,6 +35,16 @@
 <!-- Cartes offres -->
 <section class="section offres-detail-section">
   <div class="container">
+
+    <!-- Toggle mensuel/annuel – juste au-dessus des cartes -->
+    <div class="billing-toggle-inline">
+      <span class="toggle-label active" id="label-mensuel">Mensuel</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="toggle-annuel" />
+        <span class="toggle-track"></span>
+      </label>
+      <span class="toggle-label" id="label-annuel">Annuel <span class="save-badge">-20%</span></span>
+    </div>
     <div class="offres-detail-grid" id="plans-grid">
       <div class="plans-loading" style="grid-column:1/-1;text-align:center;padding:60px 0;color:rgba(255,255,255,0.4);font-size:14px;">
         Chargement des formules…
