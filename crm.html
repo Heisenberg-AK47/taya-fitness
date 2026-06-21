@@ -3655,12 +3655,12 @@
 
     // ── Prospects ──────────────────────────────────────────────────────────
     function Prospects() {
-      const [subs, setSubs] = React.useState([]);
-      const [loading, setLoading] = React.useState(true);
-      const [search, setSearch] = React.useState('');
-      const [filter, setFilter] = React.useState('all'); // all | active | unsub
+      const [subs, setSubs] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [search, setSearch] = useState('');
+      const [filter, setFilter] = useState('all'); // all | active | unsub
 
-      React.useEffect(() => {
+      useEffect(() => {
         sb.from('newsletter_subscribers')
           .select('*')
           .order('subscribed_at', {ascending: false})
