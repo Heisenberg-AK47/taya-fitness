@@ -2188,42 +2188,162 @@
     }
 
     // ── Revenus ──────────────────────────────────────────────────────────────
+    const STRIPE_FN = 'https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/stripe-financials';
+    const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzeWx6c2FjamtpbWNxeGxsaHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDE3MzEsImV4cCI6MjA5NTY3NzczMX0.3BZsEh6IaFqKHsW9MX3mhxWbvSHEcAqKhyOrJFZGAoA';
+
+    function fmtEur(n, currency) {
+      return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: currency||'EUR', maximumFractionDigits: 0 }).format((n||0) / 100);
+    }
+    function fmtTs(ts) { return new Date(ts * 1000).toLocaleDateString('fr-FR'); }
+
+    function RevBarChart({ data }) {
+      if (!data || !data.length) return null;
+      const max = Math.max(...data.map(d => d.amount), 1);
+      const W = 640, H = 160, PAD = 28;
+      const bw = Math.floor((W - PAD * 2) / data.length) - 4;
+      return h('svg', { viewBox: `0 0 ${W} ${H + 26}`, style: { width: '100%', height: 'auto' } },
+        ...data.map((d, i) => {
+          const barH = Math.max(2, (d.amount / max) * H);
+          const x = PAD + i * ((W - PAD * 2) / data.length) + 2;
+          const y = H - barH;
+          return h('g', { key: d.month },
+            h('rect', { x, y, width: bw, height: barH, rx: 4, fill: i === data.length - 1 ? C.gold : C.blue, opacity: 0.82 }),
+            h('text', { x: x + bw / 2, y: H + 16, textAnchor: 'middle', fontSize: 10, fill: C.muted }, d.month.slice(5)),
+            d.amount > 0 ? h('text', { x: x + bw / 2, y: y - 4, textAnchor: 'middle', fontSize: 9, fill: C.white }, Math.round(d.amount / 100) + '€') : null
+          );
+        })
+      );
+    }
+
     function Revenus() {
-      const [abos,setAbos]=useState([]);
-      const [loading,setLoading]=useState(true);
-      useEffect(()=>{
-        sb.from('abonnements').select('plan,statut').eq('statut','active')
-          .then(({data})=>{setAbos(data||[]);setLoading(false);});
-      },[]);
-      const px={essentiel:49,progression:99,transformation:199};
-      const mrr=abos.reduce((s,a)=>s+(px[a.plan]||0),0);
-      const cnt={essentiel:0,progression:0,transformation:0};
-      abos.forEach(a=>{if(cnt[a.plan]!==undefined)cnt[a.plan]++;});
-      return h('div',null,
-        h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:24,color:C.white}},'Revenus'),
-        loading?h('p',{style:{color:C.muted}},'Chargement...'):h('div',null,
-          h('div',{style:{display:'flex',gap:16,marginBottom:32}},
-            ...[
-              {label:'MRR mensuel',value:`${mrr}€`,color:C.green},
-              {label:'ARR annuel projeté',value:`${mrr*12}€`,color:C.blue},
-              {label:'Abonnés actifs',value:abos.length,color:C.gold},
-            ].map(s=>h('div',{key:s.label,style:{background:C.soft,border:`1px solid ${C.border}`,borderRadius:12,padding:'20px 24px',flex:1}},
-              h('div',{style:{fontSize:28,fontWeight:800,color:s.color}},s.value),
-              h('div',{style:{fontSize:13,color:C.muted,marginTop:4}},s.label)
-            ))
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+
+      useEffect(() => {
+        fetch(STRIPE_FN, { headers: { Authorization: 'Bearer ' + ANON_KEY } })
+          .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(d => { setData(d); setLoading(false); })
+          .catch(e => { setError(e.message); setLoading(false); });
+      }, []);
+
+      if (loading) return h('div', null,
+        h('h1', { style: { fontSize: 24, fontWeight: 700, marginBottom: 24, color: C.white } }, 'Revenus'),
+        h('p', { style: { color: C.muted } }, 'Chargement des données Stripe…')
+      );
+      if (error) return h('div', null,
+        h('h1', { style: { fontSize: 24, fontWeight: 700, marginBottom: 24, color: C.white } }, 'Revenus'),
+        h('div', { style: { ...card, color: C.red } }, 'Erreur : ' + error)
+      );
+
+      const kpis = [
+        { label: 'MRR', value: fmtEur(data.mrr), color: C.green, sub: 'Revenu mensuel récurrent' },
+        { label: 'ARR', value: fmtEur(data.arr), color: C.blue, sub: 'Revenu annuel projeté' },
+        { label: 'Revenu total', value: fmtEur(data.totalRevenue), color: C.gold, sub: 'Tous paiements' },
+        { label: 'Balance dispo.', value: fmtEur(data.balance && data.balance.available || 0), color: C.green, sub: 'Disponible Stripe' },
+        { label: 'Abonnés actifs', value: data.activeSubscriptions, color: C.purple, sub: 'En cours' },
+        { label: 'Nouveaux / mois', value: data.newSubscriptionsThisMonth, color: C.blue, sub: 'Ce mois-ci' },
+        { label: 'Annulés / mois', value: data.cancelledThisMonth, color: C.red, sub: 'Ce mois-ci' },
+        { label: 'Taux de churn', value: ((data.churnRate || 0) * 100).toFixed(1) + '%', color: C.red, sub: 'Résiliations' },
+      ];
+
+      const planColors = [C.blue, C.gold, C.purple, C.green, '#ffd700'];
+      const totalPlanMRR = (data.revenueByPlan || []).reduce((s, p) => s + p.monthlyAmount, 0);
+
+      const stLabel = { succeeded: { l: 'Réussi', c: C.green }, pending: { l: 'En attente', c: C.gold }, failed: { l: 'Échoué', c: C.red }, refunded: { l: 'Remboursé', c: C.muted } };
+      const subLabel = { active: { l: 'Actif', c: C.green }, past_due: { l: 'Impayé', c: C.red }, canceled: { l: 'Annulé', c: C.muted }, trialing: { l: 'Essai', c: C.blue } };
+
+      return h('div', null,
+        h('h1', { style: { fontSize: 24, fontWeight: 700, marginBottom: 24, color: C.white } }, 'Revenus'),
+
+        // KPI grid
+        h('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 28 } },
+          ...kpis.map(k => h('div', { key: k.label, style: { background: C.soft, border: `1px solid ${C.border}`, borderRadius: 12, padding: '20px 24px' } },
+            h('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: C.muted, marginBottom: 8 } }, k.label),
+            h('div', { style: { fontSize: 26, fontWeight: 800, color: k.color } }, k.value),
+            h('div', { style: { fontSize: 11, color: C.muted, marginTop: 4 } }, k.sub)
+          ))
+        ),
+
+        // Chart + Plans
+        h('div', { style: { display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20, marginBottom: 20 } },
+          h('div', { style: card },
+            h('h3', { style: { fontSize: 15, fontWeight: 700, marginBottom: 16, color: C.white } }, 'Revenus 12 derniers mois'),
+            h(RevBarChart, { data: data.revenueByMonth })
           ),
-          h('div',{style:card},
-            h('h3',{style:{fontSize:16,fontWeight:600,marginBottom:20,color:C.white}},'Répartition par plan'),
-            ...['essentiel','progression','transformation'].map(plan=>h('div',{key:plan,style:{marginBottom:16}},
-              h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:6}},
-                h('span',{style:{fontSize:14,textTransform:'capitalize',color:C.white}},plan),
-                h('span',{style:{fontSize:14,color:C.muted}},`${cnt[plan]} × ${px[plan]}€ = `,h('strong',{style:{color:C.gold}},`${cnt[plan]*px[plan]}€/mois`))
-              ),
-              h('div',{style:{background:C.border,borderRadius:100,height:6}},
-                h('div',{style:{background:C.gold,borderRadius:100,height:6,width:mrr>0?`${cnt[plan]*px[plan]/mrr*100}%`:'0%'}})
-              )
-            ))
+          h('div', { style: card },
+            h('h3', { style: { fontSize: 15, fontWeight: 700, marginBottom: 16, color: C.white } }, 'Répartition par offre'),
+            ...(data.revenueByPlan || []).length === 0
+              ? [h('p', { style: { color: C.muted, fontSize: 13 } }, 'Aucun abonnement actif.')]
+              : (data.revenueByPlan || []).map((p, i) => {
+                const pct = totalPlanMRR > 0 ? (p.monthlyAmount / totalPlanMRR * 100) : 0;
+                const col = planColors[i % planColors.length];
+                return h('div', { key: p.id, style: { marginBottom: 14 } },
+                  h('div', { style: { display: 'flex', justifyContent: 'space-between', marginBottom: 5, fontSize: 13 } },
+                    h('span', { style: { color: C.white } }, p.name || p.id),
+                    h('span', { style: { color: C.muted } }, p.count + ' × ', h('strong', { style: { color: col } }, fmtEur(p.monthlyAmount) + '/m'))
+                  ),
+                  h('div', { style: { background: 'rgba(255,255,255,0.07)', borderRadius: 100, height: 5 } },
+                    h('div', { style: { background: col, borderRadius: 100, height: 5, width: pct + '%', transition: 'width 0.5s' } })
+                  )
+                );
+              })
           )
+        ),
+
+        // Recent transactions
+        h('div', { style: { ...card, marginBottom: 20 } },
+          h('h3', { style: { fontSize: 15, fontWeight: 700, marginBottom: 16, color: C.white } }, 'Dernières transactions'),
+          (data.recentTransactions || []).length === 0
+            ? h('p', { style: { color: C.muted, fontSize: 13 } }, 'Aucune transaction.')
+            : h('div', { style: { overflowX: 'auto' } },
+              h('table', { style: { width: '100%', borderCollapse: 'collapse' } },
+                h('thead', null, h('tr', null,
+                  ...['Date', 'Description', 'Client', 'Montant', 'Statut'].map(hd => h('th', { key: hd, style: th }, hd))
+                )),
+                h('tbody', null, ...(data.recentTransactions || []).map(tx => {
+                  const st = tx.refunded ? stLabel.refunded : (stLabel[tx.status] || { l: tx.status, c: C.muted });
+                  return h('tr', { key: tx.id },
+                    h('td', { style: td }, fmtTs(tx.date)),
+                    h('td', { style: { ...td, maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, tx.description || '—'),
+                    h('td', { style: { ...td, color: C.muted, fontSize: 12 } }, tx.customer_email || '—'),
+                    h('td', { style: { ...td, fontWeight: 700, color: C.green } }, fmtEur(tx.amount, (tx.currency || 'eur').toUpperCase())),
+                    h('td', { style: td }, h('span', { style: badge(st.c) }, st.l))
+                  );
+                }))
+              )
+            )
+        ),
+
+        // Recent subscriptions
+        h('div', { style: card },
+          h('h3', { style: { fontSize: 15, fontWeight: 700, marginBottom: 16, color: C.white } }, 'Abonnements récents'),
+          (data.recentSubscriptions || []).length === 0
+            ? h('p', { style: { color: C.muted, fontSize: 13 } }, 'Aucun abonnement.')
+            : h('div', { style: { overflowX: 'auto' } },
+              h('table', { style: { width: '100%', borderCollapse: 'collapse' } },
+                h('thead', null, h('tr', null,
+                  ...['Date', 'Client', 'Offre', 'Montant', 'Statut', 'Prochain paiement'].map(hd => h('th', { key: hd, style: th }, hd))
+                )),
+                h('tbody', null, ...(data.recentSubscriptions || []).map(sub => {
+                  const st = subLabel[sub.status] || { l: sub.status, c: C.muted };
+                  return h('tr', { key: sub.id },
+                    h('td', { style: td }, fmtTs(sub.created)),
+                    h('td', { style: { ...td, fontSize: 13 } },
+                      h('div', null, sub.customer_name || '—'),
+                      h('div', { style: { color: C.muted, fontSize: 11 } }, sub.customer_email)
+                    ),
+                    h('td', { style: { ...td, color: C.blue } }, sub.plan_name || '—'),
+                    h('td', { style: { ...td, fontWeight: 700, color: C.gold } }, fmtEur(sub.amount) + '/' + (sub.interval === 'month' ? 'mois' : sub.interval === 'year' ? 'an' : sub.interval || '?')),
+                    h('td', { style: td },
+                      h('span', { style: badge(st.c) }, st.l),
+                      sub.cancel_at_period_end ? h('span', { style: { ...badge(C.red), marginLeft: 4 } }, 'résiliation prévue') : null
+                    ),
+                    h('td', { style: { ...td, color: C.muted, fontSize: 12 } }, sub.current_period_end ? fmtTs(sub.current_period_end) : '—')
+                  );
+                }))
+              )
+            )
         )
       );
     }
