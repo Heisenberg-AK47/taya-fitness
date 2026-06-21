@@ -150,7 +150,7 @@
 
     const TABS = [
       {id:'dashboard',icon:'📊',label:'Dashboard'},
-      {id:'clients',icon:'👥',label:'Clients Azeoo'},
+      {id:'clients',icon:'👥',label:'Clients'},
       {id:'programmes',icon:'🏋️',label:'Programmes'},
       {id:'exercices',icon:'▶️',label:'Exercices'},
       {id:'abonnements',icon:'💳',label:'Abonnements'},
@@ -272,11 +272,11 @@
 
       return h('div',null,
         h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:8,color:C.white}},'Dashboard'),
-        h('p',{style:{color:C.muted,fontSize:14,marginBottom:32}},'Vue d\'ensemble · Azeoo + CRM Taya Fitness'),
+        h('p',{style:{color:C.muted,fontSize:14,marginBottom:32}},'Vue d\'ensemble · CRM Taya Fitness'),
         // Stats row 1
         h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,marginBottom:24}},
           ...[
-            {label:'Clients Azeoo',value:AZEOO_CLIENTS.length,color:C.blue,icon:'👥'},
+            {label:'Clients',value:AZEOO_CLIENTS.length,color:C.blue,icon:'👥'},
             {label:'Programmes',value:PROGRAMMES.length,color:C.gold,icon:'🏋️'},
             {label:'Exercices',value:'1 104',color:C.green,icon:'▶️'},
             {label:'Abonnés CRM actifs',value:stats.actifs,color:C.purple,icon:'💳'},
@@ -1616,7 +1616,7 @@
           ),
           h('div', {style:{display:'flex',gap:10}},
             isAdmin && h('button', {onClick:()=>setAddOpen(true), style:{...btn,fontSize:13,padding:'10px 18px'}}, '+ Ajouter un exercice'),
-            h('a', {href:'https://tayafitness.azeoo.com/exercises', target:'_blank', style:{...btn,background:'transparent',color:C.muted,border:`1px solid ${C.border}`,textDecoration:'none',fontSize:13,padding:'10px 18px'}}, 'Azeoo ↗')
+
           )
         ),
 
