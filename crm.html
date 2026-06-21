@@ -24,6 +24,16 @@
   .yt-modal iframe { width:min(90vw,900px);height:min(50vw,500px);border:none;border-radius:12px; }
   .prog-card:hover { transform:translateY(-3px);transition:transform 0.2s; }
   .exo-card:hover { transform:translateY(-2px);transition:transform 0.2s;cursor:pointer; }
+  #crm-sidebar { transition:left 0.25s; }
+  #crm-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:199; }
+  .crm-hamburger { display:none;position:fixed;top:14px;left:14px;z-index:300;background:#122033;border:1px solid rgba(255,255,255,0.12);border-radius:10px;width:42px;height:42px;cursor:pointer;color:#f0f4f8;font-size:22px;line-height:1;align-items:center;justify-content:center; }
+  @media (max-width: 767px) {
+    .crm-hamburger { display:flex; }
+    #crm-sidebar { position:fixed!important;left:-240px;top:0;bottom:0;z-index:200;width:230px!important;min-height:100vh; }
+    #crm-sidebar.mob-open { left:0!important; }
+    #crm-overlay.mob-open { display:block!important; }
+    #crm-main { padding:16px!important;padding-top:60px!important; }
+  }
   </style>
 </head>
 <body>
@@ -167,6 +177,9 @@
       const [loading, setLoading] = useState(true);
       const [loginLoading, setLoginLoading] = useState(false);
       const [err, setErr] = useState('');
+      const [menuOpen,setMenuOpen] = useState(false);
+      function toggleMenu(){const s=document.getElementById('crm-sidebar');const v=document.getElementById('crm-overlay');const next=!menuOpen;if(s)s.classList.toggle('mob-open',next);if(v)v.classList.toggle('mob-open',next);setMenuOpen(next);}
+      function closeMobileMenu(){const s=document.getElementById('crm-sidebar');const v=document.getElementById('crm-overlay');if(s)s.classList.remove('mob-open');if(v)v.classList.remove('mob-open');setMenuOpen(false);}
       const [email, setEmail] = useState('');
       const [pass, setPass] = useState('');
 
@@ -222,7 +235,9 @@
       const Page = pages[tab] || Dashboard;
 
       return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',fontFamily:'Inter,sans-serif'}},
-        h('div',{style:{width:230,background:C.soft,borderRight:`1px solid ${C.border}`,display:'flex',flexDirection:'column',minHeight:'100vh',flexShrink:0}},
+        h('button',{className:'crm-hamburger',onClick:toggleMenu},'\u2630'),
+        h('div',{id:'crm-overlay',onClick:closeMobileMenu}),
+        h('div',{id:'crm-sidebar',style:{width:230,background:C.soft,borderRight:`1px solid ${C.border}`,display:'flex',flexDirection:'column',minHeight:'100vh',flexShrink:0}},
           h('div',{style:{padding:'28px 20px 20px',borderBottom:`1px solid ${C.border}`}},
             h('div',{dangerouslySetInnerHTML:{__html:`
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 110" style="width:160px;height:auto;display:block">
@@ -232,7 +247,7 @@
             h('div',{style:{fontSize:12,color:C.muted,marginTop:4}},user.email)
           ),
           h('nav',{style:{flex:1,padding:'12px 10px',overflowY:'auto'}},
-            ...TABS.map(t => h('button',{key:t.id,onClick:()=>setTab(t.id),style:{width:'100%',display:'flex',alignItems:'center',gap:10,padding:'11px 12px',borderRadius:10,border:'none',background:tab===t.id?`rgba(255,107,74,0.12)`:'transparent',color:tab===t.id?C.gold:C.muted,fontWeight:tab===t.id?600:400,fontSize:14,cursor:'pointer',textAlign:'left',marginBottom:2}},
+            ...TABS.map(t => h('button',{key:t.id,onClick:()=>{setTab(t.id);closeMobileMenu();},style:{width:'100%',display:'flex',alignItems:'center',gap:10,padding:'11px 12px',borderRadius:10,border:'none',background:tab===t.id?`rgba(255,107,74,0.12)`:'transparent',color:tab===t.id?C.gold:C.muted,fontWeight:tab===t.id?600:400,fontSize:14,cursor:'pointer',textAlign:'left',marginBottom:2}},
               h('span',null,t.icon), t.label
             ))
           ),
@@ -240,7 +255,7 @@
             h('button',{onClick:()=>sb.auth.signOut(),style:{width:'100%',background:'transparent',color:C.muted,border:`1px solid ${C.border}`,borderRadius:10,padding:'10px',fontSize:13,cursor:'pointer'}},'Déconnexion')
           )
         ),
-        h('main',{style:{flex:1,padding:40,overflowY:'auto',maxHeight:'100vh',color:C.white}},
+        h('main',{id:'crm-main',style:{flex:1,padding:40,overflowY:'auto',maxHeight:'100vh',color:C.white}},
           h(Page,null)
         )
       );
