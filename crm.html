@@ -19,11 +19,77 @@
     }
   }
   </script>
-  <style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: 'Inter', sans-serif; }
+  <style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Inter',sans-serif; }
+
+  /* YouTube modal */
   .yt-modal { position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:1000; }
   .yt-modal iframe { width:min(90vw,900px);height:min(50vw,500px);border:none;border-radius:12px; }
+
+  /* Hover */
   .prog-card:hover { transform:translateY(-3px);transition:transform 0.2s; }
   .exo-card:hover { transform:translateY(-2px);transition:transform 0.2s;cursor:pointer; }
+
+  /* Layout */
+  .crm-root   { display:flex; min-height:100vh; }
+  .crm-sidebar{ width:230px;flex-shrink:0;display:flex;flex-direction:column;min-height:100vh; }
+  .crm-main   { flex:1;padding:40px;overflow-y:auto;max-height:100vh; }
+  .crm-bottom-nav { display:none; }
+
+  /* Grilles */
+  .crm-grid-4 { display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px; }
+  .crm-grid-3 { display:grid;grid-template-columns:repeat(3,1fr);gap:16px; }
+  .crm-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px; }
+
+  /* ════════════ MOBILE ≤ 768px ════════════ */
+  @media (max-width:768px) {
+
+    /* Cacher sidebar → bottom nav */
+    .crm-sidebar { display:none !important; }
+    .crm-bottom-nav {
+      display:flex !important;
+      position:fixed;bottom:0;left:0;right:0;z-index:900;
+      background:#0f172a;border-top:1px solid #1e293b;
+      padding:6px 2px max(6px,env(safe-area-inset-bottom));
+      justify-content:space-around;align-items:flex-end;
+    }
+    .crm-bottom-nav button {
+      display:flex;flex-direction:column;align-items:center;gap:2px;
+      background:transparent;border:none;cursor:pointer;
+      color:#64748b;font-size:9px;font-family:'Inter',sans-serif;
+      padding:4px 2px;min-width:36px;border-radius:8px;
+      -webkit-tap-highlight-color:transparent;line-height:1;
+    }
+    .crm-bottom-nav button.active { color:#ff6b4a; }
+    .crm-bottom-nav button .ti { font-size:18px;display:block;margin-bottom:2px; }
+
+    /* Main : padding réduit + espace bottom nav */
+    .crm-main { padding:14px !important; padding-bottom:88px !important; }
+
+    /* Grilles */
+    .crm-grid-4 { grid-template-columns:repeat(2,1fr) !important; gap:10px !important; }
+    .crm-grid-3 { grid-template-columns:repeat(2,1fr) !important; gap:10px !important; }
+    .crm-grid-2 { grid-template-columns:1fr !important; gap:12px !important; }
+
+    /* Tables scrollables sans wrapper JS — trick CSS pur */
+    .crm-main table {
+      display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;
+      min-width:520px;max-width:100%;
+    }
+    .crm-main thead, .crm-main tbody, .crm-main tr { display:table;width:100%;table-layout:fixed; }
+
+    /* Inputs : éviter le zoom automatique iOS */
+    input, select, textarea { font-size:16px !important; }
+
+    /* Boutons touch-friendly */
+    button { min-height:38px; }
+  }
+
+  @media (max-width:480px) {
+    .crm-grid-4 { grid-template-columns:1fr 1fr !important; }
+    .crm-grid-3 { grid-template-columns:1fr !important; }
+  }
   </style>
 </head>
 <body>
@@ -148,6 +214,12 @@
       {nom:"MAUX DE DOS : MUSCLE-LE !",duree:"12 semaines",prix:"€19.95",objectif:"Get Fit",niveau:"",img:"https://cdn.azeoo.com/programs/large/img-1232-690085f6175a1.jpg"},
     ];
 
+    function useIsMobile(bp=768){
+      const [m,setM]=useState(window.innerWidth<bp);
+      useEffect(()=>{const h=()=>setM(window.innerWidth<bp);window.addEventListener('resize',h);return()=>window.removeEventListener('resize',h);},[bp]);
+      return m;
+    }
+
     const TABS = [
       {id:'dashboard',icon:'📊',label:'Dashboard'},
       {id:'clients',icon:'👥',label:'Clients'},
@@ -221,8 +293,9 @@
       const pages = {dashboard:Dashboard,clients:ClientsAzeoo,programmes:Programmes,exercices:Exercices,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches,questionnaires:Questionnaires,prospects:Prospects};
       const Page = pages[tab] || Dashboard;
 
-      return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',fontFamily:'Inter,sans-serif'}},
-        h('div',{style:{width:230,background:C.soft,borderRight:`1px solid ${C.border}`,display:'flex',flexDirection:'column',minHeight:'100vh',flexShrink:0}},
+      const BOTTOM_TABS = TABS.slice(0,9);
+      return h('div',{className:'crm-root',style:{background:C.bg,fontFamily:'Inter,sans-serif'}},
+        h('div',{className:'crm-sidebar',style:{background:C.soft,borderRight:`1px solid ${C.border}`}},
           h('div',{style:{padding:'28px 20px 20px',borderBottom:`1px solid ${C.border}`}},
             h('div',{dangerouslySetInnerHTML:{__html:`
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 110" style="width:160px;height:auto;display:block">
@@ -240,8 +313,15 @@
             h('button',{onClick:()=>sb.auth.signOut(),style:{width:'100%',background:'transparent',color:C.muted,border:`1px solid ${C.border}`,borderRadius:10,padding:'10px',fontSize:13,cursor:'pointer'}},'Déconnexion')
           )
         ),
-        h('main',{style:{flex:1,padding:40,overflowY:'auto',maxHeight:'100vh',color:C.white}},
+        h('main',{className:'crm-main',style:{color:C.white}},
           h(Page,null)
+        ),
+        h('div',{className:'crm-bottom-nav'},
+          ...BOTTOM_TABS.map(t=>h('button',{key:t.id,className:tab===t.id?'active':'',onClick:()=>setTab(t.id)},
+            h('span',{className:'ti'},t.icon),
+            t.label.replace('Campagnes mail','Emails').replace('Questionnaires','Forms').split(' ')[0]
+          )),
+          h('button',{onClick:()=>sb.auth.signOut()},h('span',{className:'ti'},'🚪'),'Exit')
         )
       );
     }
@@ -274,7 +354,7 @@
         h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:8,color:C.white}},'Dashboard'),
         h('p',{style:{color:C.muted,fontSize:14,marginBottom:32}},'Vue d\'ensemble · CRM Taya Fitness'),
         // Stats row 1
-        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,marginBottom:24}},
+        h('div',{className:'crm-grid-4'},
           ...[
             {label:'Clients',value:AZEOO_CLIENTS.length,color:C.blue,icon:'👥'},
             {label:'Programmes',value:PROGRAMMES.length,color:C.gold,icon:'🏋️'},
@@ -291,7 +371,7 @@
           ))
         ),
         // Goals breakdown
-        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,marginBottom:24}},
+        h('div',{className:'crm-grid-2'},
           h('div',{style:card},
             h('h3',{style:{fontSize:15,fontWeight:600,marginBottom:20,color:C.white}},'Répartition objectifs clients'),
             ...Object.entries(goalCounts).map(([obj,n])=>h('div',{key:obj,style:{marginBottom:12}},
@@ -314,7 +394,7 @@
           )
         ),
         // Revenue stats
-        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16}},
+        h('div',{className:'crm-grid-3'},
           ...[
             {label:'MRR',value:`${stats.revenus}€`,color:C.green},
             {label:'ARR projeté',value:`${stats.revenus*12}€`,color:C.blue},
