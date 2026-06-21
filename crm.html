@@ -19,124 +19,11 @@
     }
   }
   </script>
-  <style>
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:'Inter',sans-serif; }
-
-  /* YouTube modal */
+  <style>* { box-sizing: border-box; margin: 0; padding: 0; } body { font-family: 'Inter', sans-serif; }
   .yt-modal { position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:1000; }
   .yt-modal iframe { width:min(90vw,900px);height:min(50vw,500px);border:none;border-radius:12px; }
-
-  /* Hover */
   .prog-card:hover { transform:translateY(-3px);transition:transform 0.2s; }
   .exo-card:hover { transform:translateY(-2px);transition:transform 0.2s;cursor:pointer; }
-
-  /* Layout */
-  .crm-root   { display:flex; min-height:100vh; }
-  .crm-sidebar{ width:230px;flex-shrink:0;display:flex;flex-direction:column;min-height:100vh; }
-  .crm-main   { flex:1;padding:40px;overflow-y:auto;max-height:100vh; }
-  .crm-bottom-nav { display:none; }
-
-  /* Grilles */
-  .crm-grid-4 { display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px; }
-  .crm-grid-3 { display:grid;grid-template-columns:repeat(3,1fr);gap:16px; }
-  .crm-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px; }
-
-  /* ════════════ MOBILE ≤ 768px ════════════ */
-
-  /* Topbar mobile */
-  .crm-topbar { display:none; }
-
-  /* Drawer overlay */
-  .crm-drawer-overlay {
-    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1100;
-    opacity:0;transition:opacity .25s;
-  }
-  .crm-drawer-overlay.open { opacity:1; }
-
-  /* Drawer panel */
-  .crm-drawer {
-    position:fixed;top:0;left:0;bottom:0;width:260px;
-    background:#0f172a;border-right:1px solid #1e293b;
-    z-index:1101;transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1);
-    display:flex;flex-direction:column;overflow-y:auto;
-    padding-top:max(16px,env(safe-area-inset-top));
-    padding-bottom:max(16px,env(safe-area-inset-bottom));
-  }
-  .crm-drawer.open { transform:translateX(0); }
-
-  .crm-drawer-header {
-    display:flex;align-items:center;justify-content:space-between;
-    padding:0 16px 16px;border-bottom:1px solid #1e293b;margin-bottom:8px;
-  }
-  .crm-drawer-title { font-size:18px;font-weight:800;color:#ff6b4a;letter-spacing:1px; }
-  .crm-drawer-close {
-    background:transparent;border:none;color:#64748b;font-size:22px;
-    cursor:pointer;padding:4px 8px;line-height:1;border-radius:6px;
-  }
-  .crm-drawer nav a, .crm-drawer-nav-btn {
-    display:block;width:100%;text-align:left;
-    padding:13px 20px;font-size:14px;font-weight:500;
-    background:transparent;border:none;cursor:pointer;
-    color:#94a3b8;font-family:'Inter',sans-serif;
-    border-radius:10px;margin:1px 8px;width:calc(100% - 16px);
-    -webkit-tap-highlight-color:transparent;transition:background .15s,color .15s;
-  }
-  .crm-drawer-nav-btn.active { background:rgba(255,107,74,.12);color:#ff6b4a;font-weight:600; }
-  .crm-drawer-nav-btn:hover { background:rgba(255,255,255,.05);color:#e2e8f0; }
-  .crm-drawer-logout {
-    margin-top:auto;padding:12px 20px;
-    font-size:13px;color:#64748b;background:transparent;border:none;
-    cursor:pointer;font-family:'Inter',sans-serif;text-align:left;
-    border-top:1px solid #1e293b;width:100%;
-  }
-
-  @media (max-width:768px) {
-
-    /* Cacher sidebar desktop */
-    .crm-sidebar { display:none !important; }
-    .crm-bottom-nav { display:none !important; }
-
-    /* Topbar */
-    .crm-topbar {
-      display:flex !important;
-      position:fixed;top:0;left:0;right:0;z-index:900;height:52px;
-      background:#0f172a;border-bottom:1px solid #1e293b;
-      align-items:center;justify-content:space-between;
-      padding:0 16px;padding-top:env(safe-area-inset-top);
-    }
-    .crm-topbar-title { font-size:16px;font-weight:700;color:#ff6b4a;letter-spacing:.5px; }
-    .crm-hamburger {
-      background:transparent;border:none;cursor:pointer;
-      color:#e2e8f0;font-size:22px;padding:6px;border-radius:8px;
-      -webkit-tap-highlight-color:transparent;line-height:1;
-    }
-    .crm-drawer-overlay { display:block; }
-
-    /* Main : espace pour topbar */
-    .crm-main { padding:14px !important; padding-top:66px !important; }
-
-    /* Grilles */
-    .crm-grid-4 { grid-template-columns:repeat(2,1fr) !important; gap:10px !important; }
-    .crm-grid-3 { grid-template-columns:repeat(2,1fr) !important; gap:10px !important; }
-    .crm-grid-2 { grid-template-columns:1fr !important; gap:12px !important; }
-
-    /* Tables scrollables — trick CSS pur */
-    .crm-main table {
-      display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;
-      min-width:520px;max-width:100%;
-    }
-    .crm-main thead,.crm-main tbody,.crm-main tr { display:table;width:100%;table-layout:fixed; }
-
-    /* Inputs iOS zoom fix */
-    input,select,textarea { font-size:16px !important; }
-    button { min-height:38px; }
-  }
-
-  @media (max-width:480px) {
-    .crm-grid-4 { grid-template-columns:1fr 1fr !important; }
-    .crm-grid-3 { grid-template-columns:1fr !important; }
-  }
   </style>
 </head>
 <body>
@@ -186,6 +73,7 @@
     const td = {padding:'14px 16px',fontSize:14,color:C.white,borderBottom:`1px solid ${C.border}`};
     const badge = (c) => ({background:`${c}22`,color:c,fontSize:11,fontWeight:600,padding:'3px 8px',borderRadius:100,display:'inline-block',marginRight:4});
 
+    // ── Azeoo clients data (52 clients réels) ───────────────────────────────
     const AZEOO_CLIENTS = [
       {nom:"marilyne melendi",email:"marilynemelendi7@gmail.com",app:"Apple",groupe:"—",objectif:"Sculpt Your Body",niveau:"Advanced"},
       {nom:"sieu-ly thai",email:"sieuly.thai@gmail.com",app:"Apple",groupe:"—",objectif:"Lose Weight",niveau:"Beginner"},
@@ -241,6 +129,7 @@
       {nom:"Test Apple",email:"apple.tayafitness@yopmail.com",app:"Android",groupe:"—",objectif:"Get Fit",niveau:"Beginner"},
     ];
 
+    // ── Programmes from Azeoo ────────────────────────────────────────────────
     const PROGRAMMES = [
       {nom:"The legend is on its way...",duree:"8 semaines",prix:"€19.95",objectif:"Sculpt Your Body",niveau:"",img:"https://cdn.azeoo.com/programs/large/sans-titre-65-5eaee7a9d27e0.jpg"},
       {nom:"PERTE DE POIDS & PRISE DE MASSE",duree:"8 semaines",prix:"Perso",objectif:"Build Muscle",niveau:"Beginner",img:"https://cdn.azeoo.com/programs/large/img-0246-698ee5b4e6c63.jpg"},
@@ -258,12 +147,6 @@
       {nom:"Full Body Kilos Killer !",duree:"12 semaines",prix:"€19.95",objectif:"Lose Weight",niveau:"",img:"https://cdn.azeoo.com/programs/large/img-1232-690085f6175a1.jpg"},
       {nom:"MAUX DE DOS : MUSCLE-LE !",duree:"12 semaines",prix:"€19.95",objectif:"Get Fit",niveau:"",img:"https://cdn.azeoo.com/programs/large/img-1232-690085f6175a1.jpg"},
     ];
-
-    function useIsMobile(bp=768){
-      const [m,setM]=useState(window.innerWidth<bp);
-      useEffect(()=>{const h=()=>setM(window.innerWidth<bp);window.addEventListener('resize',h);return()=>window.removeEventListener('resize',h);},[bp]);
-      return m;
-    }
 
     const TABS = [
       {id:'dashboard',icon:'📊',label:'Dashboard'},
@@ -338,17 +221,8 @@
       const pages = {dashboard:Dashboard,clients:ClientsAzeoo,programmes:Programmes,exercices:Exercices,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches,questionnaires:Questionnaires,prospects:Prospects};
       const Page = pages[tab] || Dashboard;
 
-      const [drawerOpen,setDrawerOpen] = useState(false);
-      const openDrawer  = () => setDrawerOpen(true);
-      const closeDrawer = () => setDrawerOpen(false);
-      const goTab = (id) => { setTab(id); closeDrawer(); };
-
-      // Label court sans emoji pour le drawer
-      const tabLabel = t => t.label;
-
-      return h('div',{className:'crm-root',style:{background:C.bg,fontFamily:'Inter,sans-serif'}},
-
-        h('div',{className:'crm-sidebar',style:{background:C.soft,borderRight:`1px solid ${C.border}`}},
+      return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',fontFamily:'Inter,sans-serif'}},
+        h('div',{style:{width:230,background:C.soft,borderRight:`1px solid ${C.border}`,display:'flex',flexDirection:'column',minHeight:'100vh',flexShrink:0}},
           h('div',{style:{padding:'28px 20px 20px',borderBottom:`1px solid ${C.border}`}},
             h('div',{dangerouslySetInnerHTML:{__html:`
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 110" style="width:160px;height:auto;display:block">
@@ -366,35 +240,13 @@
             h('button',{onClick:()=>sb.auth.signOut(),style:{width:'100%',background:'transparent',color:C.muted,border:`1px solid ${C.border}`,borderRadius:10,padding:'10px',fontSize:13,cursor:'pointer'}},'Déconnexion')
           )
         ),
-
-        h('div',{className:'crm-topbar'},
-          h('span',{className:'crm-topbar-title'},'TAYA CRM'),
-          h('button',{className:'crm-hamburger',onClick:openDrawer,title:'Menu'},'☰')
-        ),
-
-        h('div',{className:'crm-drawer-overlay'+(drawerOpen?' open':''),onClick:closeDrawer}),
-
-        h('div',{className:'crm-drawer'+(drawerOpen?' open':'')},
-          h('div',{className:'crm-drawer-header'},
-            h('span',{className:'crm-drawer-title'},'Menu'),
-            h('button',{className:'crm-drawer-close',onClick:closeDrawer},'×')
-          ),
-          h('nav',null,
-            ...TABS.map(t=>h('button',{
-              key:t.id,
-              className:'crm-drawer-nav-btn'+(tab===t.id?' active':''),
-              onClick:()=>goTab(t.id)
-            }, tabLabel(t)))
-          ),
-          h('button',{className:'crm-drawer-logout',onClick:()=>{sb.auth.signOut();closeDrawer();}},'Déconnexion')
-        ),
-
-        h('main',{className:'crm-main',style:{color:C.white}},
+        h('main',{style:{flex:1,padding:40,overflowY:'auto',maxHeight:'100vh',color:C.white}},
           h(Page,null)
         )
       );
     }
 
+    // ── Dashboard ─────────────────────────────────────────────────────────────
     function Dashboard() {
       const [stats,setStats] = useState({clients:0,actifs:0,revenus:0,newsletter:0});
       const [recent,setRecent] = useState([]);
@@ -422,7 +274,7 @@
         h('h1',{style:{fontSize:24,fontWeight:700,marginBottom:8,color:C.white}},'Dashboard'),
         h('p',{style:{color:C.muted,fontSize:14,marginBottom:32}},'Vue d\'ensemble · CRM Taya Fitness'),
         // Stats row 1
-        h('div',{className:'crm-grid-4'},
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:16,marginBottom:24}},
           ...[
             {label:'Clients',value:AZEOO_CLIENTS.length,color:C.blue,icon:'👥'},
             {label:'Programmes',value:PROGRAMMES.length,color:C.gold,icon:'🏋️'},
@@ -439,7 +291,7 @@
           ))
         ),
         // Goals breakdown
-        h('div',{className:'crm-grid-2'},
+        h('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,marginBottom:24}},
           h('div',{style:card},
             h('h3',{style:{fontSize:15,fontWeight:600,marginBottom:20,color:C.white}},'Répartition objectifs clients'),
             ...Object.entries(goalCounts).map(([obj,n])=>h('div',{key:obj,style:{marginBottom:12}},
@@ -462,7 +314,7 @@
           )
         ),
         // Revenue stats
-        h('div',{className:'crm-grid-3'},
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:16}},
           ...[
             {label:'MRR',value:`${stats.revenus}€`,color:C.green},
             {label:'ARR projeté',value:`${stats.revenus*12}€`,color:C.blue},
@@ -475,6 +327,7 @@
       );
     }
 
+    // ── Clients Azeoo ─────────────────────────────────────────────────────────
     function ClientsAzeoo() {
       const ADMIN = ['fumeysarah@yahoo.fr','contact@sergepaulmier.com','contact@tayafitness.com'];
       const [clients,setClients] = useState([]);
@@ -607,11 +460,13 @@
         setGroupes(prev=>prev.filter(g=>g.id!==id));
       }
 
+      // ── Section helper
       const Sec=(title,children)=>h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:20,marginBottom:14}},
         title&&h('div',{style:{fontSize:12,fontWeight:700,color:C.white,marginBottom:14,paddingBottom:10,borderBottom:`1px solid ${C.border}`}},title),
         ...children
       );
 
+      // ── Groups management modal
       const GroupsModal=()=>h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:e=>{if(e.target===e.currentTarget)setShowGroupsModal(false);}},
         h('div',{style:{background:C.card,borderRadius:20,padding:28,width:'100%',maxWidth:480,maxHeight:'80vh',display:'flex',flexDirection:'column'}},
           h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}},
@@ -637,6 +492,7 @@
         )
       );
 
+      // ── CLIENT EDITOR (new/edit)
       if(view==='new'||view==='edit'){
         const isEdit=view==='edit';
         return h('div',null,
@@ -728,6 +584,7 @@
         );
       }
 
+      // ── CLIENT DETAIL VIEW
       if(view==='detail'&&selectedClient){
         const c=selectedClient;
         const progName=c.programme_id?programmes.find(p=>p.id===c.programme_id)?.titre:null;
@@ -826,6 +683,7 @@
         );
       }
 
+      // ── LIST VIEW
       const statCounts={total:clients.length,actif:clients.filter(c=>c.statut==='actif').length,inactif:clients.filter(c=>c.statut==='inactif').length};
       return h('div',null,
         // Header
@@ -927,6 +785,7 @@
     }
 
 
+    // ── Programmes ────────────────────────────────────────────────────────────
     function Programmes() {
       const ADMIN = ['fumeysarah@yahoo.fr','contact@sergepaulmier.com','contact@tayafitness.com'];
       const [progs,setProgs] = useState([]);
@@ -1095,11 +954,13 @@
         setSaving(false);setTimeout(()=>setMsg(''),4000);
       }
 
+      // ── Section helper ─────────────────────────────────────────────────────
       const Sec=(title,children,extra={})=>h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:20,marginBottom:14,...(extra.style||{})}},
         h('div',{style:{fontSize:12,fontWeight:700,color:C.white,marginBottom:14,paddingBottom:10,borderBottom:`1px solid ${C.border}`}},title),
         ...children
       );
 
+      // ── FULL-PAGE PROGRAMME EDITOR ─────────────────────────────────────────
       if(progEditorView!==null){
         const isEdit=progEditorView&&progEditorView!=='new';
         const Lbl=(t,sub)=>h('div',{style:{marginBottom:sub?2:0}},h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},t),sub&&h('div',{style:{fontSize:10,color:C.muted,marginBottom:4}},sub));
@@ -1120,6 +981,7 @@
 
           h('div',{style:{display:'grid',gridTemplateColumns:'1fr 320px',gap:14,alignItems:'start'}},
 
+            // ── Colonne gauche ─────────────────────────────────────────────
             h('div',null,
 
               Sec('📋 Informations générales',[
@@ -1192,6 +1054,7 @@
               ])
             ),
 
+            // ── Colonne droite ─────────────────────────────────────────────
             h('div',null,
 
               Sec('🖼️ Image',[
@@ -1288,6 +1151,7 @@
         );
       }
 
+      // ── Modals (exercices) ─────────────────────────────────────────────────
       const AddExoModal=()=>{
         const selExo=allExos.find(e=>e.id===aForm.exercise_id);
         return h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
@@ -1371,6 +1235,7 @@
         );
       };
 
+      // ─── WORKOUT DAY VIEW ─────────────────────────────────────────────────────
       if(selectedProg&&selectedDay){
         const{week:sw,day:sd}=selectedDay;
         const DAYS_FR=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
@@ -1456,6 +1321,7 @@
         );
       }
 
+      // ─── PROGRAMME DETAIL VIEW ────────────────────────────────────────────────
       if(selectedProg){
         const DAYS_FR=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
         const totalWeeks=selectedProg.duree_semaines||8;
@@ -1545,6 +1411,7 @@
         );
       }
 
+      // ─── LIST VIEW ────────────────────────────────────────────────────────────
       const filteredProgs=filter?progs.filter(p=>p.objectif===filter):progs;
       return h('div',null,
         h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24,flexWrap:'wrap',gap:12}},
@@ -1832,6 +1699,7 @@
       );
     }
 
+    // ── Abonnements ──────────────────────────────────────────────────────────
     function Abonnements() {
       const [tab,setTab]=useState('abos');
       const [abos,setAbos]=useState([]);
@@ -1948,11 +1816,13 @@
       const CYCLE_LABEL={monthly:'/mois',yearly:'/an'};
       const planColorMap={};subPlans.forEach(p=>{planColorMap[p.name]=p.color||C.gold;});
 
+      // ── Section helper ────────────────────────────────────────────────────
       const Section=(title,children)=>h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:22,marginBottom:16}},
         h('div',{style:{fontSize:12,fontWeight:700,color:C.white,marginBottom:16,paddingBottom:10,borderBottom:`1px solid ${C.border}`}},title),
         ...children
       );
 
+      // ── Plan editor (pleine page) ─────────────────────────────────────────
       if(planEditorView!==null){
         const isEdit=planEditorView&&planEditorView!=='new';
         const planSlug=(planForm.name||'').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
@@ -1973,6 +1843,7 @@
 
           h('div',{style:{display:'grid',gridTemplateColumns:'1fr 340px',gap:16,alignItems:'start'}},
 
+            // ── Colonne gauche
             h('div',null,
 
               // Section Identité
@@ -2144,6 +2015,7 @@
               ])
             ),
 
+            // ── Colonne droite
             h('div',null,
 
               // Section Image
@@ -2192,6 +2064,7 @@
         );
       }
 
+      // ── Abo Modal ──────────────────────────────────────────────────────────
       const aboModal=showAboModal&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:e=>{if(e.target===e.currentTarget)setShowAboModal(false);}},
         h('div',{style:{background:C.card,borderRadius:20,padding:28,width:'100%',maxWidth:420}},
           h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}},
@@ -2327,6 +2200,7 @@
       );
     }
 
+    // ── Revenus ──────────────────────────────────────────────────────────────
     const STRIPE_FN = 'https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/stripe-financials';
     const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzeWx6c2FjamtpbWNxeGxsaHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDE3MzEsImV4cCI6MjA5NTY3NzczMX0.3BZsEh6IaFqKHsW9MX3mhxWbvSHEcAqKhyOrJFZGAoA';
 
@@ -2487,6 +2361,7 @@
       );
     }
 
+    // ── Emails ───────────────────────────────────────────────────────────────
     function Emails() {
       const [tab,setTab]=useState('campagnes');
       const [campaigns,setCampaigns]=useState([]);
@@ -2613,6 +2488,7 @@
 
       const tabStyle=(t)=>({padding:'10px 20px',background:tab===t?C.gold:'transparent',color:tab===t?'#fff':C.muted,border:'none',borderRadius:8,cursor:'pointer',fontWeight:600,fontSize:13,transition:'all .2s'});
 
+      // ─── CAMPAIGN EDITOR ───
       if(view!==null){
         return h('div',{style:{maxWidth:1000,margin:'0 auto'}},
           h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:28}},
@@ -2698,6 +2574,7 @@
         );
       }
 
+      // ─── AUTOMATION EDITOR ───
       if(autoView!==null){
         return h('div',{style:{maxWidth:800,margin:'0 auto'}},
           h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:28}},
@@ -2751,6 +2628,7 @@
         );
       }
 
+      // ─── MAIN VIEW ───
       const sentTotal=campaigns.filter(c=>c.statut==='envoye').reduce((s,c)=>s+(c.nb_envoyes||0),0);
       const activeAutos=automations.filter(a=>a.actif).length;
       const logsToday=logs.filter(l=>l.sent_at&&l.sent_at.startsWith(new Date().toISOString().slice(0,10))).length;
@@ -2790,6 +2668,7 @@
 
         msg&&h('div',{style:{padding:'12px 16px',background:msgOk?'rgba(62,207,142,.12)':'rgba(255,77,106,.12)',borderRadius:8,marginBottom:16,color:msgOk?C.green:C.red}},msg),
 
+        // ── CAMPAGNES TAB ──
         tab==='campagnes'&&h('div',null,
           loading?h('div',{style:{color:C.muted,textAlign:'center',padding:40}},'Chargement...'):
           campaigns.length===0
@@ -2823,6 +2702,7 @@
               )
         ),
 
+        // ── AUTOMATIONS TAB ──
         tab==='automations'&&h('div',null,
           h('div',{style:{...card,marginBottom:20,background:'rgba(255,107,53,.06)',border:`1px solid ${C.gold}33`}},
             h('div',{style:{display:'flex',gap:12}},
@@ -2858,6 +2738,7 @@
           ))
         ),
 
+        // ── LOGS TAB ──
         tab==='logs'&&h('div',null,
           h('div',{style:{...card}},
             h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}},
@@ -2885,6 +2766,7 @@
     }
 
 
+        // ── Tâches ───────────────────────────────────────────────────────────────
     function Taches() {
       const [taches,setTaches]=useState([]);
       const [titre,setTitre]=useState('');
@@ -2935,6 +2817,7 @@
     }
 
 
+    // ── Form Preview Modal ────────────────────────────────────────────────────
     function FormPreviewModal({form,fmeta,questions,onClose}){
       const [step,setStep]=useState(0);
       const bg=fmeta.bg_color||'#0d1b2a';
@@ -3023,6 +2906,7 @@
       );
     }
 
+    // ── Questionnaires ────────────────────────────────────────────────────────
     function FormBuilder({form,initQuestions,onClose,baseUrl}){
       const [questions,setQuestions]=useState(initQuestions);
       const [deletedIds,setDeletedIds]=useState([]);
@@ -3781,6 +3665,7 @@
     }
 
 
+    // ── Prospects ──────────────────────────────────────────────────────────
     function Prospects() {
       const [subs, setSubs] = useState([]);
       const [loading, setLoading] = useState(true);
