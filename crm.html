@@ -810,6 +810,7 @@
       const [delProg,setDelProg] = useState(null);
       // Full-page editor state (null=list, 'new'=create, obj=edit)
       const [progEditorView,setProgEditorView] = useState(null);
+      const [ytModal,setYtModal] = useState(null); // modal vidéo YouTube
 
       const EP = {titre:'',description:'',description_courte:'',image_url:'',prix:'0',prix_promo:'',objectif:'',niveau:'debutant',duree_semaines:8,duree_unite:'semaines',sexe:'tous',actif:true,equipement:'',mensuration:false,note:'',categorie:'',phase_precedente_id:'',monetisation_paiement:false,monetisation_credits:false,monetisation_groupes:false};
       const [pForm,setPForm] = useState(EP);
@@ -1171,8 +1172,8 @@
                       selExo.image_filename?h('img',{src:'https://cdn.azeoo.com/exercises/small-wide/'+selExo.image_filename,style:{width:'100%',height:130,objectFit:'cover',display:'block'},onError:e=>{e.target.style.display='none'}}):h('div',{style:{height:80,display:'flex',alignItems:'center',justifyContent:'center',fontSize:32}},'💪'),
                       h('div',{style:{padding:'10px 12px'}},
                         h('div',{style:{fontSize:13,fontWeight:700,color:C.gold,marginBottom:8}},selExo.name),
-                        selExo.youtube_id&&h('a',{href:'https://www.youtube.com/watch?v='+selExo.youtube_id,target:'_blank',style:{display:'flex',alignItems:'center',gap:6,background:'rgba(255,0,0,0.15)',border:'1px solid rgba(255,0,0,0.3)',color:'#ff4444',borderRadius:8,padding:'6px 10px',textDecoration:'none',fontSize:12,fontWeight:600}},'▶ Voir la vidéo'),
-                        selExo.youtube_id&&h('img',{src:`https://img.youtube.com/vi/${selExo.youtube_id}/mqdefault.jpg`,style:{width:'100%',borderRadius:8,marginTop:8,cursor:'pointer'},onClick:()=>window.open('https://www.youtube.com/watch?v='+selExo.youtube_id,'_blank'),onError:e=>{e.target.style.display='none'}})
+                        selExo.youtube_id&&h('button',{onClick:()=>setYtModal(selExo),style:{display:'flex',alignItems:'center',gap:6,background:'rgba(255,0,0,0.15)',border:'1px solid rgba(255,0,0,0.3)',color:'#ff4444',borderRadius:8,padding:'6px 10px',cursor:'pointer',fontSize:12,fontWeight:600}},'▶ Voir la vidéo'),
+                        selExo.youtube_id&&h('img',{src:`https://img.youtube.com/vi/${selExo.youtube_id}/mqdefault.jpg`,style:{width:'100%',borderRadius:8,marginTop:8,cursor:'pointer'},onClick:()=>setYtModal(selExo),onError:e=>{e.target.style.display='none'}})
                       )
                     )
                   :h('div',{style:{background:C.soft,borderRadius:12,border:`1px solid ${C.border}`,height:200,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:8,color:C.muted,fontSize:13}},h('div',{style:{fontSize:28}},'🏋️'),h('div',null,'Sélectionne un exercice'))
@@ -1215,10 +1216,10 @@
               exo?.image_filename?h('img',{src:'https://cdn.azeoo.com/exercises/small-wide/'+exo.image_filename,style:{width:80,height:52,objectFit:'cover',borderRadius:8,flexShrink:0},onError:e=>{e.target.style.display='none'}}):h('div',{style:{width:80,height:52,background:`${C.gold}22`,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',fontSize:24,flexShrink:0}},'💪'),
               h('div',{style:{flex:1}},
                 h('div',{style:{fontSize:14,fontWeight:700,color:C.white,marginBottom:4}},exo?.name||'—'),
-                exo?.youtube_id&&h('a',{href:'https://www.youtube.com/watch?v='+exo.youtube_id,target:'_blank',style:{display:'inline-flex',alignItems:'center',gap:5,background:'rgba(255,0,0,0.15)',border:'1px solid rgba(255,0,0,0.3)',color:'#ff5555',borderRadius:6,padding:'4px 10px',textDecoration:'none',fontSize:11,fontWeight:600}},'▶ Voir la vidéo')
+                exo?.youtube_id&&h('button',{onClick:()=>setYtModal(exo),style:{display:'inline-flex',alignItems:'center',gap:5,background:'rgba(255,0,0,0.15)',border:'1px solid rgba(255,0,0,0.3)',color:'#ff5555',borderRadius:6,padding:'4px 10px',cursor:'pointer',fontSize:11,fontWeight:600}},'▶ Voir la vidéo')
               )
             ),
-            exo?.youtube_id&&h('img',{src:`https://img.youtube.com/vi/${exo.youtube_id}/mqdefault.jpg`,style:{width:'100%',borderRadius:10,marginBottom:14,cursor:'pointer'},onClick:()=>window.open('https://www.youtube.com/watch?v='+exo.youtube_id,'_blank'),onError:e=>{e.target.style.display='none'}}),
+            exo?.youtube_id&&h('img',{src:`https://img.youtube.com/vi/${exo.youtube_id}/mqdefault.jpg`,style:{width:'100%',borderRadius:10,marginBottom:14,cursor:'pointer'},onClick:()=>setYtModal(exo),onError:e=>{e.target.style.display='none'}}),
             h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8,marginBottom:10}},
               ...[['Séries','sets','number'],['Reps','reps','number'],['Repos (s)','rest_seconds','number'],['Charge','charge','text']].map(([l,f,t])=>
                 h('div',{key:f},h('label',{style:{fontSize:10,color:C.muted,display:'block',marginBottom:3,textTransform:'uppercase',letterSpacing:'0.06em'}},l),
@@ -1297,13 +1298,24 @@
                         ),
                         pe.notes&&h('div',{style:{fontSize:11,color:C.muted,marginTop:6,fontStyle:'italic',borderTop:`1px solid ${C.border}`,paddingTop:5}},pe.notes)
                       ),
-                      pe.exercise?.youtube_id&&h('a',{href:'https://www.youtube.com/watch?v='+pe.exercise.youtube_id,target:'_blank',style:{width:36,height:36,borderRadius:'50%',background:`${C.red}22`,display:'flex',alignItems:'center',justifyContent:'center',color:C.red,textDecoration:'none',fontSize:14,flexShrink:0}},'▶'),
+                      pe.exercise?.youtube_id&&h('button',{onClick:()=>setYtModal(pe.exercise),title:'Voir la vidéo',style:{width:36,height:36,borderRadius:'50%',background:`${C.red}22`,border:`1px solid ${C.red}44`,display:'flex',alignItems:'center',justifyContent:'center',color:C.red,cursor:'pointer',fontSize:14,flexShrink:0}},'▶'),
                       isAdmin&&h('button',{onClick:()=>openEditExoEntry(pe),title:'Modifier',style:{width:32,height:32,borderRadius:8,background:`${C.gold}15`,border:`1px solid ${C.gold}33`,color:C.gold,cursor:'pointer',fontSize:13,flexShrink:0}},'✏️'),
                       isAdmin&&h('button',{onClick:()=>handleRemoveExo(pe.id),style:{width:32,height:32,borderRadius:8,background:'transparent',border:'none',color:C.muted,cursor:'pointer',fontSize:13,flexShrink:0}},'🗑')
                     )
                   )
                 )
               ),
+          ytModal&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.88)',zIndex:2000,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:20},onClick:e=>{if(e.target===e.currentTarget)setYtModal(null)}},
+            h('div',{style:{background:C.card,borderRadius:16,overflow:'hidden',width:'min(90vw,860px)',boxShadow:'0 24px 80px rgba(0,0,0,0.6)'}},
+              h('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'14px 18px',borderBottom:`1px solid ${C.border}`}},
+                h('div',{style:{fontWeight:600,fontSize:15,color:C.white}},ytModal.name),
+                h('button',{onClick:()=>setYtModal(null),style:{background:'transparent',border:'none',color:C.muted,fontSize:20,cursor:'pointer',lineHeight:1}},'×')
+              ),
+              h('div',{style:{position:'relative',paddingBottom:'56.25%',height:0}},
+                h('iframe',{src:`https://www.youtube.com/embed/${ytModal.youtube_id}?autoplay=1`,allow:'autoplay; encrypted-media',allowFullScreen:true,style:{position:'absolute',top:0,left:0,width:'100%',height:'100%',border:'none'}})
+              )
+            )
+          ),
           addExoOpen&&h(AddExoModal,null),
           editExoEntry&&h(EditExoEntryModal,null)
         );
