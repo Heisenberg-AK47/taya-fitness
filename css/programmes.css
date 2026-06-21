@@ -2,7 +2,7 @@
    PROGRAMMES.CSS
    ============================================================ */
 
-/* ── En-tête page ────────────────────────────────────────── */
+/* -- En-tete page -- */
 .page-hero {
   padding: calc(var(--nav-height) + 60px) 0 60px;
   background: var(--black-soft);
@@ -23,7 +23,67 @@
 .page-hero h1 { margin-bottom: 16px; }
 .page-hero p  { max-width: 520px; margin: 0 auto; }
 
-/* ── Filtres ─────────────────────────────────────────────── */
+
+/* -- Hero image programmes (style offres) -- */
+.prog-img-hero {
+  position: relative;
+  height: 360px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.prog-hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+}
+.prog-video-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background-image:
+    radial-gradient(rgba(255,255,255,0.055) 1px, transparent 1px),
+    linear-gradient(105deg, rgba(13,27,42,0.95) 0%, rgba(13,27,42,0.72) 50%, rgba(13,27,42,0.18) 100%);
+  background-size: 4px 4px, auto;
+  display: flex;
+  align-items: center;
+}
+.prog-video-overlay .container {
+  position: relative;
+  z-index: 3;
+  padding: 48px 0;
+}
+.prog-video-overlay h1 {
+  font-size: 2.8rem;
+  line-height: 1.1;
+  margin-bottom: 18px;
+  color: #fff;
+}
+.prog-video-overlay h1 em {
+  font-style: normal;
+  color: var(--orange, #ff6b4a);
+}
+.prog-video-overlay p {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.78);
+  max-width: 520px;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .prog-img-hero { height: 240px; }
+  .prog-video-overlay h1 { font-size: 2rem; }
+}
+@media (max-width: 480px) {
+  .prog-img-hero { height: 280px; }
+  .prog-video-overlay h1 { font-size: 1.6rem; }
+  .prog-video-overlay p { font-size: 0.88rem; }
+}
+
+/* -- Filtres -- */
 .filtres-section {
   background: var(--black);
   padding: 32px 0;
@@ -83,21 +143,21 @@
   color: var(--black);
 }
 
-/* ── Compteur ────────────────────────────────────────────── */
+/* -- Compteur -- */
 .programmes-count {
   font-size: 0.85rem;
   color: var(--white-muted);
   margin-bottom: 28px;
 }
 
-/* ── Grille ──────────────────────────────────────────────── */
+/* -- Grille -- */
 .programmes-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 28px;
 }
 
-/* Carte programme — reprend les styles de index.css */
+/* Carte programme */
 .programme-card {
   display: flex;
   flex-direction: column;
@@ -183,7 +243,7 @@
   margin-right: 6px;
 }
 
-/* ── Empty state ─────────────────────────────────────────── */
+/* -- Empty state -- */
 .empty-state {
   grid-column: 1 / -1;
   text-align: center;
@@ -193,6 +253,6 @@
 
 .empty-state span { font-size: 3rem; display: block; margin-bottom: 16px; }
 
-/* ── Responsive ──────────────────────────────────────────── */
+/* -- Responsive -- */
 @media (max-width: 1024px) { .programmes-grid { grid-template-columns: repeat(2,1fr); } }
 @media (max-width: 640px)  { .programmes-grid { grid-template-columns: 1fr; } }
