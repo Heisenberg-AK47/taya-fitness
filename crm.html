@@ -32,41 +32,7 @@
     #crm-sidebar { position:fixed!important;left:-240px;top:0;bottom:0;z-index:200;width:230px!important;min-height:100vh; }
     #crm-sidebar.mob-open { left:0!important; }
     #crm-overlay.mob-open { display:block!important; }
-    #crm-main { padding:12px!important;padding-top:58px!important;overflow-x:hidden; }
-
-    /* Stats grid: 2 colonnes */
-    .crm-stats-grid { grid-template-columns:repeat(2,1fr)!important; }
-
-    /* Clients table: cacher colonnes secondaires (2-5), garder Client+Statut+Edit */
-    .crm-clients-table thead tr th:nth-child(2),
-    .crm-clients-table tbody tr td:nth-child(2),
-    .crm-clients-table thead tr th:nth-child(3),
-    .crm-clients-table tbody tr td:nth-child(3),
-    .crm-clients-table thead tr th:nth-child(4),
-    .crm-clients-table tbody tr td:nth-child(4),
-    .crm-clients-table thead tr th:nth-child(5),
-    .crm-clients-table tbody tr td:nth-child(5) { display:none!important; }
-
-    /* Toutes les autres tables: scroll horizontal */
-    #crm-main table:not(.crm-clients-table) { display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%; }
-
-    /* Header: empiler sur mobile */
-    #crm-main h1 { font-size:18px!important; }
-    #crm-main [style*="justifyContent:'space-between'"] { flex-direction:column; }
-
-    /* Cards: padding réduit */
-    #crm-main [style*="padding:24"] { padding:14px!important; }
-    #crm-main [style*="padding: 24"] { padding:14px!important; }
-
-    /* Inputs: pleine largeur */
-    #crm-main input, #crm-main select { min-width:0!important; }
-
-    /* Stat cards: padding compact */
-    .crm-stats-grid > div { padding:12px 8px!important; }
-    .crm-stats-grid > div > div:first-child { font-size:20px!important; }
-
-    /* Prevent page overflow */
-    body { overflow-x:hidden; }
+    #crm-main { padding:16px!important;padding-top:60px!important; }
   }
   </style>
 </head>
@@ -748,7 +714,7 @@
         ),
 
         // Stats bar
-        h('div',{className:'crm-stats-grid',style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:20}},
+        h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginBottom:20}},
           h('div',{style:{...card,textAlign:'center',padding:16}},h('div',{style:{fontSize:24,fontWeight:800,color:C.white}},statCounts.total),h('div',{style:{fontSize:11,color:C.muted,marginTop:4,textTransform:'uppercase',letterSpacing:'0.06em'}},'Total clients')),
           h('div',{style:{...card,textAlign:'center',padding:16}},h('div',{style:{fontSize:24,fontWeight:800,color:C.green}},statCounts.actif),h('div',{style:{fontSize:11,color:C.muted,marginTop:4,textTransform:'uppercase',letterSpacing:'0.06em'}},'Actifs')),
           h('div',{style:{...card,textAlign:'center',padding:16}},h('div',{style:{fontSize:24,fontWeight:800,color:C.gold}},statCounts.inactif),h('div',{style:{fontSize:11,color:C.muted,marginTop:4,textTransform:'uppercase',letterSpacing:'0.06em'}},'Inactifs')),
@@ -780,7 +746,7 @@
             h('div',{style:{fontSize:13}},'Modifiez vos filtres ou ajoutez un nouveau client'),
             isAdmin&&h('button',{onClick:openNew,style:{...btn,marginTop:16,fontSize:13}},'+ Ajouter un client')
           )
-          :h('table',{className:'crm-clients-table',style:{width:'100%',borderCollapse:'collapse'}},
+          :h('table',{style:{width:'100%',borderCollapse:'collapse'}},
             h('thead',null,h('tr',null,
               ...['Client','Groupes','Objectif','Programme','Abonnement','Statut',''].map(l=>h('th',{key:l,style:th},l))
             )),
