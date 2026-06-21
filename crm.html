@@ -186,7 +186,6 @@
     const td = {padding:'14px 16px',fontSize:14,color:C.white,borderBottom:`1px solid ${C.border}`};
     const badge = (c) => ({background:`${c}22`,color:c,fontSize:11,fontWeight:600,padding:'3px 8px',borderRadius:100,display:'inline-block',marginRight:4});
 
-    // ── Azeoo clients data (52 clients réels) ───────────────────────────────
     const AZEOO_CLIENTS = [
       {nom:"marilyne melendi",email:"marilynemelendi7@gmail.com",app:"Apple",groupe:"—",objectif:"Sculpt Your Body",niveau:"Advanced"},
       {nom:"sieu-ly thai",email:"sieuly.thai@gmail.com",app:"Apple",groupe:"—",objectif:"Lose Weight",niveau:"Beginner"},
@@ -242,7 +241,6 @@
       {nom:"Test Apple",email:"apple.tayafitness@yopmail.com",app:"Android",groupe:"—",objectif:"Get Fit",niveau:"Beginner"},
     ];
 
-    // ── Programmes from Azeoo ────────────────────────────────────────────────
     const PROGRAMMES = [
       {nom:"The legend is on its way...",duree:"8 semaines",prix:"€19.95",objectif:"Sculpt Your Body",niveau:"",img:"https://cdn.azeoo.com/programs/large/sans-titre-65-5eaee7a9d27e0.jpg"},
       {nom:"PERTE DE POIDS & PRISE DE MASSE",duree:"8 semaines",prix:"Perso",objectif:"Build Muscle",niveau:"Beginner",img:"https://cdn.azeoo.com/programs/large/img-0246-698ee5b4e6c63.jpg"},
@@ -350,7 +348,6 @@
 
       return h('div',{className:'crm-root',style:{background:C.bg,fontFamily:'Inter,sans-serif'}},
 
-        // ── Sidebar desktop ──────────────────────────────────────────────────
         h('div',{className:'crm-sidebar',style:{background:C.soft,borderRight:`1px solid ${C.border}`}},
           h('div',{style:{padding:'28px 20px 20px',borderBottom:`1px solid ${C.border}`}},
             h('div',{dangerouslySetInnerHTML:{__html:`
@@ -370,16 +367,13 @@
           )
         ),
 
-        // ── Topbar mobile ────────────────────────────────────────────────────
         h('div',{className:'crm-topbar'},
           h('span',{className:'crm-topbar-title'},'TAYA CRM'),
           h('button',{className:'crm-hamburger',onClick:openDrawer,title:'Menu'},'☰')
         ),
 
-        // ── Drawer overlay ───────────────────────────────────────────────────
         h('div',{className:'crm-drawer-overlay'+(drawerOpen?' open':''),onClick:closeDrawer}),
 
-        // ── Drawer panel ─────────────────────────────────────────────────────
         h('div',{className:'crm-drawer'+(drawerOpen?' open':'')},
           h('div',{className:'crm-drawer-header'},
             h('span',{className:'crm-drawer-title'},'Menu'),
@@ -395,14 +389,12 @@
           h('button',{className:'crm-drawer-logout',onClick:()=>{sb.auth.signOut();closeDrawer();}},'Déconnexion')
         ),
 
-        // ── Contenu principal ────────────────────────────────────────────────
         h('main',{className:'crm-main',style:{color:C.white}},
           h(Page,null)
         )
       );
     }
 
-    // ── Dashboard ─────────────────────────────────────────────────────────────
     function Dashboard() {
       const [stats,setStats] = useState({clients:0,actifs:0,revenus:0,newsletter:0});
       const [recent,setRecent] = useState([]);
@@ -483,7 +475,6 @@
       );
     }
 
-    // ── Clients Azeoo ─────────────────────────────────────────────────────────
     function ClientsAzeoo() {
       const ADMIN = ['fumeysarah@yahoo.fr','contact@sergepaulmier.com','contact@tayafitness.com'];
       const [clients,setClients] = useState([]);
@@ -616,13 +607,11 @@
         setGroupes(prev=>prev.filter(g=>g.id!==id));
       }
 
-      // ── Section helper
       const Sec=(title,children)=>h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:20,marginBottom:14}},
         title&&h('div',{style:{fontSize:12,fontWeight:700,color:C.white,marginBottom:14,paddingBottom:10,borderBottom:`1px solid ${C.border}`}},title),
         ...children
       );
 
-      // ── Groups management modal
       const GroupsModal=()=>h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:e=>{if(e.target===e.currentTarget)setShowGroupsModal(false);}},
         h('div',{style:{background:C.card,borderRadius:20,padding:28,width:'100%',maxWidth:480,maxHeight:'80vh',display:'flex',flexDirection:'column'}},
           h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}},
@@ -648,7 +637,6 @@
         )
       );
 
-      // ── CLIENT EDITOR (new/edit)
       if(view==='new'||view==='edit'){
         const isEdit=view==='edit';
         return h('div',null,
@@ -740,7 +728,6 @@
         );
       }
 
-      // ── CLIENT DETAIL VIEW
       if(view==='detail'&&selectedClient){
         const c=selectedClient;
         const progName=c.programme_id?programmes.find(p=>p.id===c.programme_id)?.titre:null;
@@ -839,7 +826,6 @@
         );
       }
 
-      // ── LIST VIEW
       const statCounts={total:clients.length,actif:clients.filter(c=>c.statut==='actif').length,inactif:clients.filter(c=>c.statut==='inactif').length};
       return h('div',null,
         // Header
@@ -941,7 +927,6 @@
     }
 
 
-    // ── Programmes ────────────────────────────────────────────────────────────
     function Programmes() {
       const ADMIN = ['fumeysarah@yahoo.fr','contact@sergepaulmier.com','contact@tayafitness.com'];
       const [progs,setProgs] = useState([]);
@@ -1110,13 +1095,11 @@
         setSaving(false);setTimeout(()=>setMsg(''),4000);
       }
 
-      // ── Section helper ─────────────────────────────────────────────────────
       const Sec=(title,children,extra={})=>h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:20,marginBottom:14,...(extra.style||{})}},
         h('div',{style:{fontSize:12,fontWeight:700,color:C.white,marginBottom:14,paddingBottom:10,borderBottom:`1px solid ${C.border}`}},title),
         ...children
       );
 
-      // ── FULL-PAGE PROGRAMME EDITOR ─────────────────────────────────────────
       if(progEditorView!==null){
         const isEdit=progEditorView&&progEditorView!=='new';
         const Lbl=(t,sub)=>h('div',{style:{marginBottom:sub?2:0}},h('label',{style:{display:'block',fontSize:11,color:C.muted,marginBottom:4}},t),sub&&h('div',{style:{fontSize:10,color:C.muted,marginBottom:4}},sub));
@@ -1137,7 +1120,6 @@
 
           h('div',{style:{display:'grid',gridTemplateColumns:'1fr 320px',gap:14,alignItems:'start'}},
 
-            // ── Colonne gauche ─────────────────────────────────────────────
             h('div',null,
 
               Sec('📋 Informations générales',[
@@ -1210,7 +1192,6 @@
               ])
             ),
 
-            // ── Colonne droite ─────────────────────────────────────────────
             h('div',null,
 
               Sec('🖼️ Image',[
@@ -1307,7 +1288,6 @@
         );
       }
 
-      // ── Modals (exercices) ─────────────────────────────────────────────────
       const AddExoModal=()=>{
         const selExo=allExos.find(e=>e.id===aForm.exercise_id);
         return h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.85)',display:'flex',alignItems:'flex-start',justifyContent:'center',zIndex:1000,padding:'32px 16px',overflowY:'auto'}},
@@ -1391,7 +1371,6 @@
         );
       };
 
-      // ─── WORKOUT DAY VIEW ─────────────────────────────────────────────────────
       if(selectedProg&&selectedDay){
         const{week:sw,day:sd}=selectedDay;
         const DAYS_FR=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
@@ -1477,7 +1456,6 @@
         );
       }
 
-      // ─── PROGRAMME DETAIL VIEW ────────────────────────────────────────────────
       if(selectedProg){
         const DAYS_FR=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
         const totalWeeks=selectedProg.duree_semaines||8;
@@ -1567,7 +1545,6 @@
         );
       }
 
-      // ─── LIST VIEW ────────────────────────────────────────────────────────────
       const filteredProgs=filter?progs.filter(p=>p.objectif===filter):progs;
       return h('div',null,
         h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24,flexWrap:'wrap',gap:12}},
@@ -1855,7 +1832,6 @@
       );
     }
 
-    // ── Abonnements ──────────────────────────────────────────────────────────
     function Abonnements() {
       const [tab,setTab]=useState('abos');
       const [abos,setAbos]=useState([]);
@@ -1972,13 +1948,11 @@
       const CYCLE_LABEL={monthly:'/mois',yearly:'/an'};
       const planColorMap={};subPlans.forEach(p=>{planColorMap[p.name]=p.color||C.gold;});
 
-      // ── Section helper ────────────────────────────────────────────────────
       const Section=(title,children)=>h('div',{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:22,marginBottom:16}},
         h('div',{style:{fontSize:12,fontWeight:700,color:C.white,marginBottom:16,paddingBottom:10,borderBottom:`1px solid ${C.border}`}},title),
         ...children
       );
 
-      // ── Plan editor (pleine page) ─────────────────────────────────────────
       if(planEditorView!==null){
         const isEdit=planEditorView&&planEditorView!=='new';
         const planSlug=(planForm.name||'').toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
@@ -1999,7 +1973,6 @@
 
           h('div',{style:{display:'grid',gridTemplateColumns:'1fr 340px',gap:16,alignItems:'start'}},
 
-            // ── Colonne gauche
             h('div',null,
 
               // Section Identité
@@ -2171,7 +2144,6 @@
               ])
             ),
 
-            // ── Colonne droite
             h('div',null,
 
               // Section Image
@@ -2220,7 +2192,6 @@
         );
       }
 
-      // ── Abo Modal ──────────────────────────────────────────────────────────
       const aboModal=showAboModal&&h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center',padding:20},onClick:e=>{if(e.target===e.currentTarget)setShowAboModal(false);}},
         h('div',{style:{background:C.card,borderRadius:20,padding:28,width:'100%',maxWidth:420}},
           h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}},
@@ -2356,7 +2327,6 @@
       );
     }
 
-    // ── Revenus ──────────────────────────────────────────────────────────────
     const STRIPE_FN = 'https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/stripe-financials';
     const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVzeWx6c2FjamtpbWNxeGxsaHdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMDE3MzEsImV4cCI6MjA5NTY3NzczMX0.3BZsEh6IaFqKHsW9MX3mhxWbvSHEcAqKhyOrJFZGAoA';
 
@@ -2517,7 +2487,6 @@
       );
     }
 
-    // ── Emails ───────────────────────────────────────────────────────────────
     function Emails() {
       const [tab,setTab]=useState('campagnes');
       const [campaigns,setCampaigns]=useState([]);
@@ -2644,7 +2613,6 @@
 
       const tabStyle=(t)=>({padding:'10px 20px',background:tab===t?C.gold:'transparent',color:tab===t?'#fff':C.muted,border:'none',borderRadius:8,cursor:'pointer',fontWeight:600,fontSize:13,transition:'all .2s'});
 
-      // ─── CAMPAIGN EDITOR ───
       if(view!==null){
         return h('div',{style:{maxWidth:1000,margin:'0 auto'}},
           h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:28}},
@@ -2730,7 +2698,6 @@
         );
       }
 
-      // ─── AUTOMATION EDITOR ───
       if(autoView!==null){
         return h('div',{style:{maxWidth:800,margin:'0 auto'}},
           h('div',{style:{display:'flex',alignItems:'center',gap:16,marginBottom:28}},
@@ -2784,7 +2751,6 @@
         );
       }
 
-      // ─── MAIN VIEW ───
       const sentTotal=campaigns.filter(c=>c.statut==='envoye').reduce((s,c)=>s+(c.nb_envoyes||0),0);
       const activeAutos=automations.filter(a=>a.actif).length;
       const logsToday=logs.filter(l=>l.sent_at&&l.sent_at.startsWith(new Date().toISOString().slice(0,10))).length;
@@ -2824,7 +2790,6 @@
 
         msg&&h('div',{style:{padding:'12px 16px',background:msgOk?'rgba(62,207,142,.12)':'rgba(255,77,106,.12)',borderRadius:8,marginBottom:16,color:msgOk?C.green:C.red}},msg),
 
-        // ── CAMPAGNES TAB ──
         tab==='campagnes'&&h('div',null,
           loading?h('div',{style:{color:C.muted,textAlign:'center',padding:40}},'Chargement...'):
           campaigns.length===0
@@ -2858,7 +2823,6 @@
               )
         ),
 
-        // ── AUTOMATIONS TAB ──
         tab==='automations'&&h('div',null,
           h('div',{style:{...card,marginBottom:20,background:'rgba(255,107,53,.06)',border:`1px solid ${C.gold}33`}},
             h('div',{style:{display:'flex',gap:12}},
@@ -2894,7 +2858,6 @@
           ))
         ),
 
-        // ── LOGS TAB ──
         tab==='logs'&&h('div',null,
           h('div',{style:{...card}},
             h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}},
@@ -2922,7 +2885,6 @@
     }
 
 
-        // ── Tâches ───────────────────────────────────────────────────────────────
     function Taches() {
       const [taches,setTaches]=useState([]);
       const [titre,setTitre]=useState('');
@@ -2973,7 +2935,6 @@
     }
 
 
-    // ── Form Preview Modal ────────────────────────────────────────────────────
     function FormPreviewModal({form,fmeta,questions,onClose}){
       const [step,setStep]=useState(0);
       const bg=fmeta.bg_color||'#0d1b2a';
@@ -3062,7 +3023,6 @@
       );
     }
 
-    // ── Questionnaires ────────────────────────────────────────────────────────
     function FormBuilder({form,initQuestions,onClose,baseUrl}){
       const [questions,setQuestions]=useState(initQuestions);
       const [deletedIds,setDeletedIds]=useState([]);
@@ -3821,7 +3781,6 @@
     }
 
 
-    // ── Prospects ──────────────────────────────────────────────────────────
     function Prospects() {
       const [subs, setSubs] = useState([]);
       const [loading, setLoading] = useState(true);
