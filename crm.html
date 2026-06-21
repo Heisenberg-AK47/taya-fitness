@@ -32,7 +32,17 @@
     #crm-sidebar { position:fixed!important;left:-240px;top:0;bottom:0;z-index:200;width:230px!important;min-height:100vh; }
     #crm-sidebar.mob-open { left:0!important; }
     #crm-overlay.mob-open { display:block!important; }
-    #crm-main { padding:16px!important;padding-top:60px!important; }
+    #crm-main { padding:16px!important;padding-top:60px!important;overflow-x:hidden; }
+
+    /* Grid stats 2 colonnes */
+    #crm-main div[style*="repeat(4,1fr)"] { grid-template-columns:repeat(2,1fr)!important; }
+
+    /* Tables: scroll interne uniquement */
+    #crm-main table { display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-width:100%; }
+    #crm-main th, #crm-main td { white-space:nowrap; }
+
+    /* Prevent full-page horizontal scroll */
+    body { overflow-x:hidden; }
   }
   </style>
 </head>
