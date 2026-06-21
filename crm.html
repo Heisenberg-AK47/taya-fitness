@@ -43,46 +43,93 @@
   .crm-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px; }
 
   /* ════════════ MOBILE ≤ 768px ════════════ */
+
+  /* Topbar mobile */
+  .crm-topbar { display:none; }
+
+  /* Drawer overlay */
+  .crm-drawer-overlay {
+    display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1100;
+    opacity:0;transition:opacity .25s;
+  }
+  .crm-drawer-overlay.open { opacity:1; }
+
+  /* Drawer panel */
+  .crm-drawer {
+    position:fixed;top:0;left:0;bottom:0;width:260px;
+    background:#0f172a;border-right:1px solid #1e293b;
+    z-index:1101;transform:translateX(-100%);transition:transform .25s cubic-bezier(.4,0,.2,1);
+    display:flex;flex-direction:column;overflow-y:auto;
+    padding-top:max(16px,env(safe-area-inset-top));
+    padding-bottom:max(16px,env(safe-area-inset-bottom));
+  }
+  .crm-drawer.open { transform:translateX(0); }
+
+  .crm-drawer-header {
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 16px 16px;border-bottom:1px solid #1e293b;margin-bottom:8px;
+  }
+  .crm-drawer-title { font-size:18px;font-weight:800;color:#ff6b4a;letter-spacing:1px; }
+  .crm-drawer-close {
+    background:transparent;border:none;color:#64748b;font-size:22px;
+    cursor:pointer;padding:4px 8px;line-height:1;border-radius:6px;
+  }
+  .crm-drawer nav a, .crm-drawer-nav-btn {
+    display:block;width:100%;text-align:left;
+    padding:13px 20px;font-size:14px;font-weight:500;
+    background:transparent;border:none;cursor:pointer;
+    color:#94a3b8;font-family:'Inter',sans-serif;
+    border-radius:10px;margin:1px 8px;width:calc(100% - 16px);
+    -webkit-tap-highlight-color:transparent;transition:background .15s,color .15s;
+  }
+  .crm-drawer-nav-btn.active { background:rgba(255,107,74,.12);color:#ff6b4a;font-weight:600; }
+  .crm-drawer-nav-btn:hover { background:rgba(255,255,255,.05);color:#e2e8f0; }
+  .crm-drawer-logout {
+    margin-top:auto;padding:12px 20px;
+    font-size:13px;color:#64748b;background:transparent;border:none;
+    cursor:pointer;font-family:'Inter',sans-serif;text-align:left;
+    border-top:1px solid #1e293b;width:100%;
+  }
+
   @media (max-width:768px) {
 
-    /* Cacher sidebar → bottom nav */
+    /* Cacher sidebar desktop */
     .crm-sidebar { display:none !important; }
-    .crm-bottom-nav {
+    .crm-bottom-nav { display:none !important; }
+
+    /* Topbar */
+    .crm-topbar {
       display:flex !important;
-      position:fixed;bottom:0;left:0;right:0;z-index:900;
-      background:#0f172a;border-top:1px solid #1e293b;
-      padding:6px 2px max(6px,env(safe-area-inset-bottom));
-      justify-content:space-around;align-items:flex-end;
+      position:fixed;top:0;left:0;right:0;z-index:900;height:52px;
+      background:#0f172a;border-bottom:1px solid #1e293b;
+      align-items:center;justify-content:space-between;
+      padding:0 16px;padding-top:env(safe-area-inset-top);
     }
-    .crm-bottom-nav button {
-      display:flex;flex-direction:column;align-items:center;gap:2px;
+    .crm-topbar-title { font-size:16px;font-weight:700;color:#ff6b4a;letter-spacing:.5px; }
+    .crm-hamburger {
       background:transparent;border:none;cursor:pointer;
-      color:#64748b;font-size:9px;font-family:'Inter',sans-serif;
-      padding:4px 2px;min-width:36px;border-radius:8px;
+      color:#e2e8f0;font-size:22px;padding:6px;border-radius:8px;
       -webkit-tap-highlight-color:transparent;line-height:1;
     }
-    .crm-bottom-nav button.active { color:#ff6b4a; }
-    .crm-bottom-nav button .ti { font-size:18px;display:block;margin-bottom:2px; }
+    .crm-drawer-overlay { display:block; }
 
-    /* Main : padding réduit + espace bottom nav */
-    .crm-main { padding:14px !important; padding-bottom:88px !important; }
+    /* Main : espace pour topbar */
+    .crm-main { padding:14px !important; padding-top:66px !important; }
 
     /* Grilles */
     .crm-grid-4 { grid-template-columns:repeat(2,1fr) !important; gap:10px !important; }
     .crm-grid-3 { grid-template-columns:repeat(2,1fr) !important; gap:10px !important; }
     .crm-grid-2 { grid-template-columns:1fr !important; gap:12px !important; }
 
-    /* Tables scrollables sans wrapper JS — trick CSS pur */
+    /* Tables scrollables — trick CSS pur */
     .crm-main table {
       display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;
       min-width:520px;max-width:100%;
     }
-    .crm-main thead, .crm-main tbody, .crm-main tr { display:table;width:100%;table-layout:fixed; }
+    .crm-main thead,.crm-main tbody,.crm-main tr { display:table;width:100%;table-layout:fixed; }
 
-    /* Inputs : éviter le zoom automatique iOS */
-    input, select, textarea { font-size:16px !important; }
-
-    /* Boutons touch-friendly */
+    /* Inputs iOS zoom fix */
+    input,select,textarea { font-size:16px !important; }
     button { min-height:38px; }
   }
 
@@ -293,8 +340,17 @@
       const pages = {dashboard:Dashboard,clients:ClientsAzeoo,programmes:Programmes,exercices:Exercices,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches,questionnaires:Questionnaires,prospects:Prospects};
       const Page = pages[tab] || Dashboard;
 
-      const BOTTOM_TABS = TABS.slice(0,9);
+      const [drawerOpen,setDrawerOpen] = useState(false);
+      const openDrawer  = () => setDrawerOpen(true);
+      const closeDrawer = () => setDrawerOpen(false);
+      const goTab = (id) => { setTab(id); closeDrawer(); };
+
+      // Label court sans emoji pour le drawer
+      const tabLabel = t => t.label;
+
       return h('div',{className:'crm-root',style:{background:C.bg,fontFamily:'Inter,sans-serif'}},
+
+        // ── Sidebar desktop ──────────────────────────────────────────────────
         h('div',{className:'crm-sidebar',style:{background:C.soft,borderRight:`1px solid ${C.border}`}},
           h('div',{style:{padding:'28px 20px 20px',borderBottom:`1px solid ${C.border}`}},
             h('div',{dangerouslySetInnerHTML:{__html:`
@@ -313,15 +369,35 @@
             h('button',{onClick:()=>sb.auth.signOut(),style:{width:'100%',background:'transparent',color:C.muted,border:`1px solid ${C.border}`,borderRadius:10,padding:'10px',fontSize:13,cursor:'pointer'}},'Déconnexion')
           )
         ),
+
+        // ── Topbar mobile ────────────────────────────────────────────────────
+        h('div',{className:'crm-topbar'},
+          h('span',{className:'crm-topbar-title'},'TAYA CRM'),
+          h('button',{className:'crm-hamburger',onClick:openDrawer,title:'Menu'},'☰')
+        ),
+
+        // ── Drawer overlay ───────────────────────────────────────────────────
+        h('div',{className:'crm-drawer-overlay'+(drawerOpen?' open':''),onClick:closeDrawer}),
+
+        // ── Drawer panel ─────────────────────────────────────────────────────
+        h('div',{className:'crm-drawer'+(drawerOpen?' open':'')},
+          h('div',{className:'crm-drawer-header'},
+            h('span',{className:'crm-drawer-title'},'Menu'),
+            h('button',{className:'crm-drawer-close',onClick:closeDrawer},'×')
+          ),
+          h('nav',null,
+            ...TABS.map(t=>h('button',{
+              key:t.id,
+              className:'crm-drawer-nav-btn'+(tab===t.id?' active':''),
+              onClick:()=>goTab(t.id)
+            }, tabLabel(t)))
+          ),
+          h('button',{className:'crm-drawer-logout',onClick:()=>{sb.auth.signOut();closeDrawer();}},'Déconnexion')
+        ),
+
+        // ── Contenu principal ────────────────────────────────────────────────
         h('main',{className:'crm-main',style:{color:C.white}},
           h(Page,null)
-        ),
-        h('div',{className:'crm-bottom-nav'},
-          ...BOTTOM_TABS.map(t=>h('button',{key:t.id,className:tab===t.id?'active':'',onClick:()=>setTab(t.id)},
-            h('span',{className:'ti'},t.icon),
-            t.label.replace('Campagnes mail','Emails').replace('Questionnaires','Forms').split(' ')[0]
-          )),
-          h('button',{onClick:()=>sb.auth.signOut()},h('span',{className:'ti'},'🚪'),'Exit')
         )
       );
     }
