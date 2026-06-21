@@ -158,6 +158,7 @@
       {id:'emails',icon:'📧',label:'Campagnes mail'},
       {id:'taches',icon:'✅',label:'Tâches'},
       {id:'questionnaires',icon:'📋',label:'Questionnaires'},
+      {id:'prospects',icon:'🎯',label:'Prospects'},
     ];
 
     function App() {
@@ -217,7 +218,7 @@
         )
       );
 
-      const pages = {dashboard:Dashboard,clients:ClientsAzeoo,programmes:Programmes,exercices:Exercices,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches,questionnaires:Questionnaires};
+      const pages = {dashboard:Dashboard,clients:ClientsAzeoo,programmes:Programmes,exercices:Exercices,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches,questionnaires:Questionnaires,prospects:Prospects};
       const Page = pages[tab] || Dashboard;
 
       return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',fontFamily:'Inter,sans-serif'}},
@@ -3648,6 +3649,128 @@
             )
           )
         )
+      );
+    }
+
+
+    // ── Prospects ──────────────────────────────────────────────────────────
+    function Prospects() {
+      const [subs, setSubs] = React.useState([]);
+      const [loading, setLoading] = React.useState(true);
+      const [search, setSearch] = React.useState('');
+      const [filter, setFilter] = React.useState('all'); // all | active | unsub
+
+      React.useEffect(() => {
+        sb.from('newsletter_subscribers')
+          .select('*')
+          .order('subscribed_at', {ascending: false})
+          .then(({data}) => { setSubs(data || []); setLoading(false); });
+      }, []);
+
+      const filtered = subs.filter(s => {
+        const matchSearch = !search || s.email.toLowerCase().includes(search.toLowerCase()) || (s.first_name||'').toLowerCase().includes(search.toLowerCase());
+        const matchFilter = filter === 'all' || (filter === 'active' && !s.unsubscribed_at) || (filter === 'unsub' && !!s.unsubscribed_at);
+        return matchSearch && matchFilter;
+      });
+
+      const total = subs.length;
+      const actifs = subs.filter(s => !s.unsubscribed_at).length;
+      const desabos = subs.filter(s => !!s.unsubscribed_at).length;
+      const avgStep = subs.length ? Math.round(subs.filter(s=>!s.unsubscribed_at).reduce((a,s)=>a+s.current_step,0) / Math.max(actifs,1)) : 0;
+
+      const fmt = d => d ? new Date(d).toLocaleDateString('fr-FR') : '—';
+
+      const stepColor = step => {
+        if (step >= 20) return C.green;
+        if (step >= 10) return C.gold;
+        return C.blue;
+      };
+
+      return h('div', {style:{padding:'28px 32px'}},
+        // Header
+        h('div', {style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:24}},
+          h('div', null,
+            h('div', {style:{fontSize:22,fontWeight:800,color:C.white}}, '🎯 Prospects Newsletter'),
+            h('div', {style:{fontSize:13,color:C.muted,marginTop:3}}, 'Abonnés à la séquence drip hebdomadaire')
+          )
+        ),
+
+        // Stats cards
+        h('div', {style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,marginBottom:28}},
+          ...[
+            {label:'Total inscrits',value:total,color:C.blue,icon:'👥'},
+            {label:'Actifs',value:actifs,color:C.green,icon:'✅'},
+            {label:'Désabonnés',value:desabos,color:C.red,icon:'🚫'},
+            {label:'Étape moyenne',value:'S'+avgStep+'/30',color:C.gold,icon:'📬'},
+          ].map(stat =>
+            h('div', {style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,padding:'16px 18px'},key:stat.label},
+              h('div', {style:{fontSize:20,marginBottom:6}}, stat.icon),
+              h('div', {style:{fontSize:26,fontWeight:800,color:stat.color}}, stat.value),
+              h('div', {style:{fontSize:11,color:C.muted,marginTop:2,textTransform:'uppercase',letterSpacing:'.06em'}}, stat.label)
+            )
+          )
+        ),
+
+        // Filters + search
+        h('div', {style:{display:'flex',gap:10,marginBottom:18,alignItems:'center'}},
+          h('input', {
+            placeholder:'Rechercher email, prénom…',
+            value:search,
+            onChange:e=>setSearch(e.target.value),
+            style:{...inp,flex:1,padding:'9px 14px',fontSize:13}
+          }),
+          ...['all','active','unsub'].map(f =>
+            h('button', {key:f, onClick:()=>setFilter(f), style:{
+              background: filter===f ? `rgba(255,107,74,0.12)` : 'transparent',
+              border: `1px solid ${filter===f ? C.gold : C.border}`,
+              color: filter===f ? C.gold : C.muted,
+              borderRadius:8, padding:'8px 16px', cursor:'pointer', fontSize:12, fontWeight:600
+            }}, f==='all'?'Tous':f==='active'?'Actifs':'Désabonnés')
+          )
+        ),
+
+        // Table
+        loading
+          ? h('div', {style:{textAlign:'center',padding:40,color:C.muted}}, 'Chargement…')
+          : filtered.length === 0
+            ? h('div', {style:{textAlign:'center',padding:40,color:C.muted}}, 'Aucun prospect trouvé')
+            : h('div', {style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:14,overflow:'hidden'}},
+                h('table', {style:{width:'100%',borderCollapse:'collapse',fontSize:13}},
+                  h('thead', null,
+                    h('tr', {style:{borderBottom:`1px solid ${C.border}`,background:C.soft}},
+                      ...['Email','Prénom','Inscrit le','Étape','Statut'].map(col =>
+                        h('th', {key:col, style:{padding:'11px 14px',textAlign:'left',fontSize:11,fontWeight:700,color:C.muted,textTransform:'uppercase',letterSpacing:'.06em'}}, col)
+                      )
+                    )
+                  ),
+                  h('tbody', null,
+                    filtered.map((s,i) =>
+                      h('tr', {key:s.id, style:{borderBottom:`1px solid ${C.border}`,background:i%2===0?'transparent':C.soft+'44'}},
+                        h('td', {style:{padding:'11px 14px',color:C.white,fontWeight:500}}, s.email),
+                        h('td', {style:{padding:'11px 14px',color:C.muted}}, s.first_name || '—'),
+                        h('td', {style:{padding:'11px 14px',color:C.muted}}, fmt(s.subscribed_at)),
+                        h('td', {style:{padding:'11px 14px'}},
+                          h('div', {style:{display:'flex',alignItems:'center',gap:6}},
+                            h('div', {style:{
+                              width:`${Math.round((s.current_step/30)*100)}%`,
+                              height:4, borderRadius:2,
+                              background:stepColor(s.current_step),
+                              minWidth:4, maxWidth:80,
+                              display:'inline-block', verticalAlign:'middle'
+                            }}),
+                            h('span', {style:{color:stepColor(s.current_step),fontWeight:600}}, `${s.current_step}/30`)
+                          )
+                        ),
+                        h('td', {style:{padding:'11px 14px'}},
+                          s.unsubscribed_at
+                            ? h('span', {style:{background:`${C.red}22`,color:C.red,fontSize:11,fontWeight:700,padding:'3px 8px',borderRadius:20}}, 'Désabonné')
+                            : h('span', {style:{background:`${C.green}22`,color:C.green,fontSize:11,fontWeight:700,padding:'3px 8px',borderRadius:20}}, 'Actif')
+                        )
+                      )
+                    )
+                  )
+                )
+              )
       );
     }
 
