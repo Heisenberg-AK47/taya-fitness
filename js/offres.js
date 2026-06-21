@@ -43,6 +43,19 @@ async function loadPlans() {
   }
   currentPlans = plans || [];
   renderPlans(currentPlans);
+  updateComparatifPrices(currentPlans);
+}
+
+// ── Mise à jour du tableau comparatif ────────────────────────
+
+function updateComparatifPrices(plans) {
+  plans.forEach((plan, i) => {
+    const cell = document.getElementById('cmp-price-' + i);
+    if (!cell) return;
+    const isFeatured = cell.classList.contains('featured-col') || cell.id === 'cmp-price-1';
+    const style = isFeatured ? 'color:var(--gold)' : '';
+    cell.innerHTML = '<strong' + (style ? ' style="' + style + '"' : '') + '>' + plan.price + '€/mois</strong>';
+  });
 }
 
 // ── Rendu des cartes ─────────────────────────────────────────

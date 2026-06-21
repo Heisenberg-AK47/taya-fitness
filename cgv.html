@@ -108,10 +108,8 @@
           <h2 id="produits">3. Services proposés</h2>
           <p>Taya Fitness propose les services suivants :</p>
           <h3>Abonnements de coaching</h3>
-          <ul>
-            <li><strong>Starter (49€/mois) :</strong> Accès à l'application mobile, programme d'entraînement mensuel, base de recettes saines, calcul des macros, suivi de progression et exercices en vidéo.</li>
-            <li><strong>Performance (99€/mois) :</strong> Tout Starter inclus + programme sur mesure, plan nutrition personnalisé, suivi hebdomadaire, 1 visio/mois avec Sarah, messagerie directe.</li>
-            <li><strong>Premium VIP (199€/mois) :</strong> Tout Performance inclus + suivi quotidien, visios illimitées, coaching à Fitness Park La Défense, support 7j/7. Éligible au crédit d'impôt service à la personne (50%).</li>
+          <ul id="cgv-plans-list">
+            <li style="color:rgba(255,255,255,0.3);font-style:italic;">Chargement des formules…</li>
           </ul>
           <h3>Programmes à l'unité</h3>
           <p>Des programmes d'entraînement et nutritionnels sont proposés à l'achat unitaire. Chaque programme inclut l'accès aux contenus (PDF, vidéos) décrits sur la page de vente correspondante.</p>
@@ -126,10 +124,8 @@
                 <th>Tarif annuel (-20%)</th>
               </tr>
             </thead>
-            <tbody>
-              <tr><td>Starter</td><td>49€/mois</td><td>39€/mois</td></tr>
-              <tr><td>Performance</td><td>99€/mois</td><td>79€/mois</td></tr>
-              <tr><td>Premium VIP</td><td>199€/mois</td><td>159€/mois</td></tr>
+            <tbody id="cgv-price-tbody">
+              <tr><td colspan="3" style="text-align:center;color:rgba(255,255,255,0.3);font-style:italic;">Chargement…</td></tr>
             </tbody>
           </table>
           <p>Les prix des programmes à l'unité sont indiqués sur chaque page produit. Taya Fitness se réserve le droit de modifier ses tarifs à tout moment. Les modifications ne s'appliquent pas aux abonnements en cours jusqu'à leur prochain renouvellement, avec un préavis de 30 jours.</p>
@@ -233,7 +229,39 @@
   <script type="module">
 import { initNavbar } from "/js/navbar.js";
 import { initFooter } from "/js/footer.js";
-document.addEventListener("DOMContentLoaded", () => { initNavbar(); initFooter(); });
+import { supabase } from "/js/supabase.js";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  initNavbar();
+  initFooter();
+
+  // Charger les formules depuis Supabase (source unique de vérité)
+  const { data: plans } = await supabase
+    .from('subscription_plans')
+    .select('name, description, price, annual_price, features')
+    .order('price', { ascending: true });
+
+  if (plans && plans.length) {
+    // Section 3 — liste des formules
+    const list = document.getElementById('cgv-plans-list');
+    if (list) {
+      list.innerHTML = plans.map(p => {
+        const priceA = p.annual_price ? p.annual_price + '€' : Math.round(p.price * 0.8) + '€';
+        const featuresSummary = (p.features || []).slice(0, 4).join(', ');
+        return `<li><strong>${p.name} (${p.price}€/mois) :</strong> ${p.description}${featuresSummary ? ' — ' + featuresSummary + '…' : ''}</li>`;
+      }).join('');
+    }
+
+    // Section 4 — tableau des tarifs
+    const tbody = document.getElementById('cgv-price-tbody');
+    if (tbody) {
+      tbody.innerHTML = plans.map(p => {
+        const priceA = p.annual_price ? p.annual_price + '€/mois' : Math.round(p.price * 0.8) + '€/mois';
+        return `<tr><td>${p.name}</td><td>${p.price}€/mois</td><td>${priceA}</td></tr>`;
+      }).join('');
+    }
+  }
+});
 </script>
 </body>
 </html>
