@@ -43,6 +43,42 @@
 
     /* Prevent full-page horizontal scroll */
     body { overflow-x:hidden; }
+
+    /* ── FormBuilder: layout mobile ─────────── */
+    /* Panneaux empiles verticalement */
+    div:has(> [style*="width: 220px"]) { flex-direction:column!important; overflow-y:auto!important; }
+    /* Panneau gauche: strip horizontal scrollable */
+    [style*="width: 220px"] {
+      width:100%!important; max-height:108px!important;
+      flex-direction:row!important; border-right:none!important;
+      border-bottom:1px solid rgba(255,255,255,0.07)!important;
+      overflow-x:auto!important; overflow-y:hidden!important; flex-shrink:0!important;
+    }
+    [style*="width: 220px"] > div:first-child {
+      display:flex!important; flex-direction:row!important;
+      min-width:max-content!important; padding:6px!important; gap:4px!important;
+    }
+    /* Chaque question: chip compact icon+numero */
+    [style*="width: 220px"] > div:first-child > div {
+      min-width:50px!important; max-width:50px!important; flex-direction:column!important;
+      align-items:center!important; padding:6px 4px!important; margin-bottom:0!important;
+    }
+    [style*="width: 220px"] > div:first-child > div > span:first-child { display:none!important; }
+    [style*="width: 220px"] > div:first-child > div > div { display:none!important; }
+    /* Cacher bouton Ajouter dans la sidebar */
+    [style*="width: 220px"] > div:last-child { display:none!important; }
+    /* Panneau droit: padding compact */
+    div:has(> [style*="width: 220px"]) > div:last-child { padding:14px 12px!important; }
+    /* Barre du haut: wrap + compact */
+    div:has(> div:has(> [style*="width: 220px"])) > div:first-child {
+      flex-wrap:wrap!important; gap:6px!important; padding:8px!important;
+    }
+    div:has(> div:has(> [style*="width: 220px"])) > div:first-child input {
+      max-width:180px!important; font-size:12px!important;
+    }
+    div:has(> div:has(> [style*="width: 220px"])) > div:first-child > div[style*="flex: 1"] {
+      display:none!important;
+    }
   }
   </style>
 </head>
