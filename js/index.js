@@ -131,18 +131,27 @@ function programmCard(p) {
 }
 
 /* ── Newsletter ──────────────────────────────────────────── */
+const NEWSLETTER_URL = 'https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/newsletter-subscribe';
+
 function initNewsletter() {
   document.getElementById('newsletter-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const email = e.target.querySelector('input[type=email]').value;
-    const btn   = e.target.querySelector('button');
+    const email      = e.target.querySelector('input[type=email]').value;
+    const nameInput  = e.target.querySelector('input[type=text], input[name=first_name]');
+    const first_name = nameInput ? nameInput.value.trim() : undefined;
+    const btn        = e.target.querySelector('button');
 
     btn.disabled = true;
     btn.textContent = '...';
 
     try {
-      await supabase.from('newsletter').upsert({ email, created_at: new Date().toISOString() });
-      btn.textContent = '✓ Inscrit !';
+      const res = await fetch(NEWSLETTER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, first_name }),
+      });
+      if (!res.ok) throw new Error('Erreur réseau');
+      btn.textContent = '✓ Bienvenue !';
       e.target.reset();
     } catch {
       btn.textContent = 'Erreur';
