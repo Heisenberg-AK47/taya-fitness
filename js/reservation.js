@@ -19,14 +19,12 @@ const TYPE_LABELS = {
   'stade-de-france': 'Fitness Park Stade de France',
   'aubervilliers':   'Fitness Park Aubervilliers',
   'carnot':          'Fitness Park rue Carnot · Saint-Denis',
-  'visio':           'Visio coaching',
 };
 
 const TYPE_ADDRESSES = {
-  'stade-de-france': 'Fitness Park Stade de France, Saint-Denis (93)',
-  'aubervilliers':   'Fitness Park Aubervilliers (93300)',
-  'carnot':          'Fitness Park rue Carnot, Saint-Denis (93200)',
-  'visio':           'En ligne — Google Meet / Zoom',
+  'stade-de-france': 'Av. du Président Wilson, 93210 Saint-Denis',
+  'aubervilliers':   '42 Av. Victor Hugo, 93300 Aubervilliers',
+  'carnot':          '17 Rue Carnot, 93200 Saint-Denis',
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
