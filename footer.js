@@ -11,7 +11,7 @@ export function initFooter() {
         <!-- Marque -->
         <div class="footer-brand">
           <a href="/" class="footer-logo">Taya<span>Fitness</span></a>
-          <p>Coach sportive certifiée, spécialisée en coaching personnalisé, nutrition et développement personnel. Transforme ton corps et ton esprit.</p>
+          <p>Coach sportif certifié à Aubervilliers et Saint-Denis. Séances à Fitness Park Aubervilliers, Fitness Park Stade de France et Fitness Park rue Carnot. Coaching personnalisé, perte de poids, musculation.</p>
           <div class="footer-socials">
             <a href="https://instagram.com/tayafitness" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -73,7 +73,7 @@ export function initFooter() {
           </div>
           <div class="contact-item">
             <div class="icon">📍</div>
-            <p><strong>Zone</strong>Région parisienne</p>
+            <p><strong>Zone</strong>Aubervilliers · Saint-Denis · 93</p>
           </div>
         </div>
 
