@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paiement — Taya Fitness</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/css/global.css" />
+  <link rel="stylesheet" href="/css/navbar.css" />
+  <link rel="stylesheet" href="/css/footer.css" />
+  <style>
+    .payment-card {
+      background: #0d1b2a;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 36px;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .payment-recap {
+      background: #122033;
+      border: 1px solid rgba(255,107,74,0.20);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-bottom: 8px;
+    }
+    .recap-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: #ff6b4a;
+      text-transform: uppercase;
+      margin: 0 0 4px;
+    }
+    .recap-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #f0f4f8;
+      margin: 0 0 16px;
+      font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+    }
+    .recap-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 14px;
+    }
+    .recap-row:last-child { border-bottom: none; }
+    .recap-row span:first-child { color: rgba(220,232,244,0.5); }
+    .recap-row span:last-child { color: #f0f4f8; font-weight: 600; }
+    .payment-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 0 14px;
+      border-top: 1px solid rgba(255,107,74,0.2);
+      margin-top: 4px;
+    }
+    .payment-total span:first-child { color: rgba(220,232,244,0.7); font-weight: 600; font-size: 15px; }
+    .payment-total span:last-child { font-size: 26px; font-weight: 800; color: #ff6b4a; }
+    .btn-pay {
+      width: 100%;
+      justify-content: center;
+      font-size: 16px;
+      padding: 16px;
+      border-radius: 12px;
+    }
+    .secure-badge {
+      text-align: center;
+      font-size: 12px;
+      color: rgba(220,232,244,0.35);
+      margin-top: 12px;
+    }
+    .back-link {
+      display: block;
+      text-align: center;
+      font-size: 13px;
+      color: rgba(220,232,244,0.4);
+      text-decoration: none;
+      margin-top: 20px;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: rgba(220,232,244,0.7); }
+    #payment-error {
+      background: rgba(255, 80, 80, 0.10);
+      border: 1px solid rgba(255, 80, 80, 0.3);
+      border-radius: 8px;
+      color: #ff9090;
+      padding: 12px 16px;
+      font-size: 13px;
+      margin-top: 12px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="navbar-placeholder"></div>
+  <main>
+
+    <section class="page-hero res-hero">
+      <div class="container">
+        <span class="label">Étape 2 / 2</span>
+        <h1>Confirmer & payer</h1>
+        <p>Vérifie ton créneau et finalise ta réservation.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="payment-card">
+
+          <div class="payment-recap">
+            <p class="recap-label">Ta séance découverte</p>
+            <p class="recap-title">Coaching individuel avec Sarah</p>
+            <div class="recap-row">
+              <span>Lieu</span>
+              <span id="recap-lieu">—</span>
+            </div>
+            <div class="recap-row">
+              <span>Date</span>
+              <span id="recap-date">—</span>
+            </div>
+            <div class="recap-row">
+              <span>Heure</span>
+              <span id="recap-heure">—</span>
+            </div>
+            <div class="recap-row">
+              <span>Durée</span>
+              <span>60 minutes</span>
+            </div>
+          </div>
+
+          <div class="payment-total">
+            <span>Total</span>
+            <span>69 €</span>
+          </div>
+
+          <button class="btn btn-primary btn-pay" id="btn-pay">
+            Payer 69 € →
+          </button>
+          <div id="payment-error"></div>
+          <p class="secure-badge">🔒 Paiement sécurisé par Stripe · CB, Apple Pay, Google Pay</p>
+          <a href="/reservation" class="back-link">← Modifier mon créneau</a>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="footer-placeholder"></div>
+  <script type="module" src="/js/reservation-paiement.js"></script>
+</body>
+</html>

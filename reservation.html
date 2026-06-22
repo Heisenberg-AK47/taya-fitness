@@ -4,8 +4,8 @@
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Réserver un créneau — Taya Fitness</title>
-  <meta name="description" content="Réservez votre créneau de coaching avec Sarah. Visio, coaching Fitness Park La Défense ou en salle." />
+  <title>Réserver une séance découverte — Taya Fitness | Aubervilliers & Saint-Denis</title>
+  <meta name="description" content="Réservez votre séance découverte avec Sarah, coach sportive à Fitness Park Stade de France, Aubervilliers ou Saint-Denis. 69€ · 1h · Paiement sécurisé." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="/css/global.css" />
@@ -19,9 +19,9 @@
 
     <section class="page-hero res-hero">
       <div class="container">
-        <span class="label">Planning</span>
+        <span class="label">Séance découverte</span>
         <h1>Réserver un créneau</h1>
-        <p>Choisis le type de séance, la date et l'heure qui te convient.</p>
+        <p>Coaching individuel · 1h · 69€ · Paiement sécurisé par Stripe</p>
       </div>
     </section>
 
@@ -30,72 +30,70 @@
 
         <!-- Alerte non connecté -->
         <div class="alert alert-info" id="alert-auth" style="display:none; margin-bottom:32px;">
-          💡 <a href="/auth?redirect=/reservation" style="color:var(--gold);text-decoration:underline">Connecte-toi</a> pour enregistrer ta réservation.
+          💡 <a href="/auth?redirect=/reservation" style="color:var(--gold);text-decoration:underline">Connecte-toi</a> pour retrouver ta réservation dans ton espace.
         </div>
 
         <div class="reservation-grid">
 
-          <!-- Étape 1 : Type de séance -->
+          <!-- Étape 1 : Lieu de séance -->
           <div class="resa-col">
             <div class="resa-step">
               <div class="step-num">1</div>
-              <h3>Type de séance</h3>
+              <h3>Lieu de la séance</h3>
             </div>
             <div class="type-cards" id="type-cards">
-              <div class="type-card active" data-type="visio">
+              <div class="type-card active" data-type="stade-de-france">
+                <div class="type-icon">🏋️</div>
+                <div>
+                  <strong>Fitness Park Stade de France</strong>
+                  <small>Saint-Denis · 1h de coaching individuel</small>
+                </div>
+                <div class="type-check">✓</div>
+              </div>
+              <div class="type-card" data-type="aubervilliers">
+                <div class="type-icon">🏋️</div>
+                <div>
+                  <strong>Fitness Park Aubervilliers</strong>
+                  <small>Aubervilliers (93) · 1h de coaching individuel</small>
+                </div>
+                <div class="type-check">✓</div>
+              </div>
+              <div class="type-card" data-type="carnot">
+                <div class="type-icon">🏋️</div>
+                <div>
+                  <strong>Fitness Park rue Carnot</strong>
+                  <small>Saint-Denis (93) · 1h de coaching individuel</small>
+                </div>
+                <div class="type-check">✓</div>
+              </div>
+              <div class="type-card" data-type="visio">
                 <div class="type-icon">💻</div>
                 <div>
                   <strong>Visio coaching</strong>
-                  <small>Google Meet ou Zoom · 30 ou 60 min</small>
+                  <small>Google Meet ou Zoom · 1h</small>
                 </div>
                 <div class="type-check">✓</div>
               </div>
-              <div class="type-card" data-type="domicile">
-                <div class="type-icon">🏠</div>
-                <div>
-                  <strong>Coaching Fitness Park La Défense</strong>
-                  <small>Île-de-France uniquement · 60 min</small>
-                </div>
-                <div class="type-check">✓</div>
-              </div>
-              <div class="type-card" data-type="salle">
-                <div class="type-icon">🏋️</div>
-                <div>
-                  <strong>En salle (Fitness Park)</strong>
-                  <small>Paris & région parisienne · 60 min</small>
-                </div>
-                <div class="type-check">✓</div>
-              </div>
-            </div>
-
-            <!-- Durée -->
-            <div class="resa-step" style="margin-top:32px;">
-              <div class="step-num">2</div>
-              <h3>Durée</h3>
-            </div>
-            <div class="duree-btns">
-              <button class="duree-btn active" data-duree="30">30 min</button>
-              <button class="duree-btn" data-duree="60">60 min</button>
             </div>
 
             <!-- Résumé sélection -->
             <div class="resa-summary" id="resa-summary" style="margin-top:32px;">
               <h4>Récapitulatif</h4>
-              <div class="summary-line"><span>Type</span><strong id="summary-type">Visio coaching</strong></div>
-              <div class="summary-line"><span>Durée</span><strong id="summary-duree">30 min</strong></div>
+              <div class="summary-line"><span>Lieu</span><strong id="summary-type">Fitness Park Stade de France</strong></div>
+              <div class="summary-line"><span>Durée</span><strong>60 min</strong></div>
               <div class="summary-line"><span>Date</span><strong id="summary-date">—</strong></div>
               <div class="summary-line"><span>Heure</span><strong id="summary-heure">—</strong></div>
+              <div class="summary-line"><span>Prix</span><strong style="color:var(--orange,#ff6b4a);">69 €</strong></div>
               <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:20px;" id="btn-reserver" disabled>
-                Confirmer la réservation
+                Continuer vers le paiement →
               </button>
-              <p style="text-align:center;font-size:0.78rem;color:#555;margin-top:8px;">Sarah confirmera sous 24h</p>
             </div>
           </div>
 
           <!-- Étape 2 : Calendrier -->
           <div class="resa-col">
             <div class="resa-step">
-              <div class="step-num">3</div>
+              <div class="step-num">2</div>
               <h3>Choisir une date</h3>
             </div>
             <div class="calendrier" id="calendrier">
@@ -113,7 +111,7 @@
             <!-- Créneaux horaires -->
             <div id="creneaux-section" style="display:none;margin-top:28px;">
               <div class="resa-step">
-                <div class="step-num">4</div>
+                <div class="step-num">3</div>
                 <h3>Choisir un horaire</h3>
               </div>
               <div class="creneaux-horaires" id="creneaux-horaires"></div>
@@ -125,17 +123,6 @@
     </section>
 
   </main>
-
-  <!-- Modal confirmation -->
-  <div class="modal-overlay" id="modal-confirmation" style="display:none;">
-    <div class="modal">
-      <div class="modal-icon">✅</div>
-      <h3>Demande envoyée !</h3>
-      <p>Sarah va confirmer ton créneau sous 24h. Tu recevras une confirmation par email.</p>
-      <div id="modal-recap" class="modal-recap"></div>
-      <a href="/dashboard" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:20px;">Voir mes réservations</a>
-    </div>
-  </div>
 
   <div id="footer-placeholder"></div>
   <script type="module" src="/js/reservation.js"></script>
