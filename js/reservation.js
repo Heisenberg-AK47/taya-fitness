@@ -64,7 +64,7 @@ function renderCalendrier() {
   const date = new Date(currentYear, currentMonth, 1);
   label.textContent = date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
-  const firstDay    = (date.getDay() + 6) % 7; // Lundi = 0
+  const firstDay    = (date.getDay() + 6) % 7;
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
   let html = '';
@@ -78,7 +78,18 @@ function renderCalendrier() {
     const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isSelected = selectedDate === dateStr;
 
-    const classes = ['cal-day', isPast || isSun ? 'disabled' : '', isToday ? 'today' : '', isSelected ? 'selected' : ''].filter(Boolean).join(' ');
+    // Si c'est aujourd'hui, vérifier qu'il reste au moins un créneau disponible
+    let isFull = false;
+    if (isToday) {
+      const nowMin = today.getHours() * 60 + today.getMinutes();
+      isFull = CRENEAUX.every(h => {
+        const [hh, mm] = h.split(':').map(Number);
+        return hh * 60 + mm <= nowMin;
+      });
+    }
+
+    const disabled = isPast || isSun || isFull;
+    const classes = ['cal-day', disabled ? 'disabled' : '', isToday ? 'today' : '', isSelected ? 'selected' : ''].filter(Boolean).join(' ');
     html += `<div class="${classes}" data-date="${dateStr}">${d}</div>`;
   }
 
@@ -115,6 +126,7 @@ async function renderCreneaux(dateStr) {
   const grid    = document.getElementById('creneaux-horaires');
   section.style.display = 'block';
 
+  // Créneaux déjà pris en base
   let indispo = [];
   try {
     const debut = new Date(`${dateStr}T00:00:00`).toISOString();
@@ -127,10 +139,21 @@ async function renderCreneaux(dateStr) {
     indispo = (data || []).map(r => r.date_heure.slice(11, 16));
   } catch {}
 
+  // Créneaux passés pour aujourd'hui
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const isToday  = dateStr === todayStr;
+  const nowMin   = now.getHours() * 60 + now.getMinutes();
+
   grid.innerHTML = CRENEAUX.map(h => {
-    const busy = indispo.includes(h);
-    return `<button class="creneau-heure${busy ? ' indispo' : ''}${selectedHeure === h ? ' selected' : ''}"
-      data-heure="${h}" ${busy ? 'disabled' : ''}>${h}</button>`;
+    const [hh, mm] = h.split(':').map(Number);
+    const slotMin  = hh * 60 + mm;
+    const isPast   = isToday && slotMin <= nowMin;
+    const busy     = indispo.includes(h);
+    const disabled = busy || isPast;
+
+    return `<button class="creneau-heure${disabled ? ' indispo' : ''}${selectedHeure === h ? ' selected' : ''}"
+      data-heure="${h}" ${disabled ? 'disabled' : ''}>${h}</button>`;
   }).join('');
 
   grid.querySelectorAll('.creneau-heure:not(.indispo)').forEach(btn => {
