@@ -7,28 +7,38 @@ import { initFooter } from './footer.js';
 import { getCurrentUser } from './auth.js';
 import { supabase } from './supabase.js';
 
-let selectedType   = 'visio';
-let selectedDuree  = 30;
-let selectedDate   = null;
-let selectedHeure  = null;
-let currentYear    = new Date().getFullYear();
-let currentMonth   = new Date().getMonth();
-let currentUser    = null;
+let selectedType  = 'stade-de-france';
+let selectedDate  = null;
+let selectedHeure = null;
+let currentYear   = new Date().getFullYear();
+let currentMonth  = new Date().getMonth();
 
-// Créneaux disponibles par défaut (Sarah peut les configurer depuis l'admin)
 const CRENEAUX = ['08:00','09:00','10:00','11:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+
+const TYPE_LABELS = {
+  'stade-de-france': 'Fitness Park Stade de France',
+  'aubervilliers':   'Fitness Park Aubervilliers',
+  'carnot':          'Fitness Park rue Carnot · Saint-Denis',
+  'visio':           'Visio coaching',
+};
+
+const TYPE_ADDRESSES = {
+  'stade-de-france': 'Fitness Park Stade de France, Saint-Denis (93)',
+  'aubervilliers':   'Fitness Park Aubervilliers (93300)',
+  'carnot':          'Fitness Park rue Carnot, Saint-Denis (93200)',
+  'visio':           'En ligne — Google Meet / Zoom',
+};
 
 document.addEventListener('DOMContentLoaded', async () => {
   initNavbar();
   initFooter();
 
-  currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUser();
   if (!currentUser) {
     document.getElementById('alert-auth').style.display = 'block';
   }
 
   initTypeCards();
-  initDuree();
   renderCalendrier();
   initBtnReserver();
 });
@@ -45,18 +55,6 @@ function initTypeCards() {
   });
 }
 
-/* ── Durée ───────────────────────────────────────────────── */
-function initDuree() {
-  document.querySelectorAll('.duree-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.duree-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedDuree = parseInt(btn.dataset.duree);
-      updateSummary();
-    });
-  });
-}
-
 /* ── Calendrier ──────────────────────────────────────────── */
 function renderCalendrier() {
   const label = document.getElementById('cal-month-label');
@@ -66,15 +64,11 @@ function renderCalendrier() {
   const date = new Date(currentYear, currentMonth, 1);
   label.textContent = date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
 
-  const firstDay = (date.getDay() + 6) % 7; // Lundi = 0
+  const firstDay    = (date.getDay() + 6) % 7; // Lundi = 0
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
   let html = '';
-
-  // Cases vides avant le 1er
-  for (let i = 0; i < firstDay; i++) {
-    html += `<div class="cal-day empty"></div>`;
-  }
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day empty"></div>`;
 
   for (let d = 1; d <= daysInMonth; d++) {
     const dateObj = new Date(currentYear, currentMonth, d);
@@ -84,14 +78,8 @@ function renderCalendrier() {
     const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isSelected = selectedDate === dateStr;
 
-    const classes = [
-      'cal-day',
-      isPast || isSun ? 'disabled' : '',
-      isToday ? 'today' : '',
-      isSelected ? 'selected' : ''
-    ].filter(Boolean).join(' ');
-
-    html += `<div class="${classes}" data-date="${dateStr}" ${isPast || isSun ? '' : ''}>${d}</div>`;
+    const classes = ['cal-day', isPast || isSun ? 'disabled' : '', isToday ? 'today' : '', isSelected ? 'selected' : ''].filter(Boolean).join(' ');
+    html += `<div class="${classes}" data-date="${dateStr}">${d}</div>`;
   }
 
   grid.innerHTML = html;
@@ -127,7 +115,6 @@ async function renderCreneaux(dateStr) {
   const grid    = document.getElementById('creneaux-horaires');
   section.style.display = 'block';
 
-  // Charger les réservations existantes pour cette date
   let indispo = [];
   try {
     const debut = new Date(`${dateStr}T00:00:00`).toISOString();
@@ -142,7 +129,7 @@ async function renderCreneaux(dateStr) {
 
   grid.innerHTML = CRENEAUX.map(h => {
     const busy = indispo.includes(h);
-    return `<button class="creneau-heure ${busy ? 'indispo' : ''} ${selectedHeure === h ? 'selected' : ''}"
+    return `<button class="creneau-heure${busy ? ' indispo' : ''}${selectedHeure === h ? ' selected' : ''}"
       data-heure="${h}" ${busy ? 'disabled' : ''}>${h}</button>`;
   }).join('');
 
@@ -158,12 +145,9 @@ async function renderCreneaux(dateStr) {
 }
 
 /* ── Résumé ──────────────────────────────────────────────── */
-const typeLabels = { visio: 'Visio coaching', domicile: 'À domicile', salle: 'En salle' };
-
 function updateSummary() {
-  document.getElementById('summary-type').textContent  = typeLabels[selectedType] || selectedType;
-  document.getElementById('summary-duree').textContent = `${selectedDuree} min`;
-  document.getElementById('summary-date').textContent  = selectedDate
+  document.getElementById('summary-type').textContent = TYPE_LABELS[selectedType] || selectedType;
+  document.getElementById('summary-date').textContent = selectedDate
     ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })
     : '—';
   document.getElementById('summary-heure').textContent = selectedHeure || '—';
@@ -175,42 +159,22 @@ function checkReady() {
   if (btn) btn.disabled = !(selectedDate && selectedHeure);
 }
 
-/* ── Confirmer réservation ───────────────────────────────── */
+/* ── Continuer vers le paiement ──────────────────────────── */
 function initBtnReserver() {
-  document.getElementById('btn-reserver')?.addEventListener('click', async () => {
+  document.getElementById('btn-reserver')?.addEventListener('click', () => {
     if (!selectedDate || !selectedHeure) return;
 
-    const btn = document.getElementById('btn-reserver');
-    btn.disabled = true;
-    btn.textContent = '...';
+    const booking = {
+      type:       selectedType,
+      label:      TYPE_LABELS[selectedType],
+      address:    TYPE_ADDRESSES[selectedType],
+      date:       selectedDate,
+      heure:      selectedHeure,
+      date_heure: new Date(`${selectedDate}T${selectedHeure}:00`).toISOString(),
+      date_label: new Date(selectedDate + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' }),
+    };
 
-    try {
-      const dateHeure = new Date(`${selectedDate}T${selectedHeure}:00`).toISOString();
-
-      if (currentUser) {
-        await supabase.from('reservations').insert({
-          user_id:    currentUser.id,
-          date_heure: dateHeure,
-          type:       selectedType,
-          statut:     'en_attente',
-          notes:      `Durée : ${selectedDuree} min`
-        });
-      }
-
-      // Modal confirmation
-      const d = new Date(`${selectedDate}T${selectedHeure}:00`);
-      document.getElementById('modal-recap').innerHTML = `
-        📅 ${d.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' })}<br/>
-        🕐 ${selectedHeure} · ${selectedDuree} min<br/>
-        📍 ${typeLabels[selectedType]}
-      `;
-      document.getElementById('modal-confirmation').style.display = 'flex';
-
-    } catch (err) {
-      console.error(err);
-      btn.disabled = false;
-      btn.textContent = 'Confirmer la réservation';
-      alert('Erreur lors de la réservation. Réessaie.');
-    }
+    sessionStorage.setItem('taya_booking', JSON.stringify(booking));
+    window.location.href = '/reservation-paiement';
   });
 }
