@@ -216,6 +216,7 @@
       {id:'questionnaires',icon:'📋',label:'Questionnaires'},
       {id:'prospects',icon:'🎯',label:'Prospects'},
   {id:'analytique',icon:'📈',label:'Analytique'},
+      {id:'clients-online',icon:'🌐',label:'Clients Online'},
     ];
 
 
@@ -391,7 +392,7 @@
         )
       );
 
-      const pages = {dashboard:Dashboard,clients:ClientsAzeoo,programmes:Programmes,exercices:Exercices,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches,questionnaires:Questionnaires,prospects:Prospects,analytique:Analytique};
+      const pages = {dashboard:Dashboard,clients:ClientsAzeoo,programmes:Programmes,exercices:Exercices,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches,questionnaires:Questionnaires,prospects:Prospects,analytique:Analytique,'clients-online':ClientsOnline};
       const Page = pages[tab] || Dashboard;
 
       return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',fontFamily:'Inter,sans-serif'}},
@@ -3962,6 +3963,194 @@
     }
 
     
+
+
+
+function ClientsOnline() {
+  const [clients, setClients] = useState([]);
+  const [loading, setLoadiuseState(State(true);
+  const [tabuseState(ct.useState('pending'); // 'pending' | 'active'
+  const [programmes,useState( = useState([]);
+  const [cuseState(tOpen] = useState(null); // client profile
+  couseState(setMessages] = useState([])useState(nput, setMsgInput] = React.ususeState(onst [unread, setUnread] = useState({});
+  const coachuseEffect(304-4599-9209-70f2837c176d';
+
+  useEffect(() => {
+    loadClients();
+    loadProgrammes();
+    subscribeMessages();
+  }, []);
+
+  async function loadClients() {
+    setLoading(true);
+    const { data } = await sb.from('profiles').select('*').eq('role','client').order('created_at',{ascending:false});
+    setClients(data || []);
+    setLoading(false);
+  }
+
+  async function loadProgrammes() {
+    const { data } = await sb.from('programmes').select('id,titre,duree_semaines').eq('actif',true).order('titre');
+    setProgrammes(data || []);
+  }
+
+  function subscribeMessages() {
+    sb.channel('coach-messages')
+      .on('postgres_changes', { event:'INSERT', schema:'public', table:'messages', filter:`to_id=eq.${coachId}` }, async (payload) => {
+        const m = payload.new;
+        setUnread(u => ({...u, [m.from_id]: (u[m.from_id]||0)+1}));
+        setMessages(prev => prev.some(x=>x.id===m.id) ? prev : [...prev, m]);
+      })
+      .subscribe();
+  }
+
+  async function openChat(client) {
+    setChatOpen(client);
+    setUnread(u => ({...u, [client.id]: 0}));
+    const { data } = await sb.from('messages')
+      .select('*')
+      .or(`and(from_id.eq.${client.id},to_id.eq.${coachId}),and(from_id.eq.${coachId},to_id.eq.${client.id})`)
+      .order('created_at');
+    setMessages(data || []);
+    await sb.from('messages').update({read:true}).eq('from_id',client.id).eq('to_id',coachId).eq('read',false);
+    setTimeout(()=>{ const el=document.getElementById('co-msgs'); if(el) el.scrollTop=el.scrollHeight; },100);
+  }
+
+  async function sendMsg() {
+    if (!msgInput.trim() || !chatOpen) return;
+    const content = msgInput.trim();
+    setMsgInput('');
+    const { data: msg } = await sb.from('messages').insert({ from_id:coachId, to_id:chatOpen.id, content, read:false }).select().single();
+    if (msg) setMessages(prev=>[...prev,msg]);
+    setTimeout(()=>{ const el=document.getElementById('co-msgs'); if(el) el.scrollTop=el.scrollHeight; },50);
+  }
+
+  async function activateClient(id) {
+    await sb.from('profiles').update({status:'active'}).eq('id',id);
+    setClients(prev=>prev.map(c=>c.id===id?{...c,status:'active'}:c));
+  }
+
+  async function rejectClient(id) {
+    if (!confirm('Refuser cet accès ?')) return;
+    await sb.from('profiles').update({status:'rejected'}).eq('id',id);
+    setClients(prev=>prev.map(c=>c.id===id?{...c,status:'rejected'}:c));
+  }
+
+  async function assignProgramme(clientId, programmeId) {
+    if (!programmeId) return;
+    // Deactivate existing
+    await sb.from('client_programs').update({status:'inactive'}).eq('client_id',clientId).eq('status','active');
+    // Assign new
+    await sb.from('client_programs').insert({ client_id:clientId, programme_id:programmeId, current_week:1, current_day:1, status:'active', assigned_by:coachId });
+    alert('Programme assigné ✓');
+  }
+
+  const pending = clients.filter(c=>c.status==='pending');
+  const active = clients.filter(c=>c.status==='active');
+  const displayed = tab==='pending' ? pending : active;
+
+  const BL = '#0a0a0a', BG2='#111', BG3='#181818', BORDER='#222', ACC='#FF5C35', TXT='#fff', MUT='#888';
+
+  const objLabels = { perte_de_poids:'Perte de poids', prise_de_masse:'Prise de masse', remise_en_forme:'Remise en forme', endurance:'Endurance', tonification:'Tonification', bien_etre:'Bien-être' };
+
+  return h('div', {style:{padding:'40px',maxWidth:900,fontFamily:'Inter,sans-serif',color:TXT}},
+    // Header
+    h('div', {style:{marginBottom:32}},
+      h('h1', {style:{fontSize:26,fontWeight:800,marginBottom:4}}, '🌐 Clients Online'),
+      h('p', {style:{color:MUT,fontSize:14}}, 'Gestion des inscriptions, programmes et messagerie')
+    ),
+    // Stats row
+    h('div', {style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14,marginBottom:28}},
+      h('div',{style:{background:BG2,border:`1px solid ${BORDER}`,borderRadius:12,padding:'16px 20px'}},
+        h('div',{style:{fontSize:24,fontWeight:800,color:ACC}},pending.length),
+        h('div',{style:{fontSize:12,color:MUT,marginTop:2}},'En attente')
+      ),
+      h('div',{style:{background:BG2,border:`1px solid ${BORDER}`,borderRadius:12,padding:'16px 20px'}},
+        h('div',{style:{fontSize:24,fontWeight:800,color:'#22c55e'}},active.length),
+        h('div',{style:{fontSize:12,color:MUT,marginTop:2}},'Actifs')
+      ),
+      h('div',{style:{background:BG2,border:`1px solid ${BORDER}`,borderRadius:12,padding:'16px 20px'}},
+        h('div',{style:{fontSize:24,fontWeight:800}},clients.length),
+        h('div',{style:{fontSize:12,color:MUT,marginTop:2}},'Total inscrits')
+      )
+    ),
+    // Tabs
+    h('div', {style:{display:'flex',gap:8,marginBottom:24}},
+      ['pending','active'].map(t=>
+        h('button',{key:t,onClick:()=>setTab(t),style:{background:tab===t?ACC:BG3,color:tab===t?'#fff':MUT,border:tab===t?'none':`1px solid ${BORDER}`,borderRadius:8,padding:'8px 18px',fontSize:13,fontWeight:600,cursor:'pointer',fontFamily:'Inter,sans-serif'}},
+          t==='pending' ? `⏳ En attente (${pending.length})` : `✅ Actifs (${active.length})`
+        )
+      )
+    ),
+    // Client list
+    loading ? h('div',{style:{color:MUT,fontSize:14,textAlign:'center',padding:40}},'Chargement…') :
+    displayed.length === 0 ? h('div',{style:{color:MUT,fontSize:14,textAlign:'center',padding:40}}, tab==='pending' ? 'Aucune inscription en attente.' : 'Aucun client actif.') :
+    h('div', {style:{display:'flex',flexDirection:'column',gap:12}},
+      displayed.map(c =>
+        h('div', {key:c.id, style:{background:BG2,border:`1px solid ${BORDER}`,borderRadius:14,padding:'18px 22px',display:'flex',alignItems:'center',gap:16,flexWrap:'wrap'}},
+          // Avatar
+          h('div',{style:{width:42,height:42,borderRadius:'50%',background:ACC,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700,fontSize:16,flexShrink:0}},
+            (c.full_name||'?').charAt(0).toUpperCase()
+          ),
+          // Info
+          h('div',{style:{flex:1,minWidth:160}},
+            h('div',{style:{fontWeight:700,fontSize:14,marginBottom:2}}, c.full_name || 'Sans nom'),
+            h('div',{style:{fontSize:12,color:MUT}}, c.email || ''),
+            c.objectif && h('div',{style:{fontSize:11,color:ACC,marginTop:2}}, objLabels[c.objectif]||c.objectif)
+          ),
+          // Programme selector (active clients only)
+          tab==='active' && h('select',{
+            onChange:(e)=>assignProgramme(c.id,e.target.value),
+            defaultValue:'',
+            style:{background:BG3,color:TXT,border:`1px solid ${BORDER}`,borderRadius:8,padding:'7px 12px',fontSize:12,fontFamily:'Inter,sans-serif',cursor:'pointer'}
+          },
+            h('option',{value:'',disabled:true},'📋 Assigner programme'),
+            ...programmes.map(p=>h('option',{key:p.id,value:p.id},p.titre))
+          ),
+          // Chat button (active only)
+          tab==='active' && h('button',{
+            onClick:()=>openChat(c),
+            style:{background:BG3,border:`1px solid ${BORDER}`,color:TXT,borderRadius:8,padding:'7px 14px',fontSize:13,cursor:'pointer',position:'relative',fontFamily:'Inter,sans-serif'}
+          },
+            '💬',
+            (unread[c.id]||0)>0 && h('span',{style:{position:'absolute',top:-4,right:-4,background:ACC,color:'#fff',fontSize:9,fontWeight:700,width:16,height:16,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center'}},unread[c.id])
+          ),
+          // Pending actions
+          tab==='pending' && h('div',{style:{display:'flex',gap:8}},
+            h('button',{onClick:()=>activateClient(c.id),style:{background:'rgba(34,197,94,0.15)',border:'1px solid rgba(34,197,94,0.3)',color:'#22c55e',borderRadius:8,padding:'7px 16px',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'Inter,sans-serif'}}, '✓ Activer'),
+            h('button',{onClick:()=>rejectClient(c.id),style:{background:'rgba(239,68,68,0.1)',border:'1px solid rgba(239,68,68,0.2)',color:'#f87171',borderRadius:8,padding:'7px 16px',fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'Inter,sans-serif'}}, '✕ Refuser')
+          )
+        )
+      )
+    ),
+    // Chat panel (overlay)
+    chatOpen && h('div',{style:{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:1000,display:'flex',alignItems:'flex-end',justifyContent:'flex-end',padding:24}},
+      h('div',{style:{background:BG2,border:`1px solid ${BORDER}`,borderRadius:20,width:400,height:500,display:'flex',flexDirection:'column',overflow:'hidden'}},
+        // Chat header
+        h('div',{style:{padding:'16px 20px',borderBottom:`1px solid ${BORDER}`,display:'flex',alignItems:'center',gap:12}},
+          h('div',{style:{width:36,height:36,borderRadius:'50%',background:ACC,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700}}, (chatOpen.full_name||'?').charAt(0).toUpperCash('div',{style:{fontSize:14,fontWeight:700}},chatOpen.full_name||chatOpen.email),,fontWeight:700}}),chatOpen.full_name||chatOpen.email,
+            h('div',{style:{fontSize:11,color:MUT}},chatOpen.email)
+          ),
+          h('button',{onClick:()=>setChatOpen(null),style:{background:'transparent',border:'none',color:MUT,fontSize:20,cursor:'pointer'}}, '×')
+        ),
+        // Messages
+        h('div',{id:'co-msgs',style:{flex:1,overflowY:'auto',padding:'16px 20px',display:'flex',flexDirection:'column',gap:10}},
+          messages.length===0 ? h('div',{style:{color:MUT,fontSize:13,textAlign:'center',marginTop:40}},'Pas encore de messages') :
+          messages.map(m =>
+            h('div',{key:m.id,style:{display:'flex',flexDirection:'column',alignItems:m.from_id===coachId?'flex-end':'flex-start',maxWidth:'80%',alignSelf:m.from_id===coachId?'flex-end':'flex-start'}},
+              h('div',{style:{background:m.from_id===coachId?ACC:BG3,border:m.from_id===coachId?'none':`1px solid ${BORDER}`,color:'#fff',padding:'10px 14px',borderRadius:14,fontSize:13,lineHeight:1.5,wordBreak:'break-word'}},m.content),
+              h('div',{style:{fontSize:10,color:'#555',marginTop:3}},new Date(m.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}))
+            )
+          )
+        ),
+        // Input
+        h('div',{style:{borderTop:`1px solid ${BORDER}`,padding:'12px 16px',display:'flex',gap:10,alignItems:'center'}},
+          h('input',{value:msgInput,onChange:e=>setMsgInput(e.target.value),onKeyDown:e=>e.key==='Enter'&&sendMsg(),placeholder:'Votre message…',style:{flex:1,background:BG3,border:`1px solid ${BORDER}`,color:TXT,borderRadius:10,padding:'10px 14px',fontSize:13,fontFamily:'Inter,sans-serif',outline:'none'}}),
+          h('button',{onClick:sendMsg,style:{background:ACC,border:'none',color:'#fff',borderRadius:8,padding:'10px 16px',fontSize:14,cursor:'pointer'}}, '➤')
+        )
+      )
+    )
+  );
+}
 
 createRoot(document.getElementById('root')).render(h(App));
   </script>
