@@ -218,6 +218,119 @@
   {id:'analytique',icon:'📈',label:'Analytique'},
     ];
 
+
+    // ── Google Search Console + Business Analytics ──────────────────────────
+    function Analytique() {
+      const [gsc, setGsc] = useState(null);
+      const [biz, setBiz] = useState({reservations:0,revenue:0,actifs:0,mrr:0});
+      const [loading, setLoading] = useState(true);
+      const [gscMsg, setGscMsg] = useState('');
+
+      useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('gsc') === 'connected') { setGscMsg('✅ Google Search Console connecté !'); history.replaceState({}, '', window.location.pathname); }
+        else if (params.get('gsc') === 'error') { setGscMsg('❌ Erreur OAuth : ' + (params.get('reason')||'inconnue')); history.replaceState({}, '', window.location.pathname); }
+        async function load() {
+          const [gscRes, {count:res}, {data:ab}] = await Promise.all([
+            fetch('https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/gsc-data').then(r=>r.json()).catch(()=>null),
+            sb.from('reservations').select('*',{count:'exact',head:true}),
+            sb.from('abonnements').select('plan').eq('statut','active'),
+          ]);
+          setGsc(gscRes);
+          const prix={essentiel:49,progression:99,transformation:199};
+          const mrr=(ab||[]).reduce((s,a)=>s+(prix[a.plan]||0),0);
+          setBiz({reservations:res||0,revenue:mrr*12,actifs:(ab||[]).length,mrr});
+          setLoading(false);
+        }
+        load();
+      }, []);
+
+      const authUrl = 'https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/gsc-oauth?action=auth';
+
+      function BarChart({rows, color}) {
+        if (!rows || rows.length === 0) return h('p', {style:{color:C.muted,fontSize:13}}, 'Aucune donnée');
+        const maxVal = Math.max(...rows.map(r => r.clicks||0), 1);
+        return h('div', {style:{display:'flex',alignItems:'flex-end',gap:3,height:80,marginTop:8}},
+          ...rows.map((r,i) => {
+            const pct = ((r.clicks||0)/maxVal)*100;
+            const label = (r.keys?.[0]||'').slice(5);
+            return h('div', {key:i, style:{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:2}},
+              h('div', {title:(r.keys?.[0]||'')+': '+(r.clicks||0)+' clics', style:{width:'100%',background:color,borderRadius:'3px 3px 0 0',height:pct+'%',minHeight:2}}),
+              h('div', {style:{fontSize:9,color:C.muted,writingMode:'vertical-rl',transform:'rotate(180deg)',height:24,overflow:'hidden'}}, label)
+            );
+          })
+        );
+      }
+
+      if (loading) return h('div', {style:{color:C.muted,padding:40}}, 'Chargement...');
+      const totClicks = (gsc?.byDate||[]).reduce((s,r)=>s+(r.clicks||0),0);
+      const totImpr   = (gsc?.byDate||[]).reduce((s,r)=>s+(r.impressions||0),0);
+      const avgPos    = gsc?.byDate?.length ? ((gsc.byDate.reduce((s,r)=>s+(r.position||0),0)/gsc.byDate.length).toFixed(1)) : '—';
+      const avgCtr    = totImpr>0 ? ((totClicks/totImpr)*100).toFixed(1)+'%' : '—';
+
+      return h('div', null,
+        h('h1', {style:{fontSize:24,fontWeight:700,marginBottom:4,color:C.white}}, 'Analytique'),
+        h('p',  {style:{color:C.muted,fontSize:14,marginBottom:gscMsg?12:32}}, 'Business KPIs + visibilité Google · 28 derniers jours'),
+        gscMsg && h('div', {style:{background:gscMsg.startsWith('✅')?'rgba(62,207,142,0.12)':'rgba(255,77,106,0.12)',border:'1px solid '+(gscMsg.startsWith('✅')?C.green:C.red),borderRadius:10,padding:'10px 16px',marginBottom:24,color:gscMsg.startsWith('✅')?C.green:C.red,fontSize:13}}, gscMsg),
+        h('h2', {style:{fontSize:15,fontWeight:700,color:C.white,marginBottom:14}}, '📊 KPIs Business'),
+        h('div', {style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,marginBottom:32}},
+          ...[
+            {label:'Réservations',value:biz.reservations,color:C.blue,icon:'📅'},
+            {label:'ARR',value:biz.revenue+'€',color:C.green,icon:'💰'},
+            {label:'Abonnés actifs',value:biz.actifs,color:C.gold,icon:'💳'},
+            {label:'MRR',value:biz.mrr+'€',color:C.purple,icon:'📈'},
+          ].map(s=>h('div',{key:s.label,style:{background:C.soft,border:'1px solid '+C.border,borderRadius:12,padding:'18px 20px'}},
+            h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}},
+              h('div',null, h('div',{style:{fontSize:24,fontWeight:800,color:s.color}},s.value), h('div',{style:{fontSize:12,color:C.muted,marginTop:4}},s.label)),
+              h('div',{style:{fontSize:22}},s.icon)
+            )
+          ))
+        ),
+        h('h2', {style:{fontSize:15,fontWeight:700,color:C.white,marginBottom:14}}, '🔍 Google Search Console'),
+        !gsc?.connected
+          ? h('div', {style:{background:C.card,border:'1px solid '+C.border,borderRadius:16,padding:32,textAlign:'center'}},
+              h('div', {style:{fontSize:32,marginBottom:12}}, '🔍'),
+              h('h3', {style:{color:C.white,marginBottom:8,fontSize:16}}, 'Connecter Google Search Console'),
+              h('p',  {style:{color:C.muted,fontSize:13,marginBottom:20}}, 'Clics, impressions, CTR et requêtes Google directement dans le CRM.'),
+              h('a',  {href:authUrl, style:{...btn,display:'inline-block',textDecoration:'none',padding:'12px 28px'}}, '🔗 Connecter GSC')
+            )
+          : h('div', null,
+              h('div', {style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:14,marginBottom:24}},
+                ...[
+                  {label:'Clics (28j)',value:totClicks,color:C.blue,icon:'👆'},
+                  {label:'Impressions',value:totImpr,color:C.purple,icon:'👁️'},
+                  {label:'CTR moyen',value:avgCtr,color:C.green,icon:'📊'},
+                  {label:'Position moy.',value:avgPos,color:C.gold,icon:'📍'},
+                ].map(s=>h('div',{key:s.label,style:{background:C.soft,border:'1px solid '+C.border,borderRadius:12,padding:'18px 20px'}},
+                  h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}},
+                    h('div',null, h('div',{style:{fontSize:24,fontWeight:800,color:s.color}},s.value), h('div',{style:{fontSize:12,color:C.muted,marginTop:4}},s.label)),
+                    h('div',{style:{fontSize:20}},s.icon)
+                  )
+                ))
+              ),
+              h('div', {style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:24,marginBottom:16}},
+                h('div', {style:{background:C.card,border:'1px solid '+C.border,borderRadius:16,padding:20}},
+                  h('h3', {style:{fontSize:14,fontWeight:600,color:C.white,marginBottom:4}}, 'Clics / jour'),
+                  h('p',  {style:{fontSize:11,color:C.muted,marginBottom:4}}, (gsc.startDate||'')+' → '+(gsc.endDate||'')),
+                  h(BarChart, {rows:gsc.byDate, color:C.blue})
+                ),
+                h('div', {style:{background:C.card,border:'1px solid '+C.border,borderRadius:16,padding:20}},
+                  h('h3', {style:{fontSize:14,fontWeight:600,color:C.white,marginBottom:14}}, '🔑 Top requêtes'),
+                  ...(gsc.topQueries||[]).slice(0,8).map((q,i)=>h('div',{key:i,style:{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:'1px solid '+C.border,fontSize:12}},
+                    h('span',{style:{color:C.white,maxWidth:'60%',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}},q.keys?.[0]||'—'),
+                    h('div',{style:{display:'flex',gap:10,flexShrink:0}},
+                      h('span',{style:{color:C.blue}},(q.clicks||0)+' clics'),
+                      h('span',{style:{color:C.muted}},'#'+(q.position?.toFixed(0)||'—'))
+                    )
+                  )),
+                  (gsc.topQueries||[]).length===0 && h('p',{style:{color:C.muted,fontSize:13}},'Aucune requête')
+                )
+              ),
+              h('div',{style:{textAlign:'right'}}, h('a',{href:authUrl,style:{fontSize:12,color:C.muted,textDecoration:'none'}},'🔄 Reconnecter GSC'))
+            )
+      );
+    }
+
     function App() {
       const [user, setUser] = useState(null);
       const [tab, setTab] = useState('dashboard');
