@@ -1,95 +1,193 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mon espace — Taya Fitness</title>
-  <meta name="robots" content="noindex" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="/css/global.css" />
-  <link rel="stylesheet" href="/css/navbar.css" />
-  <link rel="stylesheet" href="/css/footer.css" />
-  <link rel="stylesheet" href="/css/dashboard.css" />
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mon espace — Taya Fitness</title>
+<meta name="robots" content="noindex" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="/css/global.css" />
+<link rel="stylesheet" href="/css/navbar.css" />
+<link rel="stylesheet" href="/css/footer.css" />
+<link rel="stylesheet" href="/css/dashboard.css" />
+<style>
+  .form-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold, #FF5C35);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .profil-form textarea {
+    width: 100%;
+    background: var(--black-border, #1a2035);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--white, #fff);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 12px 16px;
+    outline: none;
+    resize: vertical;
+    transition: border-color .2s;
+    line-height: 1.6;
+  }
+  .profil-form textarea:focus { border-color: var(--gold, #FF5C35); }
+  .profil-form select {
+    width: 100%;
+    background: var(--black-border, #1a2035);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--white, #fff);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color .2s;
+    cursor: pointer;
+  }
+  .profil-form select:focus { border-color: var(--gold, #FF5C35); }
+  .profil-form select option { background: #1a2035; }
+</style>
 </head>
 <body>
-  <div id="navbar-placeholder"></div>
-  <main class="dashboard-main">
-    <div class="container">
+<div id="navbar-placeholder"></div>
+<main class="dashboard-main">
+<div class="container">
 
-      <!-- Sidebar -->
-      <aside class="dashboard-sidebar">
-        <div class="sidebar-user" id="sidebar-user">
-          <div class="sidebar-avatar" id="sidebar-avatar">?</div>
-          <div>
-            <strong id="sidebar-name">Chargement...</strong>
-            <small id="sidebar-email"></small>
-          </div>
-        </div>
-        <nav class="sidebar-nav">
-          <a href="#mes-programmes" class="sidebar-link active" data-tab="mes-programmes">🏋️ Mes programmes</a>
-          <a href="#progression"    class="sidebar-link" data-tab="progression">📈 Ma progression</a>
-          <a href="#creneaux"       class="sidebar-link" data-tab="creneaux">📅 Mes créneaux</a>
-          <a href="#profil"         class="sidebar-link" data-tab="profil">👤 Mon profil</a>
-        </nav>
-        <button class="sidebar-logout" id="sidebar-logout">🚪 Déconnexion</button>
-      </aside>
+<!-- Sidebar -->
+<aside class="dashboard-sidebar">
+<div class="sidebar-user" id="sidebar-user">
+<div class="sidebar-avatar" id="sidebar-avatar">?</div>
+<div>
+<strong id="sidebar-name">Chargement...</strong>
+<small id="sidebar-email"></small>
+</div>
+</div>
+<nav class="sidebar-nav">
+<a href="#mes-programmes" class="sidebar-link active" data-tab="mes-programmes">🏋️ Mes programmes</a>
+<a href="#progression" class="sidebar-link" data-tab="progression">📈 Ma progression</a>
+<a href="#creneaux" class="sidebar-link" data-tab="creneaux">📅 Mes créneaux</a>
+<a href="#profil" class="sidebar-link" data-tab="profil">👤 Mon profil</a>
+</nav>
+<button class="sidebar-logout" id="sidebar-logout">🚪 Déconnexion</button>
+</aside>
 
-      <!-- Contenu principal -->
-      <div class="dashboard-content">
+<!-- Contenu principal -->
+<div class="dashboard-content">
 
-        <!-- Mes programmes -->
-        <div class="dash-panel active" id="panel-mes-programmes">
-          <div class="dash-panel-header">
-            <h2>Mes programmes</h2>
-            <a href="/programmes" class="btn btn-gold-outline btn-sm">+ Découvrir</a>
-          </div>
-          <div id="mes-programmes-list" class="loader"><div class="spinner"></div></div>
-        </div>
+<!-- Mes programmes -->
+<div class="dash-panel active" id="panel-mes-programmes">
+<div class="dash-panel-header">
+<h2>Mes programmes</h2>
+<a href="/programmes" class="btn btn-gold-outline btn-sm">+ Découvrir</a>
+</div>
+<div id="mes-programmes-list" class="loader"><div class="spinner"></div></div>
+</div>
 
-        <!-- Progression -->
-        <div class="dash-panel" id="panel-progression">
-          <div class="dash-panel-header">
-            <h2>Ma progression</h2>
-          </div>
-          <div id="progression-content" class="loader"><div class="spinner"></div></div>
-        </div>
+<!-- Progression -->
+<div class="dash-panel" id="panel-progression">
+<div class="dash-panel-header">
+<h2>Ma progression</h2>
+</div>
+<div id="progression-content" class="loader"><div class="spinner"></div></div>
+</div>
 
-        <!-- Créneaux -->
-        <div class="dash-panel" id="panel-creneaux">
-          <div class="dash-panel-header">
-            <h2>Mes créneaux réservés</h2>
-            <a href="/offres" class="btn btn-gold-outline btn-sm">Réserver</a>
-          </div>
-          <div id="creneaux-content" class="loader"><div class="spinner"></div></div>
-        </div>
+<!-- Créneaux -->
+<div class="dash-panel" id="panel-creneaux">
+<div class="dash-panel-header">
+<h2>Mes créneaux réservés</h2>
+<a href="/offres" class="btn btn-gold-outline btn-sm">Réserver</a>
+</div>
+<div id="creneaux-content" class="loader"><div class="spinner"></div></div>
+</div>
 
-        <!-- Profil -->
-        <div class="dash-panel" id="panel-profil">
-          <div class="dash-panel-header">
-            <h2>Mon profil</h2>
-          </div>
-          <form id="profil-form" class="profil-form">
-            <div class="alert alert-success" id="profil-alert"></div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Prénom et nom</label>
-                <input type="text" id="profil-name" placeholder="Ton nom" />
-              </div>
-              <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="profil-email" disabled />
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
-          </form>
-        </div>
+<!-- Profil -->
+<div class="dash-panel" id="panel-profil">
+<div class="dash-panel-header">
+<h2>Mon profil</h2>
+</div>
+<form id="profil-form" class="profil-form">
+<div class="alert alert-success" id="profil-alert"></div>
 
-      </div>
-    </div>
-  </main>
-  <div id="footer-placeholder"></div>
-  <script type="module" src="/js/dashboard.js"></script>
+<div class="form-section-title">Identité</div>
+<div class="form-row">
+<div class="form-group">
+<label>Prénom</label>
+<input type="text" id="profil-prenom" placeholder="Ton prénom" />
+</div>
+<div class="form-group">
+<label>Nom</label>
+<input type="text" id="profil-nom" placeholder="Ton nom" />
+</div>
+</div>
+
+<div class="form-row">
+<div class="form-group">
+<label>Email</label>
+<input type="email" id="profil-email" disabled />
+</div>
+<div class="form-group">
+<label>Téléphone</label>
+<input type="tel" id="profil-telephone" placeholder="+33 6 xx xx xx xx" />
+</div>
+</div>
+
+<div class="form-row">
+<div class="form-group">
+<label>Date de naissance</label>
+<input type="date" id="profil-date-naissance" />
+</div>
+<div class="form-group">
+<label>Genre</label>
+<select id="profil-gender">
+<option value="">Sélectionner</option>
+<option value="homme">Homme</option>
+<option value="femme">Femme</option>
+<option value="autre">Autre / Ne pas préciser</option>
+</select>
+</div>
+</div>
+
+<div class="form-section-title" style="margin-top:28px">Adresse</div>
+<div class="form-group">
+<label>Adresse complète</label>
+<input type="text" id="profil-adresse" placeholder="12 rue de la Paix, 75001 Paris" />
+</div>
+
+<div class="form-section-title" style="margin-top:28px">Informations physiques</div>
+<div class="form-row">
+<div class="form-group">
+<label>Poids (kg)</label>
+<input type="number" id="profil-weight" placeholder="70" min="30" max="250" step="0.5" />
+</div>
+<div class="form-group">
+<label>Taille (cm)</label>
+<input type="number" id="profil-height" placeholder="175" min="100" max="250" />
+</div>
+</div>
+
+<div class="form-section-title" style="margin-top:28px">Notes &amp; Objectifs</div>
+<div class="form-group">
+<label>Notes personnelles <span style="font-weight:400;color:var(--white-muted,#9aa3b5)">(blessures, contraintes, objectifs précis…)</span></label>
+<textarea id="profil-notes" rows="4" placeholder="Ex : tendinite au genou droit, objectif marathon en octobre, régime végétarien..."></textarea>
+</div>
+
+<div style="margin-top:28px">
+<button type="submit" class="btn btn-primary">Enregistrer le profil</button>
+</div>
+</form>
+</div>
+
+</div>
+</div>
+</main>
+<div id="footer-placeholder"></div>
+<script type="module" src="/js/dashboard.js"></script>
 </body>
 </html>
