@@ -215,6 +215,7 @@
       {id:'taches',icon:'✅',label:'Tâches'},
       {id:'questionnaires',icon:'📋',label:'Questionnaires'},
       {id:'prospects',icon:'🎯',label:'Prospects'},
+  {id:'analytique',icon:'📈',label:'Analytique'},
     ];
 
     function App() {
@@ -277,7 +278,7 @@
         )
       );
 
-      const pages = {dashboard:Dashboard,clients:ClientsAzeoo,programmes:Programmes,exercices:Exercices,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches,questionnaires:Questionnaires,prospects:Prospects};
+      const pages = {dashboard:Dashboard,clients:ClientsAzeoo,programmes:Programmes,exercices:Exercices,abonnements:Abonnements,revenus:Revenus,emails:Emails,taches:Taches,questionnaires:Questionnaires,prospects:Prospects,analytique:Analytique};
       const Page = pages[tab] || Dashboard;
 
       return h('div',{style:{background:C.bg,minHeight:'100vh',display:'flex',fontFamily:'Inter,sans-serif'}},
@@ -3847,7 +3848,115 @@
       );
     }
 
-    createRoot(document.getElementById('root')).render(h(App));
+    
+function Analytique() {
+  const [rdata, setRdata] = useState({reservations:[],achats:[],abonnements:[],loading:true});
+  useEffect(() => {
+    (async () => {
+      const [{data:resa},{data:ach},{data:abo}] = await Promise.all([
+        sb.from('reservations').select('date_heure,location,statut,type').order('date_heure',{ascending:false}).limit(300),
+        sb.from('achats').select('montant,created_at,statut').order('created_at',{ascending:false}).limit(300),
+        sb.from('abonnements').select('plan,statut,created_at').order('created_at',{ascending:false}).limit(300),
+      ]);
+      setRdata({reservations:resa||[],achats:ach||[],abonnements:abo||[],loading:false});
+    })();
+  },[]);
+
+  const totalResa = rdata.reservations.length;
+  const caTotal = rdata.achats.filter(a=>a.statut==='paid').reduce((s,a)=>s+(a.montant||0),0);
+  const prixPlans = {essentiel:49,progression:99,transformation:199};
+  const aboActifs = rdata.abonnements.filter(a=>a.statut==='active');
+  const mrr = aboActifs.reduce((s,a)=>s+(prixPlans[a.plan]||0),0);
+
+  // Réservations par mois (6 derniers)
+  const now = new Date();
+  const months = Array.from({length:6},(_,i)=>{
+    const d = new Date(now.getFullYear(), now.getMonth()-5+i, 1);
+    return {label:d.toLocaleDateString('fr-FR',{month:'short'}), key:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`};
+  });
+  const resaByMonth = {};
+  rdata.reservations.forEach(r=>{if(r.date_heure){const k=r.date_heure.slice(0,7);resaByMonth[k]=(resaByMonth[k]||0)+1;}});
+  const maxBar = Math.max(...months.map(m=>resaByMonth[m.key]||0),1);
+
+  // Par club
+  const byClub = {};
+  rdata.reservations.forEach(r=>{const c=r.location||'Autre';byClub[c]=(byClub[c]||0)+1;});
+
+  if(rdata.loading) return h('div',{style:{color:C.muted,padding:'60px',textAlign:'center'}},'⏳ Chargement des données...');
+
+  const card = (content) => h('div',{style:{background:C.card,borderRadius:'14px',border:`1px solid ${C.border}`,padding:'24px'}},content);
+  const kpiLabel = {fontSize:'11px',color:C.muted,letterSpacing:'2px',textTransform:'uppercase',marginBottom:'4px'};
+  const kpiVal = {fontSize:'30px',fontWeight:'800',color:C.text};
+
+  return h('div',{style:{maxWidth:'960px',margin:'0 auto'}},
+    // KPI row
+    h('div',{style:{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:'16px',marginBottom:'24px'}},
+      [{icon:'📅',label:'Réservations',val:totalResa},
+       {icon:'💶',label:'CA encaissé',val:caTotal===0?'—':`${caTotal.toFixed(0)} €`},
+       {icon:'💳',label:'Abo. actifs',val:aboActifs.length},
+       {icon:'📈',label:'MRR',val:mrr===0?'—':`${mrr} €`}
+      ].map(({icon,label,val},i)=>h('div',{key:i,style:{background:C.card,borderRadius:'14px',border:`1px solid ${C.border}`,padding:'22px'}},
+        h('div',{style:{fontSize:'26px',marginBottom:'10px'}},icon),
+        h('div',{style:kpiLabel},label),
+        h('div',{style:kpiVal},val)
+      ))
+    ),
+    // Charts row
+    h('div',{style:{display:'grid',gridTemplateColumns:'1.3fr 1fr',gap:'20px',marginBottom:'20px'}},
+      // Bar chart — réservations / mois
+      card(h('div',null,
+        h('div',{style:{fontSize:'12px',fontWeight:'700',color:C.muted,letterSpacing:'2px',textTransform:'uppercase',marginBottom:'20px'}},'📅 Réservations par mois'),
+        h('div',{style:{display:'flex',alignItems:'flex-end',gap:'6px',height:'110px'}},
+          months.map(m=>{
+            const count = resaByMonth[m.key]||0;
+            const pct = (count/maxBar)*100;
+            return h('div',{key:m.key,style:{flex:'1',display:'flex',flexDirection:'column',alignItems:'center',gap:'4px'}},
+              h('div',{style:{fontSize:'11px',color:count>0?C.gold:C.muted,fontWeight:'600'}},count||''),
+              h('div',{style:{width:'100%',borderRadius:'4px 4px 0 0',height:`${Math.max(pct,3)}%`,background:count>0?'rgba(255,107,74,0.75)':'rgba(255,255,255,0.06)'}}),
+              h('div',{style:{fontSize:'10px',color:C.muted}},m.label)
+            );
+          })
+        )
+      )),
+      // Par club
+      card(h('div',null,
+        h('div',{style:{fontSize:'12px',fontWeight:'700',color:C.muted,letterSpacing:'2px',textTransform:'uppercase',marginBottom:'20px'}},'📍 Par club'),
+        Object.keys(byClub).length===0
+          ? h('p',{style:{color:C.muted,fontSize:'13px'}},'Aucune réservation')
+          : Object.entries(byClub).sort((a,b)=>b[1]-a[1]).map(([club,count])=>{
+              const pct = totalResa>0?Math.round((count/totalResa)*100):0;
+              const short = club.includes('Stade')||club.includes('France')?'Stade de France':club.includes('Auber')?'Aubervilliers':club.includes('Carnot')?'Carnot':club.slice(0,18);
+              return h('div',{key:club,style:{marginBottom:'14px'}},
+                h('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:'5px'}},
+                  h('span',{style:{fontSize:'13px',color:C.text}},short),
+                  h('span',{style:{fontSize:'13px',color:C.gold,fontWeight:'700'}},`${count} (${pct}%)`)
+                ),
+                h('div',{style:{background:'rgba(255,255,255,0.05)',borderRadius:'4px',height:'5px'}},
+                  h('div',{style:{background:C.gold,borderRadius:'4px',height:'5px',width:`${pct}%`,transition:'width 0.6s'}})
+                )
+              );
+            })
+      ))
+    ),
+    // Abonnements by plan
+    card(h('div',null,
+      h('div',{style:{fontSize:'12px',fontWeight:'700',color:C.muted,letterSpacing:'2px',textTransform:'uppercase',marginBottom:'20px'}},'💳 Abonnements actifs par formule'),
+      h('div',{style:{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'16px'}},
+        ['essentiel','progression','transformation'].map(plan=>{
+          const count = aboActifs.filter(a=>a.plan===plan).length;
+          const rev = count*(prixPlans[plan]||0);
+          return h('div',{key:plan,style:{background:'rgba(255,255,255,0.03)',borderRadius:'10px',border:`1px solid ${C.border}`,padding:'20px',textAlign:'center'}},
+            h('div',{style:{fontSize:'30px',fontWeight:'800',color:C.gold}},count),
+            h('div',{style:{fontSize:'13px',color:C.text,fontWeight:'600',marginTop:'6px',textTransform:'capitalize'}},plan),
+            h('div',{style:{fontSize:'12px',color:C.muted,marginTop:'3px'}},rev>0?`${rev} € / mois`:'—')
+          );
+        })
+      )
+    ))
+  );
+}
+
+createRoot(document.getElementById('root')).render(h(App));
   </script>
 </body>
 </html>
