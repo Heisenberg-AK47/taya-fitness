@@ -22,8 +22,8 @@ const TYPE_LABELS = {
 };
 
 const TYPE_ADDRESSES = {
-  'stade-de-france': 'Av. du Président Wilson, 93210 Saint-Denis',
-  'aubervilliers':   '42 Av. Victor Hugo, 93300 Aubervilliers',
+  'stade-de-france': '7 Av. Jules Rimet, 93200 Saint-Denis',
+  'aubervilliers':   '174 Av. Jean Jaurès, 93300 Aubervilliers',
   'carnot':          '17 Rue Carnot, 93200 Saint-Denis',
 };
 
@@ -76,7 +76,6 @@ function renderCalendrier() {
     const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isSelected = selectedDate === dateStr;
 
-    // Si c'est aujourd'hui, vérifier qu'il reste au moins un créneau disponible
     let isFull = false;
     if (isToday) {
       const nowMin = today.getHours() * 60 + today.getMinutes();
@@ -124,7 +123,6 @@ async function renderCreneaux(dateStr) {
   const grid    = document.getElementById('creneaux-horaires');
   section.style.display = 'block';
 
-  // Créneaux déjà pris en base
   let indispo = [];
   try {
     const debut = new Date(`${dateStr}T00:00:00`).toISOString();
@@ -137,7 +135,6 @@ async function renderCreneaux(dateStr) {
     indispo = (data || []).map(r => r.date_heure.slice(11, 16));
   } catch {}
 
-  // Créneaux passés pour aujourd'hui
   const now = new Date();
   const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
   const isToday  = dateStr === todayStr;
