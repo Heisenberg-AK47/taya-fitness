@@ -1,3 +1,16 @@
+// ── Google Analytics 4 — Taya Fitness (G-LY3D859GY9) ──────
+if (!window.__ga4Loaded) {
+  window.__ga4Loaded = true;
+  const _s = document.createElement('script');
+  _s.async = true;
+  _s.src = 'https://www.googletagmanager.com/gtag/js?id=G-LY3D859GY9';
+  document.head.appendChild(_s);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){ window.dataLayer.push(arguments); };
+  window.gtag('js', new Date());
+  window.gtag('config', 'G-LY3D859GY9');
+}
+
 /* ============================================================
    NAVBAR.JS — Injection + état connecté/déconnecté
    ============================================================ */
