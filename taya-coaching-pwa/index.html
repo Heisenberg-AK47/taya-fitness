@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taya Fitness — Coaching Online · La méthode transformation durable</title>
+<meta name="description" content="Coaching sportif 100% online : programme sur mesure, nutrition et suivi humain pour transformer ton corps durablement.">
+<meta name="theme-color" content="#0d1b2a">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" href="/icons/favicon-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+  header.nav { position: sticky; top: 0; z-index: 50; backdrop-filter: blur(10px);
+    background: rgba(13,27,42,.82); border-bottom: 1px solid var(--line); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: .04em; font-family: var(--font-head); }
+  .brand img { width: 34px; height: 34px; }
+  .brand b { color: var(--ink); } .brand i { color: var(--accent); font-style: normal; }
+  .hero { padding: 64px 0 40px; }
+  .hero .durable { color: var(--ink); }
+  .hero p.lead { max-width: 540px; color: var(--muted); font-size: 1.1rem; }
+  .stats { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 28px; }
+  .stat { border: 1px solid var(--line); border-radius: 14px; padding: 16px 22px; background: var(--card-2); }
+  .stat b { display: block; font-size: 2rem; color: var(--accent); font-family: var(--font-head); }
+  .stat.alt b { color: var(--ink); }
+  .stat span { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .ba { display: grid; gap: 20px; grid-template-columns: 1fr 1fr; }
+  @media (max-width: 680px){ .ba { grid-template-columns: 1fr; } }
+  .ba ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .ba li { padding-left: 28px; position: relative; }
+  .ba .before li::before { content: "✕"; position: absolute; left: 0; color: var(--danger); font-weight: 800; }
+  .ba .after li::before  { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: 800; }
+  .ba-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+  .ba-list li { padding-left: 28px; position: relative; }
+  .ba-list.before li::before { content: "✕"; position: absolute; left: 0; color: var(--danger); font-weight: 800; }
+  .pillar { text-align: center; }
+  .pillar .ic { font-size: 1.8rem; }
+  .pillar h3 { font-size: 1rem; margin: 8px 0 4px; }
+  .steps { counter-reset: step; }
+  .step b.n { color: var(--accent); font-size: 1.4rem; font-weight: 800; font-family: var(--font-head); }
+  .tagline { text-align: center; font-weight: 700; font-family: var(--font-head); letter-spacing: .01em; margin-top: 26px; font-size: 1.15rem; }
+  .tagline .accent { color: var(--accent); }
+  footer { border-top: 1px solid var(--line); padding: 30px 0 60px; color: var(--muted); font-size: .85rem; background: var(--bg-2); }
+  details summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; color: var(--accent); font-size: 1.4rem; line-height: 1; }
+  details[open] summary::after { content: "−"; }
+  details[open] summary { margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/"><img src="/icons/icon-192.png" alt=""><span><b>TAYA</b> <i>Fitness</i></span></a>
+    <nav style="display:flex;gap:10px;align-items:center">
+      <a class="btn btn-ghost" href="/login.html">Se connecter</a>
+      <a class="btn btn-accent" href="#offres">Commencer</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="container hero">
+  <p class="eyebrow">Coaching sportif · Nutrition · 100% online</p>
+  <h1>La méthode<br><span class="accent">transformation</span> <span class="durable">durable</span></h1>
+  <p class="lead">Un accompagnement premium pour transformer ton corps et ta vie. Durablement.</p>
+  <div class="stats">
+    <div class="stat"><b>+250</b><span>personnes transformées</span></div>
+    <div class="stat alt"><b>100%</b><span>d'engagement pour ta réussite</span></div>
+  </div>
+  <div style="margin-top:28px;display:flex;gap:12px;flex-wrap:wrap">
+    <a class="btn btn-accent" href="#offres">Voir les formules</a>
+    <a class="btn btn-ghost" href="#methode">Découvrir la méthode</a>
+  </div>
+</section>
+
+<!-- À QUI S'ADRESSE -->
+<section class="container section">
+  <p class="eyebrow">À qui s'adresse l'offre</p>
+  <h2>Tu en as <span class="accent">marre de</span> :</h2>
+  <div class="grid grid-3" style="margin-top:20px">
+    <div class="card"><ul class="ba-list before"><li>Manquer d'énergie</li><li>Ne plus te sentir bien dans ton corps</li></ul></div>
+    <div class="card"><ul class="ba-list before"><li>Manquer de résultats durables</li><li>Tester sans cesse sans succès</li></ul></div>
+    <div class="card"><ul class="ba-list before"><li>Manquer de structure et de suivi</li><li>Perdre confiance en toi</li></ul></div>
+  </div>
+  <p class="tagline">🏆 Tu mérites un accompagnement <span class="accent">qui change tout.</span></p>
+</section>
+
+<!-- AVANT / APRÈS -->
+<section class="container section">
+  <p class="eyebrow center">Avant · Après</p>
+  <h2 class="center">Un nouveau corps. Un nouvel esprit. <span class="accent">Une nouvelle vie.</span></h2>
+  <div class="ba" style="margin-top:24px">
+    <div class="card before">
+      <h3 style="color:var(--danger)">Avant</h3>
+      <ul>
+        <li>Entraînements au hasard</li><li>Aucune structure</li>
+        <li>Résultats instables</li><li>Frustration & découragement</li><li>Manque de motivation</li>
+      </ul>
+    </div>
+    <div class="card after">
+      <h3 class="accent">Après</h3>
+      <ul>
+        <li>Plan clair & personnalisé</li><li>Progression maîtrisée</li>
+        <li>Résultats visibles & durables</li><li>Confiance & estime de soi</li><li>Énergie, force & fierté</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- MÉTHODE -->
+<section id="methode" class="container section">
+  <p class="eyebrow center">Plus qu'un programme</p>
+  <h2 class="center">Une <span class="accent">méthode</span>.</h2>
+  <div class="grid grid-5" style="margin-top:24px">
+    <div class="card pillar"><div class="ic">📋</div><h3>Méthode structurée</h3><p class="note">Claire, simple et efficace</p></div>
+    <div class="card pillar"><div class="ic">🤝</div><h3>Accompagnement humain</h3><p class="note">Écoute, soutien et motivation</p></div>
+    <div class="card pillar"><div class="ic">🏋️</div><h3>Entraînement intelligent</h3><p class="note">Adapté à ton niveau et tes objectifs</p></div>
+    <div class="card pillar"><div class="ic">🥗</div><h3>Nutrition adaptée</h3><p class="note">Flexible, réaliste et durable</p></div>
+    <div class="card pillar"><div class="ic">📈</div><h3>Résultats durables</h3><p class="note">Basés sur la santé et la progression</p></div>
+  </div>
+  <p class="tagline">Personnalisé · Humain · Adapté · Durable · <span class="accent">Premium</span></p>
+</section>
+
+<!-- TU N'ES JAMAIS SEUL -->
+<section class="container section">
+  <h2 class="center">Tu n'es <span class="accent">jamais seul(e)</span>.</h2>
+  <div class="grid grid-3" style="margin-top:24px">
+    <div class="card"><h3>💬 Messagerie privée</h3><p class="note">Réponses rapides à toutes tes questions</p></div>
+    <div class="card"><h3>📊 Bilans & ajustements</h3><p class="note">On adapte ton plan selon tes progrès</p></div>
+    <div class="card"><h3>🎯 Accountability</h3><p class="note">Je te pousse, tu progresses</p></div>
+    <div class="card"><h3>⭐ Support & motivation</h3><p class="note">Présent à chaque étape</p></div>
+  </div>
+</section>
+
+<!-- ÉTAPES -->
+<section class="container section steps">
+  <p class="eyebrow center">Les étapes du programme</p>
+  <h2 class="center">Étape par étape. <span class="accent">Jusqu'au résultat.</span></h2>
+  <div class="grid grid-3" style="margin-top:24px">
+    <div class="card"><b class="n">01</b><h3>Évaluation</h3><p class="note">Ton corps, ton quotidien, tes objectifs.</p></div>
+    <div class="card"><b class="n">02</b><h3>Plan personnalisé</h3><p class="note">Entraînement, nutrition, habitudes.</p></div>
+    <div class="card"><b class="n">03</b><h3>Action & suivi</h3><p class="note">Feedbacks, ajustements, progression.</p></div>
+    <div class="card"><b class="n">04</b><h3>Résultats & autonomie</h3><p class="note">Ton physique, ton mental, ton mode de vie.</p></div>
+  </div>
+</section>
+
+<!-- PLUS DE VALEUR -->
+<section class="container section">
+  <p class="eyebrow center">Plus de valeur. Plus de résultats.</p>
+  <div class="grid grid-5" style="margin-top:24px">
+    <div class="card pillar"><div class="ic">🎁</div><h3>Guides exclusifs</h3></div>
+    <div class="card pillar"><div class="ic">📖</div><h3>Nutrition simplifiée</h3></div>
+    <div class="card pillar"><div class="ic">▶️</div><h3>Vidéos pédagogiques</h3></div>
+    <div class="card pillar"><div class="ic">🗓️</div><h3>Outils de suivi</h3></div>
+    <div class="card pillar"><div class="ic">👥</div><h3>Communauté motivante</h3></div>
+  </div>
+  <p class="tagline">Des outils. · Du soutien. · <span class="accent">Des résultats.</span></p>
+</section>
+
+<!-- GARANTIES -->
+<section class="container section">
+  <p class="eyebrow center">Garanties & accompagnement</p>
+  <div class="grid grid-3" style="margin-top:24px">
+    <div class="card center"><div class="ic" style="font-size:1.8rem">🛡️</div><h3>Accompagnement premium</h3><p class="note">Suivi humain, régulier et personnalisé</p></div>
+    <div class="card center"><div class="ic" style="font-size:1.8rem">✅</div><h3>Satisfait ou remotivé</h3><p class="note">Je m'engage à t'accompagner à fond</p></div>
+    <div class="card center"><div class="ic" style="font-size:1.8rem">🔒</div><h3>Confidentialité totale</h3><p class="note">Ton parcours reste privé</p></div>
+  </div>
+  <p class="tagline">❤️ Ta réussite est <span class="accent">ma priorité.</span></p>
+</section>
+
+<!-- OFFRES / PAYWALL -->
+<section id="offres" class="container section">
+  <p class="eyebrow center">Investis en toi</p>
+  <h2 class="center">Ta santé a <span class="accent">de la valeur</span>.</h2>
+  <p class="center muted" style="max-width:560px;margin:0 auto 8px">Accès au coaching après inscription. Engagement <b style="color:var(--ink)">3 mois minimum</b>. Annulable ensuite à tout moment.</p>
+  <div id="checkout-msg"></div>
+  <div class="plans" style="margin-top:24px">
+
+    <div class="card plan">
+      <h3>Offre 1 · Essentiel</h3>
+      <div class="price">79€ <span>/mois</span></div>
+      <ul>
+        <li>Plan d'entraînement personnalisé</li>
+        <li>Nutrition de base</li>
+        <li>Suivi toutes les 2 semaines</li>
+      </ul>
+      <div class="cta"><button class="btn btn-ghost btn-block" data-plan="online_essentiel">Choisir Essentiel</button></div>
+    </div>
+
+    <div class="card plan featured">
+      <span class="badge">★ Best-seller</span>
+      <h3>Offre 2 · Transformation</h3>
+      <div class="price">129€ <span>/mois</span></div>
+      <ul>
+        <li>Coaching complet premium</li>
+        <li>Nutrition complète</li>
+        <li>Suivi hebdomadaire</li>
+        <li>Ajustements illimités</li>
+        <li>Support & motivation</li>
+      </ul>
+      <div class="cta"><button class="btn btn-accent btn-block" data-plan="online_transformation">Choisir Transformation</button></div>
+    </div>
+
+    <div class="card plan">
+      <h3>Offre 3 · Premium</h3>
+      <div class="price">199€ <span>/mois</span></div>
+      <ul>
+        <li>Accompagnement VIP</li>
+        <li>Appels mensuels</li>
+        <li>Analyse approfondie</li>
+        <li>Priorité totale</li>
+        <li>Suivi ultra personnalisé</li>
+      </ul>
+      <div class="cta"><button class="btn btn-ghost btn-block" data-plan="online_premium">Choisir Premium</button></div>
+    </div>
+
+  </div>
+  <p class="note center" style="margin-top:18px">Paiement sécurisé par Stripe · Crédit d'impôt non applicable au coaching online · Résiliation après l'engagement.</p>
+</section>
+
+<!-- FAQ -->
+<section class="container section">
+  <h2 class="center">Questions <span class="accent">fréquentes</span></h2>
+  <div class="grid" style="margin-top:24px;max-width:760px;margin-inline:auto">
+    <details class="card"><summary>Comment se passe le coaching 100% online ?</summary><p class="note">Après ton inscription et le paiement, tu remplis un questionnaire d'objectifs. Je te construis un programme sur mesure accessible dans l'app, avec vidéos, séries/reps et suivi de ta progression séance après séance.</p></details>
+    <details class="card"><summary>Pourquoi un engagement de 3 mois ?</summary><p class="note">Une vraie transformation demande de la constance. 3 mois, c'est le minimum pour installer des habitudes et voir des résultats durables. Après cette période, tu peux résilier à tout moment.</p></details>
+    <details class="card"><summary>Je n'ai pas de matériel / je débute, c'est pour moi ?</summary><p class="note">Oui. Le programme est adapté à ton niveau, ton équipement et tes objectifs. Que tu sois à la maison ou en salle, on construit autour de ce que tu as.</p></details>
+    <details class="card"><summary>Comment annuler mon abonnement ?</summary><p class="note">Depuis ton espace, à la fin de la période d'engagement. Aucun prélèvement caché, tu gardes le contrôle.</p></details>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <strong>TA RÉUSSITE EST MA PRIORITÉ.</strong><br>
+    © <span id="y"></span> Taya Fitness — Coaching Online. Tous droits réservés.
+  </div>
+</footer>
+
+<script type="module">
+  import { supabase, currentUser, startCheckout } from '/assets/supabase.js';
+  document.getElementById('y').textContent = new Date().getFullYear();
+
+  // Register the service worker (installable PWA)
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(console.warn));
+  }
+
+  const msg = document.getElementById('checkout-msg');
+  function showMsg(text, ok=false){
+    msg.innerHTML = `<div class="alert ${ok?'alert-ok':'alert-error'}">${text}</div>`;
+    msg.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  document.querySelectorAll('[data-plan]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const plan = btn.dataset.plan;
+      btn.disabled = true; const label = btn.textContent; btn.textContent = 'Redirection…';
+      try {
+        const user = await currentUser();
+        if (!user) {
+          // Need an account first — remember the chosen plan and send to login/signup.
+          sessionStorage.setItem('taya_plan', plan);
+          location.href = '/login.html?next=' + encodeURIComponent('/index.html#offres') + '&plan=' + plan;
+          return;
+        }
+        await startCheckout({ plan, billing: 'monthly', user_id: user.id, user_email: user.email });
+      } catch (e) {
+        showMsg("Impossible de démarrer le paiement : " + e.message);
+        btn.disabled = false; btn.textContent = label;
+      }
+    });
+  });
+
+  // If the user just came back from login with a chosen plan, resume checkout.
+  (async () => {
+    const params = new URLSearchParams(location.search);
+    const pending = sessionStorage.getItem('taya_plan') || params.get('plan');
+    if (pending && location.hash === '#offres') {
+      const user = await currentUser();
+      if (user) {
+        sessionStorage.removeItem('taya_plan');
+        try { await startCheckout({ plan: pending, billing: 'monthly', user_id: user.id, user_email: user.email }); }
+        catch (e) { showMsg("Impossible de démarrer le paiement : " + e.message); }
+      }
+    }
+  })();
+</script>
+</body>
+</html>

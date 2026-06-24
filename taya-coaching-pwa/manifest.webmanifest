@@ -1,0 +1,24 @@
+{
+  "name": "Taya Fitness — Coaching Online",
+  "short_name": "Taya Coaching",
+  "description": "Coaching sportif 100% online : programmes sur mesure, suivi de progression, nutrition.",
+  "lang": "fr",
+  "dir": "ltr",
+  "start_url": "/app/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1b2a",
+  "theme_color": "#0d1b2a",
+  "categories": ["health", "fitness", "lifestyle"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Ma séance du jour", "url": "/app/?view=seance", "short_name": "Séance" },
+    { "name": "Suivi de poids", "url": "/app/?view=poids", "short_name": "Poids" }
+  ]
+}

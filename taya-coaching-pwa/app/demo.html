@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mon espace — Taya Fitness Coaching</title>
+<meta name="theme-color" content="#0d1b2a">
+
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAFWUlEQVR4nO3dP24dVRTA4WMU2lADQnIHNQ17SGWxjSyANWQB2QZKlT3QUEMXKQrUuKUwBYz1ePKzPTP339zzfVWkxO/Nmzm/uePxJIkAAAAAAAAAAJjGVe8N2OPu9au73tvAv67evj/kLB1mow378RwhiqE38Kmhf/nuQ6Mt4Sm3N9eP/v6oMQy5UZcG38Afx6UgRgthqI05H3wDP4/zIEYJYYiNMPh5jBZC1zc3+HmNEkK3AE6H3+DndRpCjwiav6HB5yG9Qvis1RtFGH4uO52Hlj/zaRaA4ecpPSJostQsH8bg81zLJVHty6HqK4DhZ4tlXmqvBFUDMPzs0SKCagEYfkqoHUGVAAw/JdWMoHgAhp8aakVQNADP7NNCyTmrcgnk7E8NNeaqWAAufWih9KVQkQAMPy2VjKDps0Awmt0BOPvTQ6lVwApAarsCcPanpxKrgBWA1DYH4OzPCPauAlYAUtsUgLM/I9mzClgBSE0ApLY6AE98MrK187l5BXD9z0i2zqNLIFITAKm96L0BNf32w+fFXuu7X/4u9lqtZP/8z7HqHx06yv3/kgf+3BEGIfPnX/sParkEIrXpAqh59mvx+ntl//xrTRcArCEAUhMAqQmA1ARAatMFUPs+9ej3wbN//rWmCwDWmPJRiOUsVfKe9Vdffh0REbc3+1/rrzc/X/y9L376cf8b/OePPz8Ve63ZzvyLKQNYnB608/+YuYfHBv/8z5QIYYl2q9EfeSlh6gAWvYf/OYN/6WtKrghr3d5cTx/B9N8DHHH4S379Xr33X21TB9D74JUaXhHUM20AvQ9a6aEVQR1TBjDrweptxv06ZQC91Tpb914FZiQAUpsugN7LdO2zdO9VoPf+LW26AGANAZCaAEhNAKQmAFKbLoDZH97qbbb9O10AsIYASG3KAGZbpkcx436dMoCIOQ9WT7Puz2kDiJj3oLU2836cOoCIuQ9eC7Pvv+kDiJj/INaSYb+l+EvxEf8/mLM90VhShqE/lSaAUzUP8sc31V76XrYhrSnFJRBcIgBSEwCpCYDUBEBqAiA1AZCaAEhNAKQmAFITAKkJgNQEQGoCIDUBkJoASE0ApCYAUhMAqQmA1ARAagIgNQGQmgBITQCkJgBSEwCpCYDUBEBqAiA1AZCaAEhNAKQmAFITAKkJgNQEQGoCIDUBkJoASE0ApCYAUhMAqQmA1ARAagIgNQGQmgBITQCFffPt94d+/WwEQGoCqKDWWdrZvzwBkJoAKil9tnb2r0MAFZUaWsNfjwAq2zu8hr+uF703IINliD/+/uvqr6EuATT0nBAMflsC6MCQj8P3AKQmAFITAKkJgNQEQGoCILVVAVy9fX8VEXF7c11lY2CPZS6XOX0OKwCpCYDUBEBqmwPwfQAj2TqPqwNY8w0GtLZ2Pl0CkZoASG1TAH4ewEi23P9fWAFIbXMAVgFGsOfsH2EFILldAVgF6Gnv2T/CCkByuwOwCtBDibN/hBWA5IoEYBWgpVJn/4iCK4AIaKHk8EdUugQSATXUmKuiAXhSlBZKzlnxFcClEDWUvvRZVLkEEgEl1Rr+iIq3QUVACTWHP6LyzwFEwB61hz+iwQ/CRMAWLYY/IqLZXZu716/ull+/fPeh1dtyMKcnyhZ3FZs9CnH6YawGPKT18Ec0fhZIBFzSY/gjGl4CnXNJRES/wb9/z9ZveOo0ggghZHJ+BdDrKYIhHl0QQh6jDP79+/d883NCmNdog78YYiPOnYewEMRxXLrJMcrgL4bamHOXQlgIYhxP3dUbbfAXQ27UQ56KgfGMOvSnht/Ax4hiHEcYdgAAAAAAAAAy+Ad7Y9zs7gBdrQAAAABJRU5ErkJggg==">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAFWUlEQVR4nO3dP24dVRTA4WMU2lADQnIHNQ17SGWxjSyANWQB2QZKlT3QUEMXKQrUuKUwBYz1ePKzPTP339zzfVWkxO/Nmzm/uePxJIkAAAAAAAAAAJjGVe8N2OPu9au73tvAv67evj/kLB1mow378RwhiqE38Kmhf/nuQ6Mt4Sm3N9eP/v6oMQy5UZcG38Afx6UgRgthqI05H3wDP4/zIEYJYYiNMPh5jBZC1zc3+HmNEkK3AE6H3+DndRpCjwiav6HB5yG9Qvis1RtFGH4uO52Hlj/zaRaA4ecpPSJostQsH8bg81zLJVHty6HqK4DhZ4tlXmqvBFUDMPzs0SKCagEYfkqoHUGVAAw/JdWMoHgAhp8aakVQNADP7NNCyTmrcgnk7E8NNeaqWAAufWih9KVQkQAMPy2VjKDps0Awmt0BOPvTQ6lVwApAarsCcPanpxKrgBWA1DYH4OzPCPauAlYAUtsUgLM/I9mzClgBSE0ApLY6AE98MrK187l5BXD9z0i2zqNLIFITAKm96L0BNf32w+fFXuu7X/4u9lqtZP/8z7HqHx06yv3/kgf+3BEGIfPnX/sParkEIrXpAqh59mvx+ntl//xrTRcArCEAUhMAqQmA1ARAatMFUPs+9ej3wbN//rWmCwDWmPJRiOUsVfKe9Vdffh0REbc3+1/rrzc/X/y9L376cf8b/OePPz8Ve63ZzvyLKQNYnB608/+YuYfHBv/8z5QIYYl2q9EfeSlh6gAWvYf/OYN/6WtKrghr3d5cTx/B9N8DHHH4S379Xr33X21TB9D74JUaXhHUM20AvQ9a6aEVQR1TBjDrweptxv06ZQC91Tpb914FZiQAUpsugN7LdO2zdO9VoPf+LW26AGANAZCaAEhNAKQmAFKbLoDZH97qbbb9O10AsIYASG3KAGZbpkcx436dMoCIOQ9WT7Puz2kDiJj3oLU2836cOoCIuQ9eC7Pvv+kDiJj/INaSYb+l+EvxEf8/mLM90VhShqE/lSaAUzUP8sc31V76XrYhrSnFJRBcIgBSEwCpCYDUBEBqAiA1AZCaAEhNAKQmAFITAKkJgNQEQGoCIDUBkJoASE0ApCYAUhMAqQmA1ARAagIgNQGQmgBITQCkJgBSEwCpCYDUBEBqAiA1AZCaAEhNAKQmAFITAKkJgNQEQGoCIDUBkJoASE0ApCYAUhMAqQmA1ARAagIgNQGQmgBITQCFffPt94d+/WwEQGoCqKDWWdrZvzwBkJoAKil9tnb2r0MAFZUaWsNfjwAq2zu8hr+uF703IINliD/+/uvqr6EuATT0nBAMflsC6MCQj8P3AKQmAFITAKkJgNQEQGoCILVVAVy9fX8VEXF7c11lY2CPZS6XOX0OKwCpCYDUBEBqmwPwfQAj2TqPqwNY8w0GtLZ2Pl0CkZoASG1TAH4ewEi23P9fWAFIbXMAVgFGsOfsH2EFILldAVgF6Gnv2T/CCkByuwOwCtBDibN/hBWA5IoEYBWgpVJn/4iCK4AIaKHk8EdUugQSATXUmKuiAXhSlBZKzlnxFcClEDWUvvRZVLkEEgEl1Rr+iIq3QUVACTWHP6LyzwFEwB61hz+iwQ/CRMAWLYY/IqLZXZu716/ull+/fPeh1dtyMKcnyhZ3FZs9CnH6YawGPKT18Ec0fhZIBFzSY/gjGl4CnXNJRES/wb9/z9ZveOo0ggghZHJ+BdDrKYIhHl0QQh6jDP79+/d883NCmNdog78YYiPOnYewEMRxXLrJMcrgL4bamHOXQlgIYhxP3dUbbfAXQ27UQ56KgfGMOvSnht/Ax4hiHEcYdgAAAAAAAAAy+Ad7Y9zs7gBdrQAAAABJRU5ErkJggg==">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<style>/* Taya Fitness — Coaching Online · Shared theme
+ * Charte identique au site tayafitness.com : navy #0d1b2a + accent orange #ff6b4a. */
+:root {
+  --bg:        #0d1b2a;
+  --bg-2:      #0a1628;
+  --card:      #16273a;
+  --card-2:    #122033;
+  --ink:       #f0f4f8;
+  --muted:     rgba(220,232,244,.6);
+  --muted-2:   rgba(220,232,244,.4);
+  --line:      rgba(255,255,255,.08);
+  --accent:    #ff6b4a;
+  --accent-2:  #e5522f;
+  --gold:      #c9a84c;
+  --good:      #3ecf8e;
+  --danger:    #ff6b6b;
+  --grad:      linear-gradient(135deg, #ff6b4a 0%, #e5522f 100%);
+  --radius:    14px;
+  --radius-sm: 10px;
+  --shadow:    0 10px 40px rgba(0,0,0,.35);
+  --font:      'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-head: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+a { color: inherit; text-decoration: none; }
+.muted { color: var(--muted); }
+.accent { color: var(--accent); }
+.gold { color: var(--gold); }
+.center { text-align: center; }
+
+.container { width: min(1080px, 92vw); margin-inline: auto; }
+.section { padding: 56px 0; }
+
+h1, h2, h3 { font-family: var(--font-head); font-weight: 800; letter-spacing: -.01em; line-height: 1.1; margin: 0 0 .4em; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.8rem); }
+h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 700; }
+h3 { font-size: 1.05rem; }
+.eyebrow { color: var(--accent); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; font-size: .78rem; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  font-weight: 600; font-size: 1rem; padding: 15px 32px; border-radius: var(--radius-sm);
+  border: 0; cursor: pointer; transition: transform .15s ease, box-shadow .2s ease, opacity .2s;
+  font-family: var(--font);
+}
+.btn:active { transform: translateY(1px); }
+.btn-accent { background: var(--grad); color: #fff; box-shadow: 0 8px 24px rgba(255,107,74,.25); }
+.btn-accent:hover { opacity: .94; }
+.btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn-ghost:hover { border-color: var(--accent); }
+.btn-block { width: 100%; }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+/* Pricing */
+.plans { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); align-items: stretch; }
+.plan { position: relative; display: flex; flex-direction: column; }
+.plan h3 { font-size: .95rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.plan .price { font-size: 2.6rem; font-weight: 800; color: var(--ink); font-family: var(--font-head); }
+.plan .price span { font-size: 1rem; color: var(--muted); font-weight: 600; }
+.plan ul { list-style: none; padding: 0; margin: 16px 0 22px; display: grid; gap: 10px; }
+.plan li { padding-left: 26px; position: relative; color: var(--ink); font-size: .95rem; }
+.plan li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: 800; }
+.plan .cta { margin-top: auto; }
+.plan.featured { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 14px 40px rgba(255,107,74,.18); }
+.badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--grad); color: #fff; font-size: .72rem; font-weight: 700;
+  padding: 5px 14px; border-radius: 999px; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap;
+}
+
+/* Feature grid */
+.grid { display: grid; gap: 18px; }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.grid-5 { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+.note { font-size: .82rem; color: var(--muted); }
+.hr { height: 1px; background: var(--line); border: 0; margin: 24px 0; }
+
+/* Forms */
+.field { display: grid; gap: 6px; margin-bottom: 14px; }
+.field label { font-size: .85rem; color: var(--muted); font-weight: 600; }
+.field input, .field select, .field textarea {
+  background: var(--card-2); border: 1px solid var(--line); color: var(--ink);
+  border-radius: var(--radius-sm); padding: 13px 14px; font-size: 1rem; font-family: inherit; width: 100%;
+}
+.field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,107,74,.18); }
+.alert { padding: 12px 14px; border-radius: var(--radius-sm); font-size: .9rem; margin-bottom: 14px; }
+.alert-error { background: rgba(255,107,107,.12); border: 1px solid var(--danger); color: #ffc2c2; }
+.alert-ok { background: rgba(62,207,142,.12); border: 1px solid var(--good); color: #b6f0d5; }
+</style>
+<style>
+  body { padding-bottom: 80px; }
+  .appbar { position: sticky; top: 0; z-index: 40; background: rgba(13,27,42,.92); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line); }
+  .appbar-in { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
+  .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-family: var(--font-head); }
+  .brand img { width: 30px; height: 30px; }
+  .brand i { color: var(--accent); font-style: normal; }
+  .iconbtn { background: transparent; border: 1px solid var(--line); color: var(--ink); border-radius: 10px; padding: 8px 12px; cursor: pointer; font-size: .9rem; }
+  main { padding-top: 18px; }
+  .view { display: none; } .view.active { display: block; }
+  .pagehead { margin: 6px 0 18px; }
+  .pagehead h1 { font-size: 1.7rem; margin: 0; }
+  .pagehead p { margin: 4px 0 0; color: var(--muted); font-size: .92rem; }
+
+  /* bottom nav */
+  .bottomnav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: var(--bg-2);
+    border-top: 1px solid var(--line); display: flex; justify-content: space-around; padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); }
+  .bottomnav a { display: flex; flex-direction: column; align-items: center; gap: 3px; color: var(--muted); font-size: .68rem; font-weight: 600; padding: 4px 14px; border-radius: 10px; }
+  .bottomnav a .ic { font-size: 1.25rem; }
+  .bottomnav a.active { color: var(--accent); }
+
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 12px; }
+  .mini { background: var(--card-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .mini .k { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; }
+  .mini .v { font-size: 1.5rem; font-weight: 800; font-family: var(--font-head); margin-top: 2px; }
+
+  .list-item { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: border-color .15s; }
+  .list-item:hover { border-color: var(--accent); }
+  .list-item .day { width: 40px; height: 40px; border-radius: 10px; background: var(--card-2); display: grid; place-items: center; font-weight: 800; color: var(--accent); font-family: var(--font-head); flex-shrink: 0; }
+  .pill { display: inline-block; font-size: .7rem; padding: 3px 9px; border-radius: 999px; background: rgba(255,107,74,.12); color: var(--accent); font-weight: 700; }
+  .pill.muted { background: rgba(255,255,255,.06); color: var(--muted); }
+
+  .ex { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .ex h3 { margin: 0 0 4px; font-size: 1.05rem; }
+  .ex .meta { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+  .ex .vid { display: block; position: relative; border-radius: 10px; overflow: hidden; margin: 10px 0; aspect-ratio: 16/9; background: #000; }
+  .ex .vid img { width: 100%; height: 100%; object-fit: cover; opacity: .85; }
+  .ex .vid .play { position: absolute; inset: 0; display: grid; place-items: center; font-size: 2.4rem; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
+  .ex .consigne { font-size: .86rem; color: var(--muted); margin: 6px 0; }
+  .sets { display: grid; gap: 8px; margin-top: 10px; }
+  .setrow { display: grid; grid-template-columns: 38px 1fr 1fr 40px; gap: 8px; align-items: center; }
+  .setrow label { font-size: .72rem; color: var(--muted); }
+  .setrow input { background: var(--card-2); border: 1px solid var(--line); color: var(--ink); border-radius: 9px; padding: 9px; font-size: .9rem; width: 100%; }
+  .setrow input:focus { outline: none; border-color: var(--accent); }
+  .setrow .sn { font-weight: 800; color: var(--accent); font-family: var(--font-head); text-align: center; }
+  .check { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--card-2); display: grid; place-items: center; cursor: pointer; color: var(--muted); }
+  .check.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .weekbar { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 12px; }
+  .weekbar button { flex-shrink: 0; background: var(--card-2); border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 7px 14px; font-weight: 700; cursor: pointer; font-size: .85rem; }
+  .weekbar button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
+  .empty .ic { font-size: 2.6rem; }
+  .back { background: transparent; border: 0; color: var(--accent); font-weight: 700; cursor: pointer; padding: 0; margin-bottom: 12px; font-size: .9rem; }
+
+  /* onboarding */
+  .ob { max-width: 520px; margin: 0 auto; }
+  .ob .opts { display: grid; gap: 10px; }
+  .ob .opt { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; cursor: pointer; font-weight: 600; }
+  .ob .opt.sel { border-color: var(--accent); background: rgba(255,107,74,.08); }
+  .ob .prog { height: 5px; background: var(--card-2); border-radius: 999px; overflow: hidden; margin-bottom: 22px; }
+  .ob .prog i { display: block; height: 100%; background: var(--grad); transition: width .3s; }
+  .toast { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); background: var(--good); color: #06301f;
+    padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: .9rem; z-index: 80; opacity: 0; transition: opacity .25s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  canvas { max-width: 100%; }
+</style>
+</head>
+<body>
+
+<div id="loading" class="empty" style="padding-top:80px"><div class="ic">⏳</div><p>Chargement de ton espace…</p></div>
+
+<div id="shell" style="display:none">
+  <header class="appbar">
+    <div class="container appbar-in">
+      <div class="brand"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAFWUlEQVR4nO3dP24dVRTA4WMU2lADQnIHNQ17SGWxjSyANWQB2QZKlT3QUEMXKQrUuKUwBYz1ePKzPTP339zzfVWkxO/Nmzm/uePxJIkAAAAAAAAAAJjGVe8N2OPu9au73tvAv67evj/kLB1mow378RwhiqE38Kmhf/nuQ6Mt4Sm3N9eP/v6oMQy5UZcG38Afx6UgRgthqI05H3wDP4/zIEYJYYiNMPh5jBZC1zc3+HmNEkK3AE6H3+DndRpCjwiav6HB5yG9Qvis1RtFGH4uO52Hlj/zaRaA4ecpPSJostQsH8bg81zLJVHty6HqK4DhZ4tlXmqvBFUDMPzs0SKCagEYfkqoHUGVAAw/JdWMoHgAhp8aakVQNADP7NNCyTmrcgnk7E8NNeaqWAAufWih9KVQkQAMPy2VjKDps0Awmt0BOPvTQ6lVwApAarsCcPanpxKrgBWA1DYH4OzPCPauAlYAUtsUgLM/I9mzClgBSE0ApLY6AE98MrK187l5BXD9z0i2zqNLIFITAKm96L0BNf32w+fFXuu7X/4u9lqtZP/8z7HqHx06yv3/kgf+3BEGIfPnX/sParkEIrXpAqh59mvx+ntl//xrTRcArCEAUhMAqQmA1ARAatMFUPs+9ej3wbN//rWmCwDWmPJRiOUsVfKe9Vdffh0REbc3+1/rrzc/X/y9L376cf8b/OePPz8Ve63ZzvyLKQNYnB608/+YuYfHBv/8z5QIYYl2q9EfeSlh6gAWvYf/OYN/6WtKrghr3d5cTx/B9N8DHHH4S379Xr33X21TB9D74JUaXhHUM20AvQ9a6aEVQR1TBjDrweptxv06ZQC91Tpb914FZiQAUpsugN7LdO2zdO9VoPf+LW26AGANAZCaAEhNAKQmAFKbLoDZH97qbbb9O10AsIYASG3KAGZbpkcx436dMoCIOQ9WT7Puz2kDiJj3oLU2836cOoCIuQ9eC7Pvv+kDiJj/INaSYb+l+EvxEf8/mLM90VhShqE/lSaAUzUP8sc31V76XrYhrSnFJRBcIgBSEwCpCYDUBEBqAiA1AZCaAEhNAKQmAFITAKkJgNQEQGoCIDUBkJoASE0ApCYAUhMAqQmA1ARAagIgNQGQmgBITQCkJgBSEwCpCYDUBEBqAiA1AZCaAEhNAKQmAFITAKkJgNQEQGoCIDUBkJoASE0ApCYAUhMAqQmA1ARAagIgNQGQmgBITQCFffPt94d+/WwEQGoCqKDWWdrZvzwBkJoAKil9tnb2r0MAFZUaWsNfjwAq2zu8hr+uF703IINliD/+/uvqr6EuATT0nBAMflsC6MCQj8P3AKQmAFITAKkJgNQEQGoCILVVAVy9fX8VEXF7c11lY2CPZS6XOX0OKwCpCYDUBEBqmwPwfQAj2TqPqwNY8w0GtLZ2Pl0CkZoASG1TAH4ewEi23P9fWAFIbXMAVgFGsOfsH2EFILldAVgF6Gnv2T/CCkByuwOwCtBDibN/hBWA5IoEYBWgpVJn/4iCK4AIaKHk8EdUugQSATXUmKuiAXhSlBZKzlnxFcClEDWUvvRZVLkEEgEl1Rr+iIq3QUVACTWHP6LyzwFEwB61hz+iwQ/CRMAWLYY/IqLZXZu716/ull+/fPeh1dtyMKcnyhZ3FZs9CnH6YawGPKT18Ec0fhZIBFzSY/gjGl4CnXNJRES/wb9/z9ZveOo0ggghZHJ+BdDrKYIhHl0QQh6jDP79+/d883NCmNdog78YYiPOnYewEMRxXLrJMcrgL4bamHOXQlgIYhxP3dUbbfAXQ27UQ56KgfGMOvSnht/Ax4hiHEcYdgAAAAAAAAAy+Ad7Y9zs7gBdrQAAAABJRU5ErkJggg==" alt=""><span>TAYA <i>Fitness</i></span></div>
+      <button class="iconbtn" id="logout">Déconnexion</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ACCUEIL -->
+    <section id="v-accueil" class="view">
+      <div class="pagehead"><h1 id="hello">Salut 👋</h1><p id="sub-status"></p></div>
+      <div class="stat-row" id="home-stats"></div>
+      <div style="margin-top:18px" id="home-program"></div>
+    </section>
+
+    <!-- PROGRAMME -->
+    <section id="v-programme" class="view">
+      <div class="pagehead"><h1>Mon programme</h1><p id="prog-sub"></p></div>
+      <div id="prog-content"></div>
+    </section>
+
+    <!-- SUIVI -->
+    <section id="v-suivi" class="view">
+      <div class="pagehead"><h1>Suivi de poids</h1><p>Note ton poids régulièrement pour visualiser ta progression.</p></div>
+      <div class="card" style="margin-bottom:18px">
+        <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
+          <div class="field" style="margin:0;flex:1;min-width:110px"><label>Poids (kg)</label><input id="w-poids" type="number" step="0.1" inputmode="decimal" placeholder="ex. 72.5"></div>
+          <div class="field" style="margin:0;flex:1;min-width:130px"><label>Date</label><input id="w-date" type="date"></div>
+          <button class="btn btn-accent" id="w-add" style="padding:13px 22px">Ajouter</button>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:18px"><canvas id="w-chart" height="200"></canvas></div>
+      <div id="w-list"></div>
+    </section>
+
+    <!-- PROFIL -->
+    <section id="v-profil" class="view">
+      <div class="pagehead"><h1>Mon profil</h1></div>
+      <div id="profil-content"></div>
+    </section>
+
+    <!-- ONBOARDING -->
+    <section id="v-onboarding" class="view">
+      <div class="ob" id="ob-root"></div>
+    </section>
+  </main>
+
+  <nav class="bottomnav" id="bottomnav">
+    <a href="#accueil" data-tab="accueil"><span class="ic">🏠</span>Accueil</a>
+    <a href="#programme" data-tab="programme"><span class="ic">🏋️</span>Programme</a>
+    <a href="#suivi" data-tab="suivi"><span class="ic">📈</span>Suivi</a>
+    <a href="#profil" data-tab="profil"><span class="ic">👤</span>Profil</a>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+
+// ===== DÉMO : mock Supabase en mémoire (aucune connexion réseau) =====
+const _user = { id:'demo', email:'marie@demo.fr', user_metadata:{ full_name:'Marie Démo' } };
+const _db = {
+  clients: [{ email:'marie@demo.fr', prenom:'Marie', nom:'Démo', objectif:'Recomposition', niveau:'Intermédiaire', genre:'Femme', programme_id:'PROG1', current_week:1, statut:'abonne' }],
+  programmes: [{ id:'PROG1', titre:'Recomposition — 3 séances / semaine', duree_semaines:8, description_courte:'Full body force & composition corporelle', objectif:'Recomposition', actif:true }],
+  programme_workouts: [
+    { id:'W1', programme_id:'PROG1', week_number:1, day_number:1, name:'LOWER — Bas du corps', description:'Quadriceps, fessiers, ischios' },
+    { id:'W2', programme_id:'PROG1', week_number:1, day_number:2, name:'UPPER — Haut du corps', description:'Dos, pec, épaules, bras' },
+    { id:'W3', programme_id:'PROG1', week_number:1, day_number:3, name:'FULL BODY', description:'Corps complet + gainage' },
+  ],
+  exercises: [
+    { id:'E1', name:'Squat guidé (Smith)', youtube_id:'gcNh17Ckjgg', repos:"2'30", consignes:"Talons sur step, descente contrôlée, poitrine sortie.", tags:['Quadriceps'] },
+    { id:'E2', name:'Presse à cuisses', youtube_id:null, repos:"2'", consignes:'Pieds bas sur la plateforme, amplitude complète.', tags:['Quadriceps'] },
+    { id:'E3', name:'Soulevé de terre roumain', youtube_id:'2SHsk9AzdjA', repos:"2'30", consignes:'Jambes quasi tendues, dos neutre, sangle de tirage.', tags:['Fessiers'] },
+    { id:'E4', name:'Leg curl assis', youtube_id:null, repos:"1'30", consignes:'Sors la poitrine, contraction complète.', tags:['Ischios'] },
+    { id:'E5', name:'Tirage vertical poulie', youtube_id:'CAwf7n6Luuc', repos:"2'", consignes:'Prise large, coudes vers le bas, omoplates serrées.', tags:['Dos'] },
+    { id:'E6', name:'Développé couché haltères', youtube_id:null, repos:"2'", consignes:'Descente lente, coudes à 45°.', tags:['Pectoraux'] },
+    { id:'E7', name:'Élévations latérales', youtube_id:null, repos:"1'", consignes:'Léger, contrôle, pas de balan.', tags:['Épaules'] },
+  ],
+  programme_exercises: [
+    { id:'PE1', programme_id:'PROG1', exercise_id:'E1', week_number:1, day_number:1, order_index:1, sets:4, reps:'8-10', rest_seconds:150, notes:'Monte la charge si 10 reps faciles.' },
+    { id:'PE2', programme_id:'PROG1', exercise_id:'E2', week_number:1, day_number:1, order_index:2, sets:3, reps:'10-12', rest_seconds:120 },
+    { id:'PE3', programme_id:'PROG1', exercise_id:'E3', week_number:1, day_number:1, order_index:3, sets:3, reps:'10', rest_seconds:150 },
+    { id:'PE4', programme_id:'PROG1', exercise_id:'E4', week_number:1, day_number:1, order_index:4, sets:3, reps:'12-15', rest_seconds:90 },
+    { id:'PE5', programme_id:'PROG1', exercise_id:'E5', week_number:1, day_number:2, order_index:1, sets:4, reps:'8-12', rest_seconds:120 },
+    { id:'PE6', programme_id:'PROG1', exercise_id:'E6', week_number:1, day_number:2, order_index:2, sets:3, reps:'10', rest_seconds:120 },
+    { id:'PE7', programme_id:'PROG1', exercise_id:'E7', week_number:1, day_number:2, order_index:3, sets:3, reps:'15', rest_seconds:60 },
+    { id:'PE8', programme_id:'PROG1', exercise_id:'E1', week_number:1, day_number:3, order_index:1, sets:3, reps:'12', rest_seconds:120 },
+    { id:'PE9', programme_id:'PROG1', exercise_id:'E5', week_number:1, day_number:3, order_index:2, sets:3, reps:'12', rest_seconds:90 },
+  ],
+  suivi_poids: [
+    { id:'P1', user_id:'demo', date:'2026-05-20', poids:71.5 },
+    { id:'P2', user_id:'demo', date:'2026-05-30', poids:70.8 },
+    { id:'P3', user_id:'demo', date:'2026-06-10', poids:70.1 },
+    { id:'P4', user_id:'demo', date:'2026-06-20', poids:69.4 },
+  ],
+  workout_logs: [],
+};
+function _q(table){
+  let rows = (_db[table]||[]).map(r=>({...r}));
+  const api = {
+    select(){ return api; },
+    eq(c,v){ rows = rows.filter(r=>r[c]===v); return api; },
+    in(c,vs){ rows = rows.filter(r=>vs.includes(r[c])); return api; },
+    order(c,o){ const asc = !(o&&o.ascending===false); rows.sort((a,b)=> a[c]>b[c]?(asc?1:-1):a[c]<b[c]?(asc?-1:1):0); return api; },
+    limit(n){ rows = rows.slice(0,n); return api; },
+    maybeSingle(){ return Promise.resolve({ data: rows[0]||null, error:null }); },
+    insert(obj){ const o=Array.isArray(obj)?obj:[obj]; o.forEach(x=>_db[table].push({ id:'X'+Math.random(), ...x })); return Promise.resolve({ data:o, error:null }); },
+    upsert(obj){
+      if(table==='workout_logs'){ const k=r=>r.user_id+'|'+r.programme_exercise_id+'|'+r.week_number+'|'+r.set_number;
+        const i=_db.workout_logs.findIndex(r=>k(r)===k(obj)); if(i>=0) _db.workout_logs[i]={..._db.workout_logs[i],...obj}; else _db.workout_logs.push({...obj}); }
+      else if(table==='clients'){ const i=_db.clients.findIndex(r=>r.email===obj.email); if(i>=0) _db.clients[i]={..._db.clients[i],...obj}; else _db.clients.push({...obj}); }
+      return Promise.resolve({ data:[obj], error:null });
+    },
+    then(res){ res({ data: rows, error:null }); }
+  };
+  return api;
+}
+const supabase = { from:_q, auth:{ getUser:async()=>({data:{user:_user}}), signOut:async()=>{ alert('Démo — déconnexion simulée'); } } };
+async function requireSubscription(){
+  return { user:_user, subscription:{ plan:'online_transformation', current_period_start:'2026-06-01', current_period_end:'2026-09-01', statut:'active' } };
+}
+// ===== fin mock =====
+
+
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const toast = (msg) => { const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1900); };
+const esc = (s) => (s??'').toString().replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const state = { user:null, sub:null, client:null, programme:null, workouts:[], week:1, weights:[], chart:null };
+
+// ---------- bootstrap ----------
+(async () => {
+  /* SW off in demo */
+  const gate = await requireSubscription();
+  if (!gate) return;                 // redirected
+  state.user = gate.user; state.sub = gate.subscription;
+
+  const { data: client } = await supabase.from('clients').select('*').eq('email', state.user.email).maybeSingle();
+  state.client = client;
+
+  const { data: w } = await supabase.from('suivi_poids').select('*').eq('user_id', state.user.id).order('date', { ascending: false }).limit(60);
+  state.weights = w || [];
+
+  $('#loading').style.display = 'none';
+  $('#shell').style.display = 'block';
+
+  // Onboarding required if no objective recorded yet
+  if (!client || !client.objectif) { showOnboarding(); }
+  else { await loadProgramme(); route(); }
+
+  window.addEventListener('hashchange', route);
+  $('#logout').onclick = async () => { await supabase.auth.signOut(); location.href = '/'; };
+  $('#w-add').onclick = addWeight;
+  $('#w-date').value = new Date().toISOString().slice(0,10);
+})();
+
+// ---------- routing ----------
+function route() {
+  if ($('#v-onboarding').classList.contains('active')) return; // stay in onboarding
+  const tab = (location.hash.replace('#','') || 'accueil');
+  $$('.view').forEach(v => v.classList.remove('active'));
+  const view = $('#v-'+tab) || $('#v-accueil');
+  view.classList.add('active');
+  $$('.bottomnav a').forEach(a => a.classList.toggle('active', a.dataset.tab===tab));
+  if (tab==='accueil') renderHome();
+  if (tab==='programme') renderProgramme();
+  if (tab==='suivi') renderSuivi();
+  if (tab==='profil') renderProfil();
+}
+
+// ---------- data ----------
+async function loadProgramme() {
+  const pid = state.client?.programme_id;
+  if (!pid) return;
+  const { data: prog } = await supabase.from('programmes').select('*').eq('id', pid).maybeSingle();
+  state.programme = prog;
+  state.week = state.client?.current_week || 1;
+  const { data: wk } = await supabase.from('programme_workouts').select('*').eq('programme_id', pid)
+    .order('day_number', { ascending: true });
+  state.workouts = wk || [];
+}
+
+// ---------- HOME ----------
+function renderHome() {
+  const prenom = state.client?.prenom || state.user.email.split('@')[0];
+  $('#hello').textContent = `Salut ${prenom} 💪`;
+  const planName = ({online_essentiel:'Essentiel',online_transformation:'Transformation',online_premium:'Premium'})[state.sub.plan] || state.sub.plan || 'Coaching online';
+  const end = state.sub.current_period_end ? new Date(state.sub.current_period_end).toLocaleDateString('fr-FR') : '—';
+  $('#sub-status').innerHTML = `Formule <b style="color:var(--ink)">${esc(planName)}</b> · prochaine échéance ${end}`;
+
+  const last = state.weights[0];
+  $('#home-stats').innerHTML = `
+    <div class="mini"><div class="k">Objectif</div><div class="v" style="font-size:1.1rem">${esc(state.client?.objectif||'—')}</div></div>
+    <div class="mini"><div class="k">Niveau</div><div class="v" style="font-size:1.1rem">${esc(state.client?.niveau||'—')}</div></div>
+    <div class="mini"><div class="k">Poids actuel</div><div class="v">${last? esc(last.poids)+' kg':'—'}</div></div>`;
+
+  const c = $('#home-program');
+  if (state.programme) {
+    c.innerHTML = `<div class="card"><div class="pill">Semaine ${state.week}</div>
+      <h3 style="margin:10px 0 4px">${esc(state.programme.titre)}</h3>
+      <p class="note">${esc(state.programme.description_courte||state.programme.objectif||'')}</p>
+      <a class="btn btn-accent btn-block" href="#programme" style="margin-top:12px">Voir mes séances →</a></div>`;
+  } else {
+    c.innerHTML = emptyProgram();
+  }
+}
+
+// ---------- PROGRAMME ----------
+let currentWorkout = null;
+function renderProgramme() {
+  const c = $('#prog-content');
+  if (!state.programme) { $('#prog-sub').textContent=''; c.innerHTML = emptyProgram(); return; }
+  $('#prog-sub').textContent = state.programme.titre;
+
+  if (currentWorkout) { renderWorkoutDetail(currentWorkout); return; }
+
+  // group workouts by day_number (unique séances)
+  const seen = new Map();
+  state.workouts.forEach(w => { if(!seen.has(w.day_number)) seen.set(w.day_number, w); });
+  const days = [...seen.values()].sort((a,b)=>a.day_number-b.day_number);
+
+  if (!days.length) { c.innerHTML = `<div class="empty"><div class="ic">📝</div><p>Aucune séance pour l'instant. Sarah finalise ton programme.</p></div>`; return; }
+
+  c.innerHTML = `<div class="weekbar" id="weekbar"></div>` + days.map(w => `
+    <div class="list-item" data-day="${w.day_number}">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="day">J${w.day_number}</div>
+        <div><div style="font-weight:700">${esc(w.name||('Séance '+w.day_number))}</div>
+        <div class="note">${esc(w.description||'')}</div></div>
+      </div><div style="color:var(--accent);font-size:1.4rem">›</div>
+    </div>`).join('');
+
+  // week selector
+  const weeks = state.programme.duree_semaines || Math.max(1, ...state.workouts.map(w=>w.week_number||1));
+  const wb = $('#weekbar');
+  wb.innerHTML = Array.from({length:weeks}, (_,i)=>i+1).map(n =>
+    `<button data-week="${n}" class="${n===state.week?'active':''}">Semaine ${n}</button>`).join('');
+  $$('#weekbar button').forEach(b => b.onclick = () => { state.week=+b.dataset.week; renderProgramme(); });
+  $$('.list-item').forEach(li => li.onclick = () => { currentWorkout = +li.dataset.day; renderProgramme(); });
+}
+
+async function renderWorkoutDetail(dayNumber) {
+  const c = $('#prog-content');
+  const w = state.workouts.find(x => x.day_number===dayNumber) || {};
+  c.innerHTML = `<button class="back" id="back">← Toutes les séances</button>
+    <div class="pill">Semaine ${state.week}</div>
+    <h2 style="margin:8px 0 14px">${esc(w.name||('Séance '+dayNumber))}</h2>
+    <div id="ex-list"><div class="empty"><div class="ic">⏳</div><p>Chargement…</p></div></div>`;
+  $('#back').onclick = () => { currentWorkout = null; renderProgramme(); };
+
+  // exercises for this programme + week + day
+  const { data: pes } = await supabase.from('programme_exercises').select('*')
+    .eq('programme_id', state.programme.id).eq('week_number', state.week).eq('day_number', dayNumber)
+    .order('order_index', { ascending: true });
+
+  let rows = pes || [];
+  // fallback: some programmes store exercises on week 1 only
+  if (!rows.length && state.week !== 1) {
+    const { data: pe1 } = await supabase.from('programme_exercises').select('*')
+      .eq('programme_id', state.programme.id).eq('week_number', 1).eq('day_number', dayNumber)
+      .order('order_index', { ascending: true });
+    rows = pe1 || [];
+  }
+  if (!rows.length) { $('#ex-list').innerHTML = `<div class="empty"><div class="ic">🛈</div><p>Aucun exercice pour cette séance/semaine.</p></div>`; return; }
+
+  const exIds = [...new Set(rows.map(r=>r.exercise_id).filter(Boolean))];
+  const { data: exs } = await supabase.from('exercises').select('*').in('id', exIds);
+  const exMap = Object.fromEntries((exs||[]).map(e=>[e.id,e]));
+
+  // existing logs
+  const peIds = rows.map(r=>r.id);
+  const { data: logs } = await supabase.from('workout_logs').select('*')
+    .eq('user_id', state.user.id).in('programme_exercise_id', peIds).eq('week_number', state.week);
+  const logMap = {};
+  (logs||[]).forEach(l => { logMap[`${l.programme_exercise_id}_${l.set_number}`] = l; });
+
+  $('#ex-list').innerHTML = rows.map(pe => {
+    const e = exMap[pe.exercise_id] || {};
+    const nSets = pe.sets || 3;
+    const yt = e.youtube_id;
+    const thumb = yt ? `https://img.youtube.com/vi/${esc(yt)}/hqdefault.jpg` : '';
+    const vid = yt ? `<a class="vid" href="https://www.youtube.com/watch?v=${esc(yt)}" target="_blank" rel="noopener"><img src="${thumb}" alt="" loading="lazy"><span class="play">▶</span></a>` : '';
+    const muscle = (e.tags && e.tags.length) ? e.tags[0] : '';
+    const repos = pe.rest_seconds ? `${pe.rest_seconds}s` : (e.repos||'');
+    const sets = Array.from({length:nSets}, (_,i)=>{
+      const sn=i+1; const lg = logMap[`${pe.id}_${sn}`] || {};
+      return `<div class="setrow" data-pe="${pe.id}" data-set="${sn}">
+        <div class="sn">S${sn}</div>
+        <input class="in-reps" inputmode="numeric" placeholder="${esc(pe.reps||'reps')}" value="${esc(lg.reps||'')}">
+        <input class="in-charge" inputmode="decimal" placeholder="kg" value="${esc(lg.charge||'')}">
+        <div class="check ${lg.done?'on':''}">✓</div>
+      </div>`;
+    }).join('');
+    return `<div class="ex">
+      <h3>${esc(e.name||'Exercice')}</h3>
+      <div class="meta">
+        ${muscle?`<span class="pill">${esc(muscle)}</span>`:''}
+        <span class="pill muted">${esc(pe.sets||3)} × ${esc(pe.reps||'—')}</span>
+        ${repos?`<span class="pill muted">repos ${esc(repos)}</span>`:''}
+        ${pe.charge?`<span class="pill muted">${esc(pe.charge)}</span>`:''}
+      </div>
+      ${vid}
+      ${e.consignes?`<div class="consigne">💡 ${esc(e.consignes)}</div>`:''}
+      ${pe.notes?`<div class="consigne">📝 ${esc(pe.notes)}</div>`:''}
+      <div class="sets">${sets}</div>
+    </div>`;
+  }).join('');
+
+  // wire logging (debounced save on blur / check toggle)
+  $$('.setrow').forEach(row => {
+    const pe = row.dataset.pe, sn = +row.dataset.set;
+    const reps = $('.in-reps', row), charge = $('.in-charge', row), chk = $('.check', row);
+    const save = async (done) => {
+      await supabase.from('workout_logs').upsert({
+        user_id: state.user.id, programme_exercise_id: pe, week_number: state.week, set_number: sn,
+        reps: reps.value || null, charge: charge.value || null, done: done,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,programme_exercise_id,week_number,set_number' });
+    };
+    reps.addEventListener('change', ()=>save(chk.classList.contains('on')));
+    charge.addEventListener('change', ()=>save(chk.classList.contains('on')));
+    chk.addEventListener('click', async ()=>{ chk.classList.toggle('on'); await save(chk.classList.contains('on')); toast('Série enregistrée'); });
+  });
+}
+
+function emptyProgram() {
+  return `<div class="empty"><div class="ic">🗓️</div>
+    <h3 style="font-family:var(--font-head)">Ton programme arrive</h3>
+    <p>Sarah construit ton programme sur mesure à partir de tes objectifs.<br>Tu recevras une notification dès qu'il est prêt.</p></div>`;
+}
+
+// ---------- SUIVI POIDS ----------
+async function renderSuivi() {
+  const { data } = await supabase.from('suivi_poids').select('*').eq('user_id', state.user.id).order('date', { ascending: true });
+  state.weights = (data||[]).slice().reverse(); // newest first for list/home
+  drawChart(data||[]);
+  const list = $('#w-list');
+  if (!data || !data.length) { list.innerHTML = `<div class="empty"><div class="ic">⚖️</div><p>Aucune mesure enregistrée. Ajoute ton premier poids ci-dessus.</p></div>`; return; }
+  list.innerHTML = state.weights.map(w => `<div class="list-item" style="cursor:default">
+    <div><b>${esc(w.poids)} kg</b> <span class="note"> · ${new Date(w.date).toLocaleDateString('fr-FR')}</span>
+    ${w.note?`<div class="note">${esc(w.note)}</div>`:''}</div></div>`).join('');
+}
+
+function drawChart(rows) {
+  const ctx = $('#w-chart'); if (!window.Chart) return;
+  if (state.chart) state.chart.destroy();
+  state.chart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: rows.map(r=>new Date(r.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})),
+      datasets: [{ data: rows.map(r=>+r.poids), borderColor:'#ff6b4a', backgroundColor:'rgba(255,107,74,.15)',
+        fill:true, tension:.3, pointRadius:3, pointBackgroundColor:'#ff6b4a' }] },
+    options: { plugins:{legend:{display:false}}, scales:{
+      x:{ grid:{color:'rgba(255,255,255,.06)'}, ticks:{color:'rgba(220,232,244,.6)'} },
+      y:{ grid:{color:'rgba(255,255,255,.06)'}, ticks:{color:'rgba(220,232,244,.6)'} } } }
+  });
+}
+
+async function addWeight() {
+  const poids = parseFloat($('#w-poids').value);
+  const date = $('#w-date').value || new Date().toISOString().slice(0,10);
+  if (!poids || poids<20 || poids>400) { toast('Poids invalide'); return; }
+  const { error } = await supabase.from('suivi_poids').insert({ user_id: state.user.id, poids, date });
+  if (error) { toast('Erreur'); return; }
+  $('#w-poids').value=''; toast('Poids ajouté'); renderSuivi();
+}
+
+// ---------- PROFIL ----------
+function renderProfil() {
+  const planName = ({online_essentiel:'Essentiel',online_transformation:'Transformation',online_premium:'Premium'})[state.sub.plan] || state.sub.plan;
+  const start = state.sub.current_period_start ? new Date(state.sub.current_period_start).toLocaleDateString('fr-FR') : '—';
+  const end = state.sub.current_period_end ? new Date(state.sub.current_period_end).toLocaleDateString('fr-FR') : '—';
+  $('#profil-content').innerHTML = `
+    <div class="card" style="margin-bottom:14px">
+      <div class="k" style="color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em">Compte</div>
+      <p style="margin:6px 0 0"><b>${esc(state.client?.prenom||'')} ${esc(state.client?.nom||'')}</b></p>
+      <p class="note" style="margin:2px 0 0">${esc(state.user.email)}</p>
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      <div class="k" style="color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em">Abonnement</div>
+      <p style="margin:6px 0 0">Formule <b>${esc(planName)}</b></p>
+      <p class="note" style="margin:2px 0 0">Période en cours : ${start} → ${end}</p>
+      <p class="note" style="margin:8px 0 0">Engagement 3 mois minimum. Résiliation possible ensuite — contacte Sarah.</p>
+    </div>
+    <button class="btn btn-ghost btn-block" id="edit-obj">Modifier mes objectifs</button>`;
+  $('#edit-obj').onclick = () => showOnboarding(true);
+}
+
+// ---------- ONBOARDING ----------
+const OB = [
+  { key:'objectif', q:'Quel est ton objectif principal ?', opts:['Perte de poids','Prise de muscle','Recomposition','Remise en forme','Performance'] },
+  { key:'genre', q:'Tu es…', opts:['Femme','Homme','Autre'] },
+  { key:'niveau', q:'Ton niveau actuel ?', opts:['Débutant','Intermédiaire','Avancé'] },
+  { key:'jours', q:'Combien de séances par semaine ?', opts:['2','3','4','5+'] },
+  { key:'equipement', q:'De quel matériel disposes-tu ?', opts:['Maison (peu de matériel)','Maison équipée','Salle de sport'] },
+];
+let obStep = 0, obData = {}, obEdit = false;
+function showOnboarding(edit=false) {
+  obEdit = edit; obStep = 0; obData = edit ? { objectif:state.client?.objectif, genre:state.client?.genre, niveau:state.client?.niveau } : {};
+  $$('.view').forEach(v=>v.classList.remove('active'));
+  $('#v-onboarding').classList.add('active');
+  $('#bottomnav').style.display = edit ? 'flex' : 'none';
+  renderOb();
+}
+function renderOb() {
+  const root = $('#ob-root');
+  if (obStep >= OB.length) return finishOb();
+  const s = OB[obStep];
+  const pct = Math.round((obStep/OB.length)*100);
+  root.innerHTML = `
+    <div style="padding-top:28px"></div>
+    <div class="prog"><i style="width:${pct}%"></i></div>
+    <p class="eyebrow">Étape ${obStep+1} / ${OB.length}</p>
+    <h1 style="font-size:1.6rem;margin:6px 0 18px">${s.q}</h1>
+    <div class="opts">${s.opts.map(o=>`<div class="opt ${obData[s.key]===o?'sel':''}" data-v="${esc(o)}">${esc(o)}</div>`).join('')}</div>
+    <div style="display:flex;gap:10px;margin-top:22px">
+      ${obStep>0?'<button class="btn btn-ghost" id="ob-back">Retour</button>':''}
+      <button class="btn btn-accent btn-block" id="ob-next">${obStep===OB.length-1?'Terminer':'Continuer'}</button>
+    </div>`;
+  $$('.opt').forEach(o => o.onclick = () => { obData[s.key]=o.dataset.v; $$('.opt').forEach(x=>x.classList.remove('sel')); o.classList.add('sel'); });
+  $('#ob-next').onclick = () => { if(!obData[s.key]){ toast('Choisis une option'); return; } obStep++; renderOb(); };
+  if ($('#ob-back')) $('#ob-back').onclick = () => { obStep--; renderOb(); };
+}
+async function finishOb() {
+  const root = $('#ob-root');
+  root.innerHTML = `<div class="empty" style="padding-top:60px"><div class="ic">⏳</div><p>Enregistrement…</p></div>`;
+  const payload = {
+    email: state.user.email,
+    prenom: state.client?.prenom || (state.user.user_metadata?.full_name || '').split(' ')[0] || null,
+    objectif: obData.objectif, niveau: obData.niveau, genre: obData.genre,
+    statut: state.client?.statut || 'abonne',
+    notes: JSON.stringify({ jours_semaine: obData.jours, equipement: obData.equipement, source:'pwa_onboarding', updated: new Date().toISOString() }),
+    updated_at: new Date().toISOString()
+  };
+  const { error } = await supabase.from('clients').upsert(payload, { onConflict: 'email' });
+  if (error) { root.innerHTML = `<div class="empty"><div class="ic">⚠️</div><p>Erreur : ${esc(error.message)}</p><button class="btn btn-accent" onclick="location.reload()">Réessayer</button></div>`; return; }
+  const { data: client } = await supabase.from('clients').select('*').eq('email', state.user.email).maybeSingle();
+  state.client = client;
+  await loadProgramme();
+  $('#bottomnav').style.display = 'flex';
+  $('#v-onboarding').classList.remove('active');
+  location.hash = '#accueil'; route();
+  toast(obEdit ? 'Objectifs mis à jour' : 'Bienvenue ! 💪');
+}
+</script>
+</body>
+</html>

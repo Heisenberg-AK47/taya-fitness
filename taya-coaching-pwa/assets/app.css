@@ -1,0 +1,107 @@
+/* Taya Fitness — Coaching Online · Shared theme
+ * Charte identique au site tayafitness.com : navy #0d1b2a + accent orange #ff6b4a. */
+:root {
+  --bg:        #0d1b2a;
+  --bg-2:      #0a1628;
+  --card:      #16273a;
+  --card-2:    #122033;
+  --ink:       #f0f4f8;
+  --muted:     rgba(220,232,244,.6);
+  --muted-2:   rgba(220,232,244,.4);
+  --line:      rgba(255,255,255,.08);
+  --accent:    #ff6b4a;
+  --accent-2:  #e5522f;
+  --gold:      #c9a84c;
+  --good:      #3ecf8e;
+  --danger:    #ff6b6b;
+  --grad:      linear-gradient(135deg, #ff6b4a 0%, #e5522f 100%);
+  --radius:    14px;
+  --radius-sm: 10px;
+  --shadow:    0 10px 40px rgba(0,0,0,.35);
+  --font:      'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-head: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+a { color: inherit; text-decoration: none; }
+.muted { color: var(--muted); }
+.accent { color: var(--accent); }
+.gold { color: var(--gold); }
+.center { text-align: center; }
+
+.container { width: min(1080px, 92vw); margin-inline: auto; }
+.section { padding: 56px 0; }
+
+h1, h2, h3 { font-family: var(--font-head); font-weight: 800; letter-spacing: -.01em; line-height: 1.1; margin: 0 0 .4em; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.8rem); }
+h2 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 700; }
+h3 { font-size: 1.05rem; }
+.eyebrow { color: var(--accent); font-weight: 700; letter-spacing: .14em; text-transform: uppercase; font-size: .78rem; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  font-weight: 600; font-size: 1rem; padding: 15px 32px; border-radius: var(--radius-sm);
+  border: 0; cursor: pointer; transition: transform .15s ease, box-shadow .2s ease, opacity .2s;
+  font-family: var(--font);
+}
+.btn:active { transform: translateY(1px); }
+.btn-accent { background: var(--grad); color: #fff; box-shadow: 0 8px 24px rgba(255,107,74,.25); }
+.btn-accent:hover { opacity: .94; }
+.btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.btn-ghost:hover { border-color: var(--accent); }
+.btn-block { width: 100%; }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line); border-radius: var(--radius); padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+/* Pricing */
+.plans { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); align-items: stretch; }
+.plan { position: relative; display: flex; flex-direction: column; }
+.plan h3 { font-size: .95rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.plan .price { font-size: 2.6rem; font-weight: 800; color: var(--ink); font-family: var(--font-head); }
+.plan .price span { font-size: 1rem; color: var(--muted); font-weight: 600; }
+.plan ul { list-style: none; padding: 0; margin: 16px 0 22px; display: grid; gap: 10px; }
+.plan li { padding-left: 26px; position: relative; color: var(--ink); font-size: .95rem; }
+.plan li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: 800; }
+.plan .cta { margin-top: auto; }
+.plan.featured { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 14px 40px rgba(255,107,74,.18); }
+.badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--grad); color: #fff; font-size: .72rem; font-weight: 700;
+  padding: 5px 14px; border-radius: 999px; text-transform: uppercase; letter-spacing: .06em; white-space: nowrap;
+}
+
+/* Feature grid */
+.grid { display: grid; gap: 18px; }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.grid-5 { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+.note { font-size: .82rem; color: var(--muted); }
+.hr { height: 1px; background: var(--line); border: 0; margin: 24px 0; }
+
+/* Forms */
+.field { display: grid; gap: 6px; margin-bottom: 14px; }
+.field label { font-size: .85rem; color: var(--muted); font-weight: 600; }
+.field input, .field select, .field textarea {
+  background: var(--card-2); border: 1px solid var(--line); color: var(--ink);
+  border-radius: var(--radius-sm); padding: 13px 14px; font-size: 1rem; font-family: inherit; width: 100%;
+}
+.field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,107,74,.18); }
+.alert { padding: 12px 14px; border-radius: var(--radius-sm); font-size: .9rem; margin-bottom: 14px; }
+.alert-error { background: rgba(255,107,107,.12); border: 1px solid var(--danger); color: #ffc2c2; }
+.alert-ok { background: rgba(62,207,142,.12); border: 1px solid var(--good); color: #b6f0d5; }
