@@ -4127,7 +4127,8 @@ function ClientsOnline() {
       h('div',{style:{background:BG2,border:`1px solid ${BORDER}`,borderRadius:20,width:400,height:500,display:'flex',flexDirection:'column',overflow:'hidden'}},
         // Chat header
         h('div',{style:{padding:'16px 20px',borderBottom:`1px solid ${BORDER}`,display:'flex',alignItems:'center',gap:12}},
-          h('div',{style:{width:36,height:36,borderRadius:'50%',background:ACC,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700}}, (chatOpen.full_name||'?').charAt(0).toUpperCash('div',{style:{fontSize:14,fontWeight:700}},chatOpen.full_name||chatOpen.email),,fontWeight:700}}),chatOpen.full_name||chatOpen.email,
+          h('div',{style:{width:36,height:36,borderRadius:'50%',background:ACC,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700}}, (chatOpen.full_name||'?').charAt(0).toUpperCase()),
+              h('div',{style:{fontSize:14,fontWeight:700}},chatOpen.full_name||chatOpen.email),
             h('div',{style:{fontSize:11,color:MUT}},chatOpen.email)
           ),
           h('button',{onClick:()=>setChatOpen(null),style:{background:'transparent',border:'none',color:MUT,fontSize:20,cursor:'pointer'}}, '×')
