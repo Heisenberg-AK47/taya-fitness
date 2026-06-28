@@ -4133,8 +4133,7 @@ function ClientsOnline() {
               h('div',{style:{fontSize:14,fontWeight:700}},chatOpen.full_name||chatOpen.email),
             h('div',{style:{fontSize:11,color:MUT}},chatOpen.email)
           ),
-          h('button',{onClick:()=>setChatOpen(null),style:{background:'transparent',border:'none',color:MUT,fontSize:20,cursor:'pointer'}}, '×')
-        ),
+          h('button',{onClick:()=>setChatOpen(null),style:{background:'transparent',border:'none',color:MUT,fontSize:20,cursor:'pointer'}}, '×'),
         // Messages
         h('div',{id:'co-msgs',style:{flex:1,overflowY:'auto',padding:'16px 20px',display:'flex',flexDirection:'column',gap:10}},
           messages.length===0 ? h('div',{style:{color:MUT,fontSize:13,textAlign:'center',marginTop:40}},'Pas encore de messages') :
