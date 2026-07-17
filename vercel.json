@@ -37,14 +37,6 @@
       "destination": "/reservation.html"
     },
     {
-      "source": "/admin",
-      "destination": "/admin.html"
-    },
-    {
-      "source": "/crm",
-      "destination": "/crm.html"
-    },
-    {
       "source": "/plans",
       "destination": "/plans.html"
     }
@@ -71,6 +63,16 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/crm",
+      "destination": "https://crm.tayafitness.com",
+      "permanent": true
+    },
+    {
+      "source": "/admin",
+      "destination": "https://crm.tayafitness.com/admin",
+      "permanent": true
+    },
     {
       "source": "/webinar-registration",
       "destination": "/offres",
