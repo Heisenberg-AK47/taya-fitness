@@ -216,8 +216,8 @@ function renderHome() {
 
   const last = state.weights[0];
   $('#home-stats').innerHTML = `
-    <div class="mini"><div class="k">Objectif</div><div class="v" style="font-size:1.1rem">${esc(state.client?.objectif||'—')}</div></div>
-    <div class="mini"><div class="k">Niveau</div><div class="v" style="font-size:1.1rem">${esc(state.client?.niveau||'—')}</div></div>
+    <div class="mini"><div class="k">Objectif</div><div class="v" style="font-size:1.1rem">${esc(pretty(state.client?.objectif))}</div></div>
+    <div class="mini"><div class="k">Niveau</div><div class="v" style="font-size:1.1rem">${esc(pretty(state.client?.niveau))}</div></div>
     <div class="mini"><div class="k">Poids actuel</div><div class="v">${last? esc(last.poids)+' kg':'—'}</div></div>`;
 
   const c = $('#home-program');
@@ -412,13 +412,22 @@ function renderProfil() {
 }
 
 // ---------- ONBOARDING ----------
+// Vocabulaire canonique unifié (mêmes codes que l'app mobile) : on STOCKE des codes, on AFFICHE des libellés.
 const OB = [
-  { key:'objectif', q:'Quel est ton objectif principal ?', opts:['Perte de poids','Prise de muscle','Recomposition','Remise en forme','Performance'] },
-  { key:'genre', q:'Tu es…', opts:['Femme','Homme','Autre'] },
-  { key:'niveau', q:'Ton niveau actuel ?', opts:['Débutant','Intermédiaire','Avancé'] },
-  { key:'jours', q:'Combien de séances par semaine ?', opts:['2','3','4','5+'] },
-  { key:'equipement', q:'De quel matériel disposes-tu ?', opts:['Maison (peu de matériel)','Maison équipée','Salle de sport'] },
+  { key:'objectif', q:'Quel est ton objectif principal ?', opts:[
+    {v:'perdre_du_poids', l:'Perte de poids'}, {v:'prendre_du_muscle', l:'Prise de muscle'},
+    {v:'recomposition', l:'Recomposition'}, {v:'se_mettre_en_forme', l:'Remise en forme'},
+    {v:'performance', l:'Performance'} ] },
+  { key:'genre', q:'Tu es…', opts:[{v:'femme',l:'Femme'},{v:'homme',l:'Homme'},{v:'autre',l:'Autre'}] },
+  { key:'niveau', q:'Ton niveau actuel ?', opts:[{v:'debutant',l:'Débutant'},{v:'intermediaire',l:'Intermédiaire'},{v:'avance',l:'Avancé'}] },
+  { key:'jours', q:'Combien de séances par semaine ?', opts:[{v:'2',l:'2'},{v:'3',l:'3'},{v:'4',l:'4'},{v:'5+',l:'5+'}] },
+  { key:'equipement', q:'De quel matériel disposes-tu ?', opts:[
+    {v:'maison_leger', l:'Maison (peu de matériel)'}, {v:'maison_equipee', l:'Maison équipée'},
+    {v:'salle', l:'Salle de sport'} ] },
 ];
+// code -> libellé lisible pour l'affichage (tolère aussi les anciennes valeurs déjà en clair)
+const OB_LABELS = Object.fromEntries(OB.flatMap(s => s.opts.map(o => [o.v, o.l])));
+const pretty = (val) => val ? (OB_LABELS[val] || val) : '—';
 let obStep = 0, obData = {}, obEdit = false;
 function showOnboarding(edit=false) {
   obEdit = edit; obStep = 0; obData = edit ? { objectif:state.client?.objectif, genre:state.client?.genre, niveau:state.client?.niveau } : {};
@@ -437,7 +446,7 @@ function renderOb() {
     <div class="prog"><i style="width:${pct}%"></i></div>
     <p class="eyebrow">Étape ${obStep+1} / ${OB.length}</p>
     <h1 style="font-size:1.6rem;margin:6px 0 18px">${s.q}</h1>
-    <div class="opts">${s.opts.map(o=>`<div class="opt ${obData[s.key]===o?'sel':''}" data-v="${esc(o)}">${esc(o)}</div>`).join('')}</div>
+    <div class="opts">${s.opts.map(o=>`<div class="opt ${obData[s.key]===o.v?'sel':''}" data-v="${esc(o.v)}">${esc(o.l)}</div>`).join('')}</div>
     <div style="display:flex;gap:10px;margin-top:22px">
       ${obStep>0?'<button class="btn btn-ghost" id="ob-back">Retour</button>':''}
       <button class="btn btn-accent btn-block" id="ob-next">${obStep===OB.length-1?'Terminer':'Continuer'}</button>
