@@ -245,7 +245,7 @@ function renderProgramme() {
   state.workouts.forEach(w => { if(!seen.has(w.day_number)) seen.set(w.day_number, w); });
   const days = [...seen.values()].sort((a,b)=>a.day_number-b.day_number);
 
-  if (!days.length) { c.innerHTML = `<div class="empty"><div class="ic">📝</div><p>Aucune séance pour l'instant. Sarah finalise ton programme.</p></div>`; return; }
+  if (!days.length) { c.innerHTML = `<div class="empty"><div class="ic">📝</div><p>Aucune séance pour l'instant.</p><button class="btn btn-accent" style="margin-top:14px" onclick="genProgram()">⚙️ (Re)générer mon programme</button></div>`; return; }
 
   c.innerHTML = `<div class="weekbar" id="weekbar"></div>` + days.map(w => `
     <div class="list-item" data-day="${w.day_number}">
@@ -351,9 +351,23 @@ async function renderWorkoutDetail(dayNumber) {
 
 function emptyProgram() {
   return `<div class="empty"><div class="ic">🗓️</div>
-    <h3 style="font-family:var(--font-head)">Ton programme arrive</h3>
-    <p>Sarah construit ton programme sur mesure à partir de tes objectifs.<br>Tu recevras une notification dès qu'il est prêt.</p></div>`;
+    <h3 style="font-family:var(--font-head)">Ton programme sur mesure</h3>
+    <p>Génère ton programme personnalisé à partir de ton objectif, ton niveau et ton matériel.</p>
+    <button class="btn btn-accent" style="margin-top:14px" onclick="genProgram()">⚙️ Générer mon programme</button></div>`;
 }
+
+// Génération à la demande (onboarding déjà fait / clients existants sans programme)
+window.genProgram = async () => {
+  if (!state.client?.id) { toast('Termine d’abord ton profil'); return; }
+  toast('Création de ton programme…');
+  const { error } = await supabase.rpc('generate_client_program', { p_client_id: state.client.id });
+  if (error) { toast('Erreur : ' + error.message); return; }
+  const { data: c } = await supabase.from('clients').select('*').eq('email', state.user.email).maybeSingle();
+  if (c) state.client = c;
+  await loadProgramme();
+  location.hash = '#programme'; route();
+  toast('Programme prêt ! 💪');
+};
 
 // ---------- SUIVI POIDS ----------
 async function renderSuivi() {
@@ -470,6 +484,18 @@ async function finishOb() {
   if (error) { root.innerHTML = `<div class="empty"><div class="ic">⚠️</div><p>Erreur : ${esc(error.message)}</p><button class="btn btn-accent" onclick="location.reload()">Réessayer</button></div>`; return; }
   const { data: client } = await supabase.from('clients').select('*').eq('email', state.user.email).maybeSingle();
   state.client = client;
+
+  // Génération automatique du programme sur mesure (à la première inscription seulement)
+  if (client && !client.programme_id) {
+    root.innerHTML = `<div class="empty" style="padding-top:60px"><div class="ic">⚙️</div><p>Création de ton programme sur mesure…<br>Ça prend quelques secondes 💪</p></div>`;
+    try {
+      const { error: genErr } = await supabase.rpc('generate_client_program', { p_client_id: client.id });
+      if (genErr) console.warn('génération programme:', genErr.message);
+      const { data: c2 } = await supabase.from('clients').select('*').eq('email', state.user.email).maybeSingle();
+      if (c2) state.client = c2;
+    } catch (e) { console.warn('génération programme (exception):', e); }
+  }
+
   await loadProgramme();
   $('#bottomnav').style.display = 'flex';
   $('#v-onboarding').classList.remove('active');
