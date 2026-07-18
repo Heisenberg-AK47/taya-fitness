@@ -44,12 +44,13 @@
   .pill { display: inline-block; font-size: .7rem; padding: 3px 9px; border-radius: 999px; background: rgba(255,107,74,.12); color: var(--accent); font-weight: 700; }
   .pill.muted { background: rgba(255,255,255,.06); color: var(--muted); }
 
-  .ex { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .ex { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px;
+    display: grid; grid-template-columns: minmax(0,1fr) auto; grid-template-areas: "main thumb" "sets thumb"; column-gap: 18px; }
   .ex h3 { margin: 0 0 4px; font-size: 1.05rem; }
   .ex .meta { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
-  .ex .ex-top { display: flex; gap: 14px; align-items: flex-start; }
-  .ex .ex-main { flex: 1; min-width: 0; }
-  .ex-thumb { flex-shrink: 0; width: 116px; aspect-ratio: 16/10; border-radius: 10px; overflow: hidden; position: relative; border: 1px solid var(--line); background: #000; cursor: pointer; padding: 0; transition: transform .12s, border-color .12s; }
+  .ex .ex-main { grid-area: main; min-width: 0; }
+  .ex .sets { grid-area: sets; }
+  .ex-thumb { grid-area: thumb; align-self: start; width: 210px; aspect-ratio: 16/10; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid var(--line); background: #000; cursor: pointer; padding: 0; transition: transform .12s, border-color .12s; }
   .ex-thumb:hover { transform: scale(1.03); border-color: var(--accent); }
   .ex-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: .92; }
   .ex-thumb .tplay { position: absolute; inset: 0; display: grid; place-items: center; font-size: 1rem; color: #fff; background: rgba(0,0,0,.18); }
@@ -81,7 +82,7 @@
   .sess-prog .lbl { font-size: .8rem; color: var(--muted); font-weight: 700; white-space: nowrap; }
   .ex .consigne { font-size: .86rem; color: var(--muted); margin: 6px 0; }
   .sets { display: grid; gap: 8px; margin-top: 10px; }
-  .setrow { display: grid; grid-template-columns: 38px 1fr 1fr 40px; gap: 8px; align-items: center; }
+  .setrow { display: grid; grid-template-columns: 34px minmax(0,132px) minmax(0,132px) 36px; gap: 8px; align-items: center; }
   .setrow label { font-size: .72rem; color: var(--muted); }
   .setrow input { background: var(--card-2); border: 1px solid var(--line); color: var(--ink); border-radius: 9px; padding: 9px; font-size: .9rem; width: 100%; }
   .setrow input:focus { outline: none; border-color: var(--accent); }
@@ -124,10 +125,9 @@
     .mini .k { font-size: .64rem; }
     .mini .v { font-size: 1.15rem; }
     .card { padding: 18px; }
-    .ex { padding: 13px; }
-    .ex .ex-top { gap: 10px; }
+    .ex { padding: 13px; column-gap: 12px; grid-template-areas: "main thumb" "sets sets"; }
     .ex h3 { font-size: .98rem; }
-    .ex-thumb { width: 94px; }
+    .ex-thumb { width: 112px; }
     .phase-h { font-size: 1rem; margin: 16px 0 10px; }
     .sess-prog .lbl { font-size: .72rem; }
     .setrow { grid-template-columns: 28px 1fr 1fr 32px; gap: 6px; }
@@ -388,32 +388,28 @@ async function renderWorkoutDetail(dayNumber) {
       </div>`;
     }).join('');
     return `<div class="ex">
-      <div class="ex-top">
-        <div class="ex-main">
-          <h3>${esc(e.name||'Exercice')}</h3>
-          <div class="meta">
-            ${muscle?`<span class="pill">${esc(muscle)}</span>`:''}
-            <span class="pill muted">${esc(pe.sets||3)} × ${esc(pe.reps||'—')}</span>
-            ${repos?`<span class="pill muted">repos ${esc(repos)}</span>`:''}
-          </div>
-          ${e.consignes?`<div class="consigne">💡 ${esc(e.consignes)}</div>`:''}
+      <div class="ex-main">
+        <h3>${esc(e.name||'Exercice')}</h3>
+        <div class="meta">
+          ${muscle?`<span class="pill">${esc(muscle)}</span>`:''}
+          <span class="pill muted">${esc(pe.sets||3)} × ${esc(pe.reps||'—')}</span>
+          ${repos?`<span class="pill muted">repos ${esc(repos)}</span>`:''}
         </div>
-        ${thumbHtml(e)}
+        ${e.consignes?`<div class="consigne">💡 ${esc(e.consignes)}</div>`:''}
       </div>
+      ${thumbHtml(e)}
       <div class="sets">${sets}</div>
     </div>`;
   };
   const renderWarm = (pe) => {
     const e = exMap[pe.exercise_id] || {};
     return `<div class="ex ex-warm">
-      <div class="ex-top">
-        <div class="ex-main">
-          <h3>${esc(e.name||'Exercice')}</h3>
-          <div class="meta"><span class="pill muted">${esc(pe.reps||'30-45 sec')}</span></div>
-          ${e.consignes?`<div class="consigne">💡 ${esc(e.consignes)}</div>`:''}
-        </div>
-        ${thumbHtml(e)}
+      <div class="ex-main">
+        <h3>${esc(e.name||'Exercice')}</h3>
+        <div class="meta"><span class="pill muted">${esc(pe.reps||'30-45 sec')}</span></div>
+        ${e.consignes?`<div class="consigne">💡 ${esc(e.consignes)}</div>`:''}
       </div>
+      ${thumbHtml(e)}
     </div>`;
   };
   const warm = rows.filter(r => r.phase === 'warmup');
