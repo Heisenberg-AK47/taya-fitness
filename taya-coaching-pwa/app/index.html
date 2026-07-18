@@ -55,6 +55,18 @@
   .phase-h span { font-weight: 600; font-size: .78rem; color: var(--muted); }
   .ex-warm { border-style: dashed; }
   .ex-warm h3 { font-size: 1rem; }
+  .ob-fields { display: grid; gap: 12px; }
+  .ob-field { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+  .ob-field > span { font-weight: 600; }
+  .ob-input { display: flex; align-items: center; gap: 6px; }
+  .ob-input input { width: 90px; background: var(--card-2); border: 1px solid var(--line); color: var(--ink); border-radius: 9px; padding: 9px 10px; font-size: 1rem; text-align: right; }
+  .ob-input input:focus { outline: none; border-color: var(--accent); }
+  .ob-input i { color: var(--muted); font-style: normal; font-size: .85rem; width: 26px; }
+  /* barre de progression de séance */
+  .sess-prog { display: flex; align-items: center; gap: 10px; margin: 2px 0 14px; }
+  .sess-prog .bar { flex: 1; height: 8px; background: var(--card-2); border-radius: 999px; overflow: hidden; }
+  .sess-prog .bar i { display: block; height: 100%; background: var(--grad); width: 0; transition: width .3s; }
+  .sess-prog .lbl { font-size: .8rem; color: var(--muted); font-weight: 700; white-space: nowrap; }
   .ex .consigne { font-size: .86rem; color: var(--muted); margin: 6px 0; }
   .sets { display: grid; gap: 8px; margin-top: 10px; }
   .setrow { display: grid; grid-template-columns: 38px 1fr 1fr 40px; gap: 8px; align-items: center; }
@@ -212,6 +224,19 @@ async function loadProgramme() {
 }
 
 // ---------- HOME ----------
+function previsionnel(cl) {
+  const obj = (cl?.objectif || '').toLowerCase();
+  let jours = 3;
+  try { jours = parseInt(JSON.parse(cl?.notes || '{}').jours_semaine) || 3; } catch (e) {}
+  if (/perdre|poids|perte/.test(obj)) {
+    const lo = jours >= 4 ? 3 : 2, hi = jours >= 4 ? 6 : (jours >= 3 ? 5 : 4);
+    return `À ~${jours} séances/semaine et avec une alimentation adaptée, vise une perte régulière de <b>${lo} à ${hi} kg en 8 semaines</b> — et une bien meilleure condition physique. La régularité fait tout. 💪`;
+  }
+  if (/muscle|masse/.test(obj)) return `En <b>8 à 12 semaines</b>, attends-toi à des muscles plus dessinés et <b>+10 à 20 % de force</b> sur tes exercices. Assez de protéines + régularité = résultats. 💪`;
+  if (/sculpt|recompo/.test(obj)) return `En <b>8 à 12 semaines</b> : une silhouette plus tonique, un tour de taille affiné et beaucoup plus d'énergie. 💪`;
+  if (/perf/.test(obj)) return `En <b>8 à 12 semaines</b> : une nette progression sur tes charges et ta puissance. Reste régulier et récupère bien. 💪`;
+  return `En <b>8 semaines</b> : plus d'endurance, moins d'essoufflement, un corps qui bouge mieux au quotidien. Le plus dur, c'était de commencer — et c'est fait ! 💪`;
+}
 function renderHome() {
   const prenom = state.client?.prenom || state.user.email.split('@')[0];
   $('#hello').textContent = `Salut ${prenom} 💪`;
@@ -226,13 +251,14 @@ function renderHome() {
     <div class="mini"><div class="k">Poids actuel</div><div class="v">${last? esc(last.poids)+' kg':'—'}</div></div>`;
 
   const c = $('#home-program');
+  const prevHtml = state.client?.objectif ? `<div class="card" style="margin-bottom:14px"><div class="pill">🎯 Ton prévisionnel</div><p style="margin:9px 0 0;line-height:1.5">${previsionnel(state.client)}</p></div>` : '';
   if (state.programme) {
-    c.innerHTML = `<div class="card"><div class="pill">Semaine ${state.week}</div>
+    c.innerHTML = prevHtml + `<div class="card"><div class="pill">Semaine ${state.week}</div>
       <h3 style="margin:10px 0 4px">${esc(state.programme.titre)}</h3>
       <p class="note">${esc(state.programme.description_courte||state.programme.objectif||'')}</p>
       <a class="btn btn-accent btn-block" href="#programme" style="margin-top:12px">Voir mes séances →</a></div>`;
   } else {
-    c.innerHTML = emptyProgram();
+    c.innerHTML = prevHtml + emptyProgram();
   }
 }
 
@@ -276,6 +302,7 @@ async function renderWorkoutDetail(dayNumber) {
   c.innerHTML = `<button class="back" id="back">← Toutes les séances</button>
     <div class="pill">Semaine ${state.week}</div>
     <h2 style="margin:8px 0 14px">${esc(w.name||('Séance '+dayNumber))}</h2>
+    <div class="sess-prog" id="sess-prog" style="display:none"><div class="bar"><i></i></div><span class="lbl"></span></div>
     <div id="ex-list"><div class="empty"><div class="ic">⏳</div><p>Chargement…</p></div></div>`;
   $('#back').onclick = () => { currentWorkout = null; renderProgramme(); };
 
@@ -362,7 +389,7 @@ async function renderWorkoutDetail(dayNumber) {
     };
     reps.addEventListener('change', ()=>save(chk.classList.contains('on')));
     charge.addEventListener('change', ()=>save(chk.classList.contains('on')));
-    chk.addEventListener('click', async ()=>{ chk.classList.toggle('on'); await save(chk.classList.contains('on')); toast('Série enregistrée'); });
+    chk.addEventListener('click', async ()=>{ chk.classList.toggle('on'); updateSessProg(); await save(chk.classList.contains('on')); toast('Série enregistrée'); });
   });
 
   // vidéos : lecture directement dans l'app au clic (lecteur YouTube intégré, sans quitter la page)
@@ -370,6 +397,17 @@ async function renderWorkoutDetail(dayNumber) {
     const id = v.dataset.yt;
     v.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1" title="Démonstration de l'exercice" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe>`;
   }, { once: true }));
+
+  updateSessProg();
+}
+function updateSessProg() {
+  const checks = $$('#ex-list .setrow .check');
+  const p = $('#sess-prog');
+  if (!p || !checks.length) return;
+  const done = checks.filter(c => c.classList.contains('on')).length;
+  p.style.display = 'flex';
+  $('.bar i', p).style.width = Math.round(done / checks.length * 100) + '%';
+  $('.lbl', p).textContent = done === checks.length ? '🎉 Séance terminée, bravo !' : `${done}/${checks.length} séries`;
 }
 
 function emptyProgram() {
@@ -457,7 +495,11 @@ const OB = [
     {v:'performance', l:'Performance'} ] },
   { key:'genre', q:'Tu es…', opts:[{v:'femme',l:'Femme'},{v:'homme',l:'Homme'},{v:'autre',l:'Autre'}] },
   { key:'niveau', q:'Ton niveau actuel ?', opts:[{v:'debutant',l:'Débutant'},{v:'intermediaire',l:'Intermédiaire'},{v:'avance',l:'Avancé'}] },
-  { key:'jours', q:'Combien de séances par semaine ?', opts:[{v:'2',l:'2'},{v:'3',l:'3'},{v:'4',l:'4'},{v:'5+',l:'5+'}] },
+  { key:'mesures', type:'fields', q:'Tes mesures — pour un programme et un objectif précis', fields:[
+    {k:'age', l:'Âge', ph:'ex. 30', suffix:'ans'},
+    {k:'poids', l:'Poids', ph:'ex. 72', suffix:'kg'},
+    {k:'taille', l:'Taille', ph:'ex. 175', suffix:'cm'} ] },
+  { key:'jours', q:'Combien de séances peux-tu faire par semaine, de façon réaliste ?', opts:[{v:'2',l:'2'},{v:'3',l:'3'},{v:'4',l:'4'},{v:'5+',l:'5+'}] },
   { key:'equipement', q:'De quel matériel disposes-tu ?', opts:[
     {v:'maison_leger', l:'Maison (peu de matériel)'}, {v:'maison_equipee', l:'Maison équipée'},
     {v:'salle', l:'Salle de sport'} ] },
@@ -469,7 +511,7 @@ const OB = [
     {v:'poignets',l:'Poignets'}, {v:'chevilles',l:'Chevilles'}, {v:'none',l:'Aucune'} ] },
 ];
 // code -> libellé lisible pour l'affichage (tolère aussi les anciennes valeurs déjà en clair)
-const OB_LABELS = Object.fromEntries(OB.flatMap(s => s.opts.map(o => [o.v, o.l])));
+const OB_LABELS = Object.fromEntries(OB.flatMap(s => (s.opts||[]).map(o => [o.v, o.l])));
 const pretty = (val) => val ? (OB_LABELS[val] || val) : '—';
 let obStep = 0, obData = {}, obEdit = false;
 function showOnboarding(edit=false) {
@@ -484,33 +526,43 @@ function renderOb() {
   if (obStep >= OB.length) return finishOb();
   const s = OB[obStep];
   const pct = Math.round((obStep/OB.length)*100);
+  const body = (s.type === 'fields')
+    ? `<div class="ob-fields">${s.fields.map(f=>`<label class="ob-field"><span>${esc(f.l)}</span><span class="ob-input"><input type="number" inputmode="numeric" data-k="${f.k}" placeholder="${esc(f.ph)}" value="${esc(obData[f.k]??'')}"><i>${esc(f.suffix)}</i></span></label>`).join('')}</div>
+       <p class="note" style="margin-top:10px">Facultatif — mais plus tu en dis, plus ton programme et ton prévisionnel sont précis.</p>`
+    : `<div class="opts">${s.opts.map(o=>{const sel=s.multi?((obData[s.key]||[]).includes(o.v)):(obData[s.key]===o.v);return `<div class="opt ${sel?'sel':''}" data-v="${esc(o.v)}">${esc(o.l)}</div>`;}).join('')}</div>
+       ${s.multi?'<p class="note" style="margin-top:8px">Plusieurs réponses possibles — ou « Aucune ».</p>':''}`;
   root.innerHTML = `
     <div style="padding-top:28px"></div>
     <div class="prog"><i style="width:${pct}%"></i></div>
     <p class="eyebrow">Étape ${obStep+1} / ${OB.length}</p>
     <h1 style="font-size:1.6rem;margin:6px 0 18px">${s.q}</h1>
-    <div class="opts">${s.opts.map(o=>{const sel=s.multi?((obData[s.key]||[]).includes(o.v)):(obData[s.key]===o.v);return `<div class="opt ${sel?'sel':''}" data-v="${esc(o.v)}">${esc(o.l)}</div>`;}).join('')}</div>
-    ${s.multi?'<p class="note" style="margin-top:8px">Plusieurs réponses possibles — ou « Aucune ».</p>':''}
+    ${body}
     <div style="display:flex;gap:10px;margin-top:22px">
       ${obStep>0?'<button class="btn btn-ghost" id="ob-back">Retour</button>':''}
       <button class="btn btn-accent btn-block" id="ob-next">${obStep===OB.length-1?'Terminer':'Continuer'}</button>
     </div>`;
-  $$('.opt').forEach(o => o.onclick = () => {
-    if (s.multi) {
-      let arr = Array.isArray(obData[s.key]) ? obData[s.key].slice() : [];
-      const v = o.dataset.v;
-      if (v === 'none') arr = ['none'];
-      else { arr = arr.filter(x=>x!=='none'); arr = arr.includes(v) ? arr.filter(x=>x!==v) : [...arr, v]; }
-      obData[s.key] = arr;
-      $$('.opt').forEach(x => x.classList.toggle('sel', arr.includes(x.dataset.v)));
-    } else {
-      obData[s.key]=o.dataset.v; $$('.opt').forEach(x=>x.classList.remove('sel')); o.classList.add('sel');
-    }
-  });
+  if (s.type === 'fields') {
+    $$('.ob-field input').forEach(inp => inp.oninput = () => { obData[inp.dataset.k] = inp.value; });
+  } else {
+    $$('.opt').forEach(o => o.onclick = () => {
+      if (s.multi) {
+        let arr = Array.isArray(obData[s.key]) ? obData[s.key].slice() : [];
+        const v = o.dataset.v;
+        if (v === 'none') arr = ['none'];
+        else { arr = arr.filter(x=>x!=='none'); arr = arr.includes(v) ? arr.filter(x=>x!==v) : [...arr, v]; }
+        obData[s.key] = arr;
+        $$('.opt').forEach(x => x.classList.toggle('sel', arr.includes(x.dataset.v)));
+      } else {
+        obData[s.key]=o.dataset.v; $$('.opt').forEach(x=>x.classList.remove('sel')); o.classList.add('sel');
+      }
+    });
+  }
   $('#ob-next').onclick = () => {
-    const val = obData[s.key];
-    const ok = s.multi ? (Array.isArray(val) && val.length>0) : !!val;
-    if(!ok){ toast(s.multi ? 'Choisis au moins une option' : 'Choisis une option'); return; }
+    if (s.type !== 'fields') {
+      const val = obData[s.key];
+      const ok = s.multi ? (Array.isArray(val) && val.length>0) : !!val;
+      if(!ok){ toast(s.multi ? 'Choisis au moins une option' : 'Choisis une option'); return; }
+    }
     obStep++; renderOb();
   };
   if ($('#ob-back')) $('#ob-back').onclick = () => { obStep--; renderOb(); };
@@ -520,10 +572,12 @@ async function finishOb() {
   root.innerHTML = `<div class="empty" style="padding-top:60px"><div class="ic">⏳</div><p>Enregistrement…</p></div>`;
   const zones = (obData.zones||[]).filter(z=>z && z!=='none');
   const contraintes = (obData.contraintes||[]).filter(c=>c && c!=='none');
+  const numOr = (v) => { const n = parseFloat(String(v ?? '').replace(',', '.')); return isFinite(n) ? n : null; };
   const payload = {
     email: state.user.email,
     prenom: state.client?.prenom || (state.user.user_metadata?.full_name || '').split(' ')[0] || null,
     objectif: obData.objectif, niveau: obData.niveau, genre: obData.genre,
+    age: numOr(obData.age), poids_kg: numOr(obData.poids), taille_cm: numOr(obData.taille),
     zones_cibles: zones, contraintes: contraintes,
     statut: state.client?.statut || 'abonne',
     notes: JSON.stringify({ jours_semaine: obData.jours, equipement: obData.equipement, source:'pwa_onboarding', updated: new Date().toISOString() }),
