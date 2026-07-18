@@ -37,6 +37,7 @@ function navbarTemplate() {
         <li><a href="/" data-page="index">Accueil</a></li>
         <li><a href="/programmes" data-page="programmes">Programmes</a></li>
         <li><a href="/offres" data-page="offres">Offres</a></li>
+        <li><a href="/coaching-en-ligne" data-page="coaching-en-ligne">Coaching en ligne</a></li>
         <li><a href="/reservation" data-page="reservation">Réserver</a></li>
         <li><a href="/contact" data-page="contact">À propos</a></li>
       </ul>
@@ -66,6 +67,7 @@ function navbarTemplate() {
       <a href="/">Accueil</a>
       <a href="/programmes">Programmes</a>
       <a href="/offres">Offres</a>
+      <a href="/coaching-en-ligne">Coaching en ligne</a>
       <a href="/reservation">Réserver</a>
       <a href="/contact">À propos</a>
       <div class="mobile-actions" id="mobile-auth-zone"></div>

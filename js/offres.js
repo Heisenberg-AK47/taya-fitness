@@ -34,6 +34,7 @@ async function loadPlans() {
   const { data: plans, error } = await supabase
     .from('subscription_plans')
     .select('*')
+    .contains('coaching_modes', ['en_salle'])
     .order('price', { ascending: true });
 
   if (error) {

@@ -1,0 +1,110 @@
+/* ============================================================
+   COACHING-ONLINE.CSS — Page de vente du coaching 100% en ligne
+   ============================================================ */
+
+/* ── HERO ─────────────────────────────────────────────────── */
+.co-hero {
+  position: relative;
+  padding: 110px 0 84px;
+  background:
+    radial-gradient(1000px 460px at 50% -10%, rgba(255,107,74,0.16), transparent 65%),
+    linear-gradient(180deg, var(--black-soft) 0%, var(--black) 100%);
+  border-bottom: 1px solid var(--black-border);
+  overflow: hidden;
+  text-align: center;
+}
+.co-hero-in { position: relative; z-index: 2; max-width: 760px; }
+.co-label {
+  display: inline-block; font-family: var(--font-body); font-size: 12px; font-weight: 700;
+  letter-spacing: .18em; text-transform: uppercase; color: var(--gold);
+  background: rgba(255,107,74,0.10); border: 1px solid rgba(255,107,74,0.28);
+  padding: 7px 16px; border-radius: 999px; margin-bottom: 22px;
+}
+.co-hero h1 {
+  font-family: var(--font-title); font-weight: 800; line-height: 1.05;
+  font-size: clamp(2.4rem, 6.5vw, 4.2rem); margin: 0 0 18px; letter-spacing: -.02em;
+}
+.co-hero h1 em { font-style: normal; color: var(--gold); }
+.co-hero-sub {
+  font-size: clamp(1rem, 2.2vw, 1.15rem); color: var(--white-muted);
+  line-height: 1.7; margin: 0 auto 30px; max-width: 620px;
+}
+.co-hero-sub strong { color: var(--white); font-weight: 600; }
+.co-hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.co-hero-note { margin: 24px 0 0; font-size: 13px; color: var(--white-muted); }
+.co-hero-note strong { color: var(--gold); }
+
+/* ── ÉTAPES ───────────────────────────────────────────────── */
+.co-steps { display: grid; gap: 22px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.co-step {
+  position: relative; background: var(--black-card); border: 1px solid var(--black-border);
+  border-radius: var(--radius-lg); padding: 30px 26px 26px; transition: border-color .2s, transform .2s;
+}
+.co-step:hover { border-color: rgba(255,107,74,0.35); transform: translateY(-3px); }
+.co-step-num {
+  width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center;
+  font-family: var(--font-title); font-weight: 800; font-size: 1.15rem; color: #fff;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  box-shadow: var(--shadow-gold); margin-bottom: 16px;
+}
+.co-step h3 { font-family: var(--font-title); font-size: 1.12rem; margin: 0 0 8px; }
+.co-step p { margin: 0; color: var(--white-muted); font-size: .94rem; line-height: 1.65; }
+
+/* ── FEATURES ─────────────────────────────────────────────── */
+.co-features-section { background: var(--black-soft); }
+.co-features { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.co-feature {
+  background: var(--black-card); border: 1px solid var(--black-border);
+  border-radius: var(--radius-lg); padding: 24px 22px;
+}
+.co-ic { font-size: 1.7rem; display: block; margin-bottom: 10px; }
+.co-feature h4 { font-family: var(--font-title); font-size: 1rem; margin: 0 0 7px; }
+.co-feature p { margin: 0; color: var(--white-muted); font-size: .89rem; line-height: 1.6; }
+
+/* ── FORMULES ─────────────────────────────────────────────── */
+.co-formules-sub {
+  margin: 16px auto 0; max-width: 620px; color: var(--white-muted);
+  font-size: .95rem; line-height: 1.65;
+}
+.co-formules-sub strong { color: var(--gold); }
+.co-secure { margin: 10px 0 0; text-align: center; font-size: 11.5px; color: var(--white-muted); }
+
+/* ── FAQ ──────────────────────────────────────────────────── */
+.co-faq-section { background: var(--black-soft); }
+.co-faq { max-width: 780px; margin: 0 auto; display: grid; gap: 12px; }
+.co-faq-item {
+  background: var(--black-card); border: 1px solid var(--black-border);
+  border-radius: var(--radius); padding: 0 22px; transition: border-color .2s;
+}
+.co-faq-item[open] { border-color: rgba(255,107,74,0.3); }
+.co-faq-item summary {
+  cursor: pointer; list-style: none; padding: 18px 0; font-weight: 600;
+  font-size: .98rem; display: flex; justify-content: space-between; align-items: center; gap: 14px;
+}
+.co-faq-item summary::-webkit-details-marker { display: none; }
+.co-faq-item summary::after {
+  content: '+'; color: var(--gold); font-size: 1.4rem; font-weight: 400; line-height: 1; flex-shrink: 0;
+}
+.co-faq-item[open] summary::after { content: '−'; }
+.co-faq-item p {
+  margin: 0 0 20px; color: var(--white-muted); font-size: .93rem; line-height: 1.7;
+}
+.co-faq-item p a { color: var(--gold); text-decoration: underline; }
+
+/* ── CTA FINAL ────────────────────────────────────────────── */
+.co-final {
+  background: radial-gradient(700px 320px at 50% 120%, rgba(255,107,74,0.18), transparent 70%), var(--black);
+  border-top: 1px solid var(--black-border);
+}
+.co-final-in { text-align: center; max-width: 620px; }
+.co-final-in h2 { font-family: var(--font-title); margin: 0 0 12px; }
+.co-final-in p { color: var(--white-muted); margin: 0 0 26px; line-height: 1.7; }
+
+/* ── MOBILE ───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .co-hero { padding: 74px 0 58px; }
+  .co-hero-cta .btn { width: 100%; justify-content: center; }
+  .co-step { padding: 24px 20px 22px; }
+  .co-faq-item { padding: 0 16px; }
+  .co-faq-item summary { font-size: .93rem; padding: 15px 0; }
+}

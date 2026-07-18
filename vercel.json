@@ -37,6 +37,10 @@
       "destination": "/reservation.html"
     },
     {
+      "source": "/coaching-en-ligne",
+      "destination": "/coaching-en-ligne.html"
+    },
+    {
       "source": "/plans",
       "destination": "/plans.html"
     }
