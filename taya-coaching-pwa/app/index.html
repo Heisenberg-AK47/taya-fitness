@@ -108,6 +108,34 @@
     padding: 10px 18px; border-radius: 999px; font-weight: 700; font-size: .9rem; z-index: 80; opacity: 0; transition: opacity .25s; pointer-events: none; }
   .toast.show { opacity: 1; }
   canvas { max-width: 100%; }
+
+  /* ---------- Optimisations mobile ---------- */
+  /* Champs à 16px : empêche le zoom automatique iOS au focus */
+  .setrow input, .ob-input input { font-size: 16px; }
+  @media (max-width: 480px) {
+    main { padding-top: 12px; }
+    h2 { font-size: 1.4rem; }
+    .pagehead h1 { font-size: 1.45rem; }
+    .pagehead p { font-size: .85rem; }
+    .appbar-in { padding: 10px 0; }
+    .iconbtn { padding: 7px 11px; font-size: .82rem; }
+    .stat-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .mini { padding: 11px 10px; }
+    .mini .k { font-size: .64rem; }
+    .mini .v { font-size: 1.15rem; }
+    .card { padding: 18px; }
+    .ex { padding: 13px; }
+    .ex .ex-top { gap: 10px; }
+    .ex h3 { font-size: .98rem; }
+    .ex-thumb { width: 94px; }
+    .phase-h { font-size: 1rem; margin: 16px 0 10px; }
+    .sess-prog .lbl { font-size: .72rem; }
+    .setrow { grid-template-columns: 28px 1fr 1fr 32px; gap: 6px; }
+    .setrow input { padding: 9px 7px; }
+    .check { width: 30px; height: 30px; }
+    .weekbar button { padding: 6px 12px; font-size: .8rem; }
+    .vidmodal-head b { font-size: .95rem; }
+  }
 </style>
 </head>
 <body>
