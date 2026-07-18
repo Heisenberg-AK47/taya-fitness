@@ -438,6 +438,12 @@ const OB = [
   { key:'equipement', q:'De quel matériel disposes-tu ?', opts:[
     {v:'maison_leger', l:'Maison (peu de matériel)'}, {v:'maison_equipee', l:'Maison équipée'},
     {v:'salle', l:'Salle de sport'} ] },
+  { key:'zones', multi:true, q:'Des zones à mettre en avant ? (plusieurs choix possibles)', opts:[
+    {v:'glutes',l:'Fessiers'}, {v:'abs',l:'Abdos'}, {v:'arms',l:'Bras'}, {v:'legs',l:'Jambes'},
+    {v:'back',l:'Dos'}, {v:'shoulders',l:'Épaules'}, {v:'chest',l:'Pectoraux'}, {v:'none',l:'Aucune en particulier'} ] },
+  { key:'contraintes', multi:true, q:'Des sensibilités ou blessures à ménager ?', opts:[
+    {v:'genoux',l:'Genoux'}, {v:'dos',l:'Dos / lombaires'}, {v:'epaules',l:'Épaules'},
+    {v:'poignets',l:'Poignets'}, {v:'chevilles',l:'Chevilles'}, {v:'none',l:'Aucune'} ] },
 ];
 // code -> libellé lisible pour l'affichage (tolère aussi les anciennes valeurs déjà en clair)
 const OB_LABELS = Object.fromEntries(OB.flatMap(s => s.opts.map(o => [o.v, o.l])));
@@ -460,22 +466,42 @@ function renderOb() {
     <div class="prog"><i style="width:${pct}%"></i></div>
     <p class="eyebrow">Étape ${obStep+1} / ${OB.length}</p>
     <h1 style="font-size:1.6rem;margin:6px 0 18px">${s.q}</h1>
-    <div class="opts">${s.opts.map(o=>`<div class="opt ${obData[s.key]===o.v?'sel':''}" data-v="${esc(o.v)}">${esc(o.l)}</div>`).join('')}</div>
+    <div class="opts">${s.opts.map(o=>{const sel=s.multi?((obData[s.key]||[]).includes(o.v)):(obData[s.key]===o.v);return `<div class="opt ${sel?'sel':''}" data-v="${esc(o.v)}">${esc(o.l)}</div>`;}).join('')}</div>
+    ${s.multi?'<p class="note" style="margin-top:8px">Plusieurs réponses possibles — ou « Aucune ».</p>':''}
     <div style="display:flex;gap:10px;margin-top:22px">
       ${obStep>0?'<button class="btn btn-ghost" id="ob-back">Retour</button>':''}
       <button class="btn btn-accent btn-block" id="ob-next">${obStep===OB.length-1?'Terminer':'Continuer'}</button>
     </div>`;
-  $$('.opt').forEach(o => o.onclick = () => { obData[s.key]=o.dataset.v; $$('.opt').forEach(x=>x.classList.remove('sel')); o.classList.add('sel'); });
-  $('#ob-next').onclick = () => { if(!obData[s.key]){ toast('Choisis une option'); return; } obStep++; renderOb(); };
+  $$('.opt').forEach(o => o.onclick = () => {
+    if (s.multi) {
+      let arr = Array.isArray(obData[s.key]) ? obData[s.key].slice() : [];
+      const v = o.dataset.v;
+      if (v === 'none') arr = ['none'];
+      else { arr = arr.filter(x=>x!=='none'); arr = arr.includes(v) ? arr.filter(x=>x!==v) : [...arr, v]; }
+      obData[s.key] = arr;
+      $$('.opt').forEach(x => x.classList.toggle('sel', arr.includes(x.dataset.v)));
+    } else {
+      obData[s.key]=o.dataset.v; $$('.opt').forEach(x=>x.classList.remove('sel')); o.classList.add('sel');
+    }
+  });
+  $('#ob-next').onclick = () => {
+    const val = obData[s.key];
+    const ok = s.multi ? (Array.isArray(val) && val.length>0) : !!val;
+    if(!ok){ toast(s.multi ? 'Choisis au moins une option' : 'Choisis une option'); return; }
+    obStep++; renderOb();
+  };
   if ($('#ob-back')) $('#ob-back').onclick = () => { obStep--; renderOb(); };
 }
 async function finishOb() {
   const root = $('#ob-root');
   root.innerHTML = `<div class="empty" style="padding-top:60px"><div class="ic">⏳</div><p>Enregistrement…</p></div>`;
+  const zones = (obData.zones||[]).filter(z=>z && z!=='none');
+  const contraintes = (obData.contraintes||[]).filter(c=>c && c!=='none');
   const payload = {
     email: state.user.email,
     prenom: state.client?.prenom || (state.user.user_metadata?.full_name || '').split(' ')[0] || null,
     objectif: obData.objectif, niveau: obData.niveau, genre: obData.genre,
+    zones_cibles: zones, contraintes: contraintes,
     statut: state.client?.statut || 'abonne',
     notes: JSON.stringify({ jours_semaine: obData.jours, equipement: obData.equipement, source:'pwa_onboarding', updated: new Date().toISOString() }),
     updated_at: new Date().toISOString()
