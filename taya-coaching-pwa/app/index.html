@@ -344,7 +344,7 @@ async function renderWorkoutDetail(dayNumber) {
   const logMap = {};
   (logs||[]).forEach(l => { logMap[`${l.programme_exercise_id}_${l.set_number}`] = l; });
 
-  const thumbHtml = (e) => { const yt=e.youtube_id; if(!yt) return ''; return `<button class="ex-thumb" data-yt="${esc(yt)}" data-title="${esc(e.name||'')}" aria-label="Voir la vidéo"><img src="https://img.youtube.com/vi/${esc(yt)}/mqdefault.jpg" alt="" loading="lazy"><span class="tplay">▶</span></button>`; };
+  const thumbHtml = (e) => { const yt=e.youtube_id; if(!yt) return ''; return `<button class="ex-thumb" data-yt="${esc(yt)}" data-title="${esc(e.name||'')}" aria-label="Voir la vidéo"><img src="https://img.youtube.com/vi/${esc(yt)}/hqdefault.jpg" alt="" loading="lazy"><span class="tplay">▶</span></button>`; };
   const renderMain = (pe) => {
     const e = exMap[pe.exercise_id] || {};
     const nSets = pe.sets || 3;
