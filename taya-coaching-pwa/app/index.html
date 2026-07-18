@@ -50,6 +50,11 @@
   .ex .vid { display: block; position: relative; border-radius: 10px; overflow: hidden; margin: 10px 0; aspect-ratio: 16/9; background: #000; cursor: pointer; }
   .ex .vid img { width: 100%; height: 100%; object-fit: cover; opacity: .85; }
   .ex .vid .play { position: absolute; inset: 0; display: grid; place-items: center; font-size: 2.4rem; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
+  .phase-h { font-family: var(--font-head); font-weight: 800; font-size: 1.1rem; margin: 20px 0 12px; display: flex; align-items: baseline; gap: 8px; }
+  .phase-h:first-child { margin-top: 4px; }
+  .phase-h span { font-weight: 600; font-size: .78rem; color: var(--muted); }
+  .ex-warm { border-style: dashed; }
+  .ex-warm h3 { font-size: 1rem; }
   .ex .consigne { font-size: .86rem; color: var(--muted); margin: 6px 0; }
   .sets { display: grid; gap: 8px; margin-top: 10px; }
   .setrow { display: grid; grid-template-columns: 38px 1fr 1fr 40px; gap: 8px; align-items: center; }
@@ -300,12 +305,10 @@ async function renderWorkoutDetail(dayNumber) {
   const logMap = {};
   (logs||[]).forEach(l => { logMap[`${l.programme_exercise_id}_${l.set_number}`] = l; });
 
-  $('#ex-list').innerHTML = rows.map(pe => {
+  const vidHtml = (e) => { const yt=e.youtube_id; if(!yt) return ''; const thumb=`https://img.youtube.com/vi/${esc(yt)}/hqdefault.jpg`; return `<div class="vid" data-yt="${esc(yt)}"><img src="${thumb}" alt="" loading="lazy"><span class="play">▶</span></div>`; };
+  const renderMain = (pe) => {
     const e = exMap[pe.exercise_id] || {};
     const nSets = pe.sets || 3;
-    const yt = e.youtube_id;
-    const thumb = yt ? `https://img.youtube.com/vi/${esc(yt)}/hqdefault.jpg` : '';
-    const vid = yt ? `<div class="vid" data-yt="${esc(yt)}"><img src="${thumb}" alt="" loading="lazy"><span class="play">▶</span></div>` : '';
     const muscle = (e.tags && e.tags.length) ? e.tags[0] : '';
     const repos = pe.rest_seconds ? `${pe.rest_seconds}s` : (e.repos||'');
     const sets = Array.from({length:nSets}, (_,i)=>{
@@ -323,14 +326,28 @@ async function renderWorkoutDetail(dayNumber) {
         ${muscle?`<span class="pill">${esc(muscle)}</span>`:''}
         <span class="pill muted">${esc(pe.sets||3)} × ${esc(pe.reps||'—')}</span>
         ${repos?`<span class="pill muted">repos ${esc(repos)}</span>`:''}
-        ${pe.charge?`<span class="pill muted">${esc(pe.charge)}</span>`:''}
       </div>
-      ${vid}
+      ${vidHtml(e)}
       ${e.consignes?`<div class="consigne">💡 ${esc(e.consignes)}</div>`:''}
-      ${pe.notes?`<div class="consigne">📝 ${esc(pe.notes)}</div>`:''}
       <div class="sets">${sets}</div>
     </div>`;
-  }).join('');
+  };
+  const renderWarm = (pe) => {
+    const e = exMap[pe.exercise_id] || {};
+    return `<div class="ex ex-warm">
+      <h3>${esc(e.name||'Exercice')}</h3>
+      <div class="meta"><span class="pill muted">${esc(pe.reps||'30-45 sec')}</span></div>
+      ${vidHtml(e)}
+      ${e.consignes?`<div class="consigne">💡 ${esc(e.consignes)}</div>`:''}
+    </div>`;
+  };
+  const warm = rows.filter(r => r.phase === 'warmup');
+  const main = rows.filter(r => r.phase !== 'warmup');
+  $('#ex-list').innerHTML =
+    (warm.length ? `<div class="phase-h">🔥 Échauffement <span>~3 min · en douceur</span></div>` + warm.map(renderWarm).join('') : '')
+    + `<div class="phase-h">💪 La séance</div>`
+    + (main[0] && main[0].notes ? `<div class="consigne" style="margin:0 0 12px">📈 ${esc(main[0].notes)}</div>` : '')
+    + main.map(renderMain).join('');
 
   // wire logging (debounced save on blur / check toggle)
   $$('.setrow').forEach(row => {
