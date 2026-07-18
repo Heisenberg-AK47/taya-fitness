@@ -47,7 +47,7 @@
   .ex { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
   .ex h3 { margin: 0 0 4px; font-size: 1.05rem; }
   .ex .meta { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
-  .ex .vid { display: block; position: relative; border-radius: 10px; overflow: hidden; margin: 10px 0; aspect-ratio: 16/9; background: #000; }
+  .ex .vid { display: block; position: relative; border-radius: 10px; overflow: hidden; margin: 10px 0; aspect-ratio: 16/9; background: #000; cursor: pointer; }
   .ex .vid img { width: 100%; height: 100%; object-fit: cover; opacity: .85; }
   .ex .vid .play { position: absolute; inset: 0; display: grid; place-items: center; font-size: 2.4rem; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
   .ex .consigne { font-size: .86rem; color: var(--muted); margin: 6px 0; }
@@ -305,7 +305,7 @@ async function renderWorkoutDetail(dayNumber) {
     const nSets = pe.sets || 3;
     const yt = e.youtube_id;
     const thumb = yt ? `https://img.youtube.com/vi/${esc(yt)}/hqdefault.jpg` : '';
-    const vid = yt ? `<a class="vid" href="https://www.youtube.com/watch?v=${esc(yt)}" target="_blank" rel="noopener"><img src="${thumb}" alt="" loading="lazy"><span class="play">▶</span></a>` : '';
+    const vid = yt ? `<div class="vid" data-yt="${esc(yt)}"><img src="${thumb}" alt="" loading="lazy"><span class="play">▶</span></div>` : '';
     const muscle = (e.tags && e.tags.length) ? e.tags[0] : '';
     const repos = pe.rest_seconds ? `${pe.rest_seconds}s` : (e.repos||'');
     const sets = Array.from({length:nSets}, (_,i)=>{
@@ -347,6 +347,12 @@ async function renderWorkoutDetail(dayNumber) {
     charge.addEventListener('change', ()=>save(chk.classList.contains('on')));
     chk.addEventListener('click', async ()=>{ chk.classList.toggle('on'); await save(chk.classList.contains('on')); toast('Série enregistrée'); });
   });
+
+  // vidéos : lecture directement dans l'app au clic (lecteur YouTube intégré, sans quitter la page)
+  $$('.vid[data-yt]').forEach(v => v.addEventListener('click', () => {
+    const id = v.dataset.yt;
+    v.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1" title="Démonstration de l'exercice" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe>`;
+  }, { once: true }));
 }
 
 function emptyProgram() {
