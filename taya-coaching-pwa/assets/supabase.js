@@ -20,13 +20,26 @@ export async function currentUser() {
   return data?.user ?? null;
 }
 
-/** Returns the user's active online subscription row, or null. */
-export async function activeSubscription(userId) {
-  if (!userId) return null;
+/**
+ * Returns the user's active subscription row, or null.
+ *
+ * Le rattachement se fait par identifiant de compte OU par e-mail : un client
+ * qui paie AVANT de créer son compte a un abonnement sans user_id, et sans
+ * cette seconde condition il paierait sans jamais obtenir l'accès.
+ * (Un trigger sur auth.users recolle le user_id à l'inscription, mais la
+ *  session peut être ouverte avant que ce soit fait.)
+ */
+export async function activeSubscription(userId, userEmail) {
+  if (!userId && !userEmail) return null;
+  const critere = [
+    userId ? `user_id.eq.${userId}` : null,
+    userEmail ? `email.ilike.${userEmail}` : null
+  ].filter(Boolean).join(',');
+
   const { data, error } = await supabase
     .from('abonnements')
     .select('*')
-    .eq('user_id', userId)
+    .or(critere)
     .in('statut', ACTIVE_STATUSES)
     .order('current_period_end', { ascending: false })
     .limit(1)
@@ -44,7 +57,7 @@ export async function activeSubscription(userId) {
 export async function requireSubscription() {
   const user = await currentUser();
   if (!user) { location.replace('/login.html?next=' + encodeURIComponent(location.pathname)); return null; }
-  const subscription = await activeSubscription(user.id);
+  const subscription = await activeSubscription(user.id, user.email);
   if (!subscription) { location.replace('/index.html#offres'); return null; }
   return { user, subscription };
 }

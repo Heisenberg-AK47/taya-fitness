@@ -24,10 +24,17 @@
 <div class="wrap">
   <div class="auth card">
     <div class="brand"><img src="/icons/icon-192.png" alt=""><span><b>TAYA</b> <i class="accent" style="font-style:normal">Fitness</i></span></div>
+    <!-- Un seul endroit pour créer un compte : le site. Ici, connexion uniquement,
+         avec les mêmes identifiants. -->
     <div class="tabs">
       <button id="tab-login" class="active">Se connecter</button>
-      <button id="tab-signup">Créer un compte</button>
     </div>
+    <p style="margin:14px 0 0;font-size:13px;line-height:1.6;opacity:.65;text-align:center">
+      Connecte-toi avec les identifiants de ton compte Taya&nbsp;Fitness —
+      les mêmes que sur le site.<br>
+      Pas encore de compte ?
+      <a href="https://www.tayafitness.com/auth" style="color:#ff6b4a;font-weight:600">Créer mon compte</a>
+    </p>
     <div id="msg"></div>
     <form id="form">
       <div class="field" id="name-field" style="display:none">
@@ -59,17 +66,28 @@
   const msg = $('msg');
   const showMsg = (t, ok=false) => msg.innerHTML = `<div class="alert ${ok?'alert-ok':'alert-error'}">${t}</div>`;
 
-  function setMode(m){
-    mode = m;
-    $('tab-login').classList.toggle('active', m==='login');
-    $('tab-signup').classList.toggle('active', m==='signup');
-    $('name-field').style.display = m==='signup' ? 'grid' : 'none';
-    $('password').autocomplete = m==='signup' ? 'new-password' : 'current-password';
-    $('submit').textContent = m==='signup' ? 'Créer mon compte' : 'Se connecter';
+  // Supabase renvoie ses erreurs en anglais : on les traduit pour le client.
+  function traduire(m){
+    const s = m || '';
+    if (s.includes('Email not confirmed'))
+      return "Ton adresse n'est pas encore confirmée. Ouvre l'e-mail de confirmation qu'on t'a envoyé, puis reviens ici.";
+    if (s.includes('Invalid login'))
+      return "E-mail ou mot de passe incorrect.";
+    if (s.includes('rate limit') || s.includes('Too many'))
+      return "Trop de tentatives. Patiente une minute avant de réessayer.";
+    return s || "Une erreur est survenue.";
+  }
+
+  // Connexion uniquement : la création de compte se fait sur le site.
+  function setMode(){
+    mode = 'login';
+    $('tab-login').classList.add('active');
+    $('name-field').style.display = 'none';
+    $('password').autocomplete = 'current-password';
+    $('submit').textContent = 'Se connecter';
     msg.innerHTML = '';
   }
-  $('tab-login').onclick = () => setMode('login');
-  $('tab-signup').onclick = () => setMode('signup');
+  $('tab-login').onclick = () => setMode();
 
   function go(){
     const url = new URL(next, location.origin);
@@ -84,24 +102,13 @@
     e.preventDefault();
     const email = $('email').value.trim();
     const password = $('password').value;
-    const name = $('name').value.trim();
     $('submit').disabled = true;
     try {
-      if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({
-          email, password,
-          options: { data: { full_name: name }, emailRedirectTo: location.origin + '/login.html' }
-        });
-        if (error) throw error;
-        showMsg("Compte créé ! Vérifie ta boîte mail pour confirmer ton adresse, puis connecte-toi.", true);
-        setMode('login');
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        go();
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      go();
     } catch (err) {
-      showMsg(err.message || "Une erreur est survenue.");
+      showMsg(traduire(err.message));
     } finally {
       $('submit').disabled = false;
     }

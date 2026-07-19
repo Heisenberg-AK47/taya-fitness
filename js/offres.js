@@ -5,6 +5,7 @@ OFFRES.JS — Taya Fitness · Plans dynamiques depuis Supabase
 import { initNavbar } from './navbar.js';
 import { initFooter } from './footer.js';
 import { supabase } from './supabase.js';
+import { exigerCompte, reprendreAchatEnAttente } from './stripe.js';
 
 const CHECKOUT_URL = 'https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/stripe-checkout';
 const MODES = { en_salle: '🏋️ En salle', a_domicile: '🏠 À domicile', en_ligne: '💻 En ligne' };
@@ -201,7 +202,9 @@ function initBillingToggle() {
 
 // ── Checkout ─────────────────────────────────────────────────
 
-function initCheckoutButtons() {
+async function initCheckoutButtons() {
+  if (await reprendreAchatEnAttente()) return;
+
   document.querySelectorAll('[data-checkout]').forEach(btn => {
     btn.replaceWith(btn.cloneNode(true));
   });
@@ -213,11 +216,16 @@ function initCheckoutButtons() {
       btn.disabled = true;
       btn.textContent = 'Chargement...';
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        const billing = document.querySelector('#toggle-annuel')?.checked ? 'annual' : 'monthly';
+        // Pas de compte = pas de paiement : sinon l'abonnement ne peut être
+        // rattaché à personne et le client paie sans obtenir l'accès.
+        const user = await exigerCompte({ type, plan, billing });
+        if (!user) return;
+
         const res = await fetch(CHECKOUT_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type, plan, billing: document.querySelector('#toggle-annuel')?.checked ? 'annual' : 'monthly', user_id: user?.id || '', user_email: user?.email || '' }),
+          body: JSON.stringify({ type, plan, billing, user_id: user.id, user_email: user.email }),
         });
         const data = await res.json();
         if (!res.ok || !data.url) throw new Error(data.error || 'Erreur');

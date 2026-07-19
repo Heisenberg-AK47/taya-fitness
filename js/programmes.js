@@ -5,6 +5,7 @@
 import { initNavbar } from './navbar.js';
 import { initFooter } from './footer.js';
 import { supabase } from './supabase.js';
+import { exigerCompte, reprendreAchatEnAttente } from './stripe.js';
 
 const CHECKOUT_URL = 'https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/stripe-checkout';
 
@@ -13,6 +14,9 @@ let filtreCategorie = 'all';
 let filtreNiveau    = 'all';
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Le client revient de la création de son compte : on relance son achat.
+  if (await reprendreAchatEnAttente()) return;
+
   initNavbar();
   initFooter();
   initFiltres();
@@ -114,18 +118,19 @@ function renderProgrammes() {
       btn.textContent = '...';
 
       try {
-        const { data: { user } } = await supabase.auth.getUser();
+        // Pas de compte = pas de paiement : sinon l'achat ne peut être
+        // rattaché à personne et le client paie sans obtenir l'accès.
+        const user = await exigerCompte({ type: 'programme', programme_id: btn.dataset.buy });
+        if (!user) return;
 
         const res = await fetch(CHECKOUT_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            type:             'programme',
-            programme_id:     btn.dataset.buy,
-            programme_titre:  btn.dataset.titre,
-            programme_prix:   parseFloat(btn.dataset.prix),
-            user_id:          user?.id    || '',
-            user_email:       user?.email || '',
+            type:         'programme',
+            programme_id: btn.dataset.buy,
+            user_id:      user.id,
+            user_email:   user.email,
           }),
         });
 
