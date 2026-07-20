@@ -1,5 +1,5 @@
 /* Taya Fitness — Coaching Online · Service Worker */
-const VERSION = 'taya-online-v1';
+const VERSION = 'taya-online-v2';
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -70,5 +70,45 @@ self.addEventListener('fetch', (event) => {
         return res;
       }).catch(() => cached)
     )
+  );
+});
+
+/* ══════════════════════════════════════════════════════════════════
+   RAPPELS DE SÉANCE
+
+   Le serveur envoie la notification ; c'est ce fichier qui l'affiche,
+   même quand l'app est fermée. C'est tout l'intérêt du service worker.
+   ══════════════════════════════════════════════════════════════════ */
+
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (_) { d = {}; }
+
+  const titre = d.titre || 'Ta séance approche 💪';
+  const options = {
+    body: d.corps || 'Rendez-vous dans une heure.',
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
+    tag: d.tag || 'seance',          // une seule notification par séance
+    renotify: false,
+    requireInteraction: false,
+    vibrate: [200, 100, 200],
+    data: { url: d.url || '/app/?view=seance' },
+    actions: [{ action: 'ouvrir', title: 'Voir ma séance' }],
+  };
+  event.waitUntil(self.registration.showNotification(titre, options));
+});
+
+// Au clic : on réutilise l'onglet déjà ouvert plutôt que d'en empiler un.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const cible = (event.notification.data && event.notification.data.url) || '/app/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((liste) => {
+      for (const c of liste) {
+        if (c.url.includes('/app') && 'focus' in c) { c.navigate(cible); return c.focus(); }
+      }
+      return self.clients.openWindow(cible);
+    })
   );
 });
