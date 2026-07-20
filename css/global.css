@@ -14,28 +14,10 @@
   --black-card:   #16273a;
   --black-border: rgba(255,255,255,0.07);
 
-  /* ── Gamme magenta ────────────────────────────────────────
-     Les tons sombres glissent vers le violet, les clairs vers le rose :
-     une gamme construite par décalage de teinte a de la profondeur,
-     là où un simple éclaircissement/assombrissement donne du délavé.
-     Contrastes mesurés — texte blanc / fond sombre du site :        */
-  --gold-pale:    #ff70d4;   /* 2.5:1 · 7.1:1  survols, halos, tirets    */
-  --gold-light:   #ff3dd8;   /* 3.0:1 · 5.7:1  texte accent secondaire   */
-  --gold:         #fe00e5;   /* 3.3:1 · 5.3:1  RÉFÉRENCE DE MARQUE       */
-  --gold-deep:    #cc00cc;   /* 4.7:1 · 3.7:1  fonds pleins, petit texte */
-  --gold-dark:    #9200a8;   /* 7.5:1 · 2.3:1  fin de dégradé, violet    */
-
-  /* ── Accent secondaire : lime ─────────────────────────────
-     Quasi complémentaire du magenta (86° contre 306°). Le rose seul est
-     connoté ; associé à un vert acide il bascule vers le registre sportif,
-     qui parle aux deux publics.
-     RÔLES — magenta : marque, actions, navigation.
-              lime    : performance, validation, progression.
-     14.7:1 sur le fond sombre, et 14.7:1 pour du texte noir posé dessus.
-     ⚠️ Jamais de texte blanc sur le lime (1.2:1), jamais de lime sur le
-        magenta (2.8:1) : les deux ne se touchent pas directement.        */
-  --lime:         #c5fd7a;
-  --lime-dark:    #5da102;   /* si besoin de lime sur un fond clair      */
+  /* Accent corail */
+  --gold:         #ff6b4a;
+  --gold-light:   #ff8c70;
+  --gold-dark:    #e5522f;
 
   /* Textes */
   --white:        #f0f4f8;
@@ -43,7 +25,7 @@
 
   /* États */
   --red:          #ff4d6a;
-  --green:        #c5fd7a;   /* aligné sur le lime : un seul vert dans la charte */
+  --green:        #3ecf8e;
   --blue-accent:  #4d9fff;
 
   /* Typographie */
@@ -54,7 +36,7 @@
   --radius:       10px;
   --radius-lg:    18px;
   --shadow:       0 8px 32px rgba(0,0,0,0.35);
-  --shadow-gold:  0 4px 24px rgba(254,0,229,0.3);
+  --shadow-gold:  0 4px 24px rgba(255,107,74,0.3);
 
   --nav-height:   72px;
   --max-width:    1200px;
@@ -143,22 +125,18 @@ p {
   margin-bottom: 60px;
 }
 
-/* Ces pastilles annoncent une section : elles doivent situer, pas crier.
-   En magenta (texte + fond + bordure) elles pesaient 21 touches à elles
-   seules et diluaient le signal des vraies actions. Neutres, elles
-   laissent la couleur aux boutons et aux chiffres. */
 .section-header .label {
   display: inline-block;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.72);
+  color: var(--gold);
   margin-bottom: 14px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,107,74,0.1);
   padding: 6px 14px;
   border-radius: 100px;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,107,74,0.2);
 }
 
 .section-header h2 { margin-bottom: 16px; }
@@ -182,18 +160,14 @@ p {
 }
 
 .btn-primary {
-  /* Magenta → violet : le dégradé descend en teinte autant qu'en luminosité,
-     ce qui donne du relief au lieu d'un aplat fluo qui vibre. */
   background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(254,0,229,0.32);
+  box-shadow: 0 4px 16px rgba(255,107,74,0.35);
 }
 .btn-primary:hover {
-  /* On éclaircit sans repasser par le fluo pur : le bouton s'illumine
-     franchement au survol tout en gardant du corps dans le bas. */
-  background: linear-gradient(135deg, var(--gold-pale) 0%, var(--gold) 100%);
+  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(254,0,229,0.42);
+  box-shadow: 0 8px 24px rgba(255,107,74,0.45);
 }
 
 .btn-outline {
@@ -213,9 +187,7 @@ p {
   border: 1.5px solid var(--gold);
 }
 .btn-gold-outline:hover {
-  /* Seul aplat magenta du site portant du texte blanc : la nuance profonde
-     le fait passer de 3.3:1 à 4.7:1, sans changement perceptible de teinte. */
-  background: var(--gold-deep);
+  background: var(--gold);
   color: #fff;
   transform: translateY(-2px);
   box-shadow: var(--shadow-gold);
@@ -235,9 +207,7 @@ p {
 .gold-divider {
   width: 48px;
   height: 3px;
-  /* Pur ornement : six de ces traits consommaient du magenta sans
-     rien signaler. En blanc estompe ils separent sans hurler. */
-  background: linear-gradient(90deg, rgba(255,255,255,0.35), transparent);
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
   border-radius: 2px;
   margin: 16px auto;
 }
@@ -253,8 +223,8 @@ p {
   text-transform: uppercase;
 }
 
-.badge-debutant      { background: rgba(197,253,122,0.12);  color: #c5fd7a; }
-.badge-intermediaire { background: rgba(254,0,229,0.12);  color: var(--gold); }
+.badge-debutant      { background: rgba(62,207,142,0.12);  color: #3ecf8e; }
+.badge-intermediaire { background: rgba(255,107,74,0.12);  color: var(--gold); }
 .badge-avance        { background: rgba(255,77,106,0.12);  color: var(--red); }
 
 /* ── Cards ───────────────────────────────────────────────── */
@@ -269,7 +239,7 @@ p {
 .card:hover {
   transform: translateY(-6px);
   box-shadow: 0 16px 48px rgba(0,0,0,0.4);
-  border-color: rgba(254,0,229,0.25);
+  border-color: rgba(255,107,74,0.25);
 }
 
 /* ── Formulaires ─────────────────────────────────────────── */
@@ -305,7 +275,7 @@ p {
 .form-group textarea:focus,
 .form-group select:focus {
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(254,0,229,0.12);
+  box-shadow: 0 0 0 3px rgba(255,107,74,0.12);
 }
 
 .form-group input::placeholder,
@@ -325,8 +295,8 @@ p {
 .alert.show { display: block; }
 
 .alert-error   { background: rgba(255,77,106,0.1);  border: 1px solid rgba(255,77,106,0.3);  color: #ff4d6a; }
-.alert-success { background: rgba(197,253,122,0.1);  border: 1px solid rgba(197,253,122,0.3);  color: #c5fd7a; }
-.alert-info    { background: rgba(254,0,229,0.1);  border: 1px solid rgba(254,0,229,0.3);  color: var(--gold); }
+.alert-success { background: rgba(62,207,142,0.1);  border: 1px solid rgba(62,207,142,0.3);  color: #3ecf8e; }
+.alert-info    { background: rgba(255,107,74,0.1);  border: 1px solid rgba(255,107,74,0.3);  color: var(--gold); }
 
 /* ── Loader ──────────────────────────────────────────────── */
 .loader {
@@ -381,7 +351,7 @@ p {
   transform: translateX(-50%);
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(254,0,229,0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(255,107,74,0.06) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -410,11 +380,11 @@ main { padding-top: var(--nav-height); }
 /* ── Scrollbar ───────────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--black); }
-::-webkit-scrollbar-thumb { background: rgba(254,0,229,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(255,107,74,0.3); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
 /* ── Sélection texte ─────────────────────────────────────── */
-::selection { background: rgba(254,0,229,0.25); color: var(--white); }
+::selection { background: rgba(255,107,74,0.25); color: var(--white); }
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 1024px) {

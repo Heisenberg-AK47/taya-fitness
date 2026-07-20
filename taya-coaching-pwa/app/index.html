@@ -19,7 +19,7 @@
   /* Photo de profil : remplace les initiales dès qu'elle existe. */
   .app-avatar {
     width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-    background: var(--accent-deep); color: #fff;
+    background: var(--accent); color: #fff;
     display: flex; align-items: center; justify-content: center;
     font-size: .78rem; font-weight: 800; overflow: hidden;
   }
@@ -51,7 +51,7 @@
     background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: border-color .15s; }
   .list-item:hover { border-color: var(--accent); }
   .list-item .day { width: 40px; height: 40px; border-radius: 10px; background: var(--card-2); display: grid; place-items: center; font-weight: 800; color: var(--accent); font-family: var(--font-head); flex-shrink: 0; }
-  .pill { display: inline-block; font-size: .7rem; padding: 3px 9px; border-radius: 999px; background: rgba(254,0,229,.12); color: var(--accent); font-weight: 700; }
+  .pill { display: inline-block; font-size: .7rem; padding: 3px 9px; border-radius: 999px; background: rgba(255,107,74,.12); color: var(--accent); font-weight: 700; }
   .pill.muted { background: rgba(255,255,255,.06); color: var(--muted); }
 
   .ex { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; margin-bottom: 14px;
@@ -90,7 +90,7 @@
   /* barre de progression de séance */
   .sess-prog { display: flex; align-items: center; gap: 10px; margin: 2px 0 14px; }
   .sess-prog .bar { flex: 1; height: 8px; background: var(--card-2); border-radius: 999px; overflow: hidden; }
-  .sess-prog .bar i { display: block; height: 100%; background: var(--lime); width: 0; transition: width .3s; }
+  .sess-prog .bar i { display: block; height: 100%; background: var(--grad); width: 0; transition: width .3s; }
   .sess-prog .lbl { font-size: .8rem; color: var(--muted); font-weight: 700; white-space: nowrap; }
   .ex .consigne { font-size: .86rem; color: var(--muted); margin: 6px 0; }
   .sets { display: grid; gap: 8px; margin-top: 10px; }
@@ -100,11 +100,11 @@
   .setrow input:focus { outline: none; border-color: var(--accent); }
   .setrow .sn { font-weight: 800; color: var(--accent); font-family: var(--font-head); text-align: center; }
   .check { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--card-2); display: grid; place-items: center; cursor: pointer; color: var(--muted); }
-  .check.on { background: var(--lime); color: #0d1b2a; border-color: var(--lime); }
+  .check.on { background: var(--accent); color: #fff; border-color: var(--accent); }
 
   .weekbar { display: flex; gap: 6px; overflow-x: auto; padding: 4px 0 12px; }
   .weekbar button { flex-shrink: 0; background: var(--card-2); border: 1px solid var(--line); color: var(--muted); border-radius: 999px; padding: 7px 14px; font-weight: 700; cursor: pointer; font-size: .85rem; }
-  .weekbar button.active { background: var(--accent-deep); color: #fff; border-color: var(--accent-deep); }
+  .weekbar button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
   .empty { text-align: center; padding: 40px 20px; color: var(--muted); }
   .empty .ic { font-size: 2.6rem; }
@@ -114,7 +114,7 @@
   .ob { max-width: 520px; margin: 0 auto; }
   .ob .opts { display: grid; gap: 10px; }
   .ob .opt { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; cursor: pointer; font-weight: 600; }
-  .ob .opt.sel { border-color: var(--accent); background: rgba(254,0,229,.08); }
+  .ob .opt.sel { border-color: var(--accent); background: rgba(255,107,74,.08); }
   .ob .prog { height: 5px; background: var(--card-2); border-radius: 999px; overflow: hidden; margin-bottom: 22px; }
   .ob .prog i { display: block; height: 100%; background: var(--grad); transition: width .3s; }
   .toast { position: fixed; bottom: 92px; left: 50%; transform: translateX(-50%); background: var(--good); color: #06301f;
@@ -544,8 +544,8 @@ function drawChart(rows) {
   state.chart = new Chart(ctx, {
     type: 'line',
     data: { labels: rows.map(r=>new Date(r.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})),
-      datasets: [{ data: rows.map(r=>+r.poids), borderColor:'#fe00e5', backgroundColor:'rgba(254,0,229,.15)',
-        fill:true, tension:.3, pointRadius:3, pointBackgroundColor:'#fe00e5' }] },
+      datasets: [{ data: rows.map(r=>+r.poids), borderColor:'#ff6b4a', backgroundColor:'rgba(255,107,74,.15)',
+        fill:true, tension:.3, pointRadius:3, pointBackgroundColor:'#ff6b4a' }] },
     options: { plugins:{legend:{display:false}}, scales:{
       x:{ grid:{color:'rgba(255,255,255,.06)'}, ticks:{color:'rgba(220,232,244,.6)'} },
       y:{ grid:{color:'rgba(255,255,255,.06)'}, ticks:{color:'rgba(220,232,244,.6)'} } } }

@@ -157,7 +157,7 @@ function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.style.cssText = `
     position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
-    background: ${type === 'success' ? '#c5fd7a' : 'var(--gold)'};
+    background: ${type === 'success' ? '#3ecf8e' : 'var(--gold)'};
     color: ${type === 'success' ? '#0d1b2a' : '#fff'};
     padding: 16px 28px; border-radius: 12px; font-weight: 600;
     font-size: 0.95rem; z-index: 9999; box-shadow: 0 8px 32px rgba(0,0,0,0.3);

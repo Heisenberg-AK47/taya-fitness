@@ -1,5 +1,5 @@
 /* Taya Fitness — Coaching Online · Shared theme
- * Charte identique au site tayafitness.com : navy #0d1b2a + accent magenta #fe00e5 + lime #c5fd7a. */
+ * Charte identique au site tayafitness.com : navy #0d1b2a + accent orange #ff6b4a. */
 :root {
   --bg:        #0d1b2a;
   --bg-2:      #0a1628;
@@ -9,17 +9,12 @@
   --muted:     rgba(220,232,244,.6);
   --muted-2:   rgba(220,232,244,.4);
   --line:      rgba(255,255,255,.08);
-  /* Même gamme magenta que le site (décalage de teinte vers le violet
-     dans les tons sombres, vers le rose dans les clairs). */
-  --accent-pale: #ff70d4;
-  --accent:      #fe00e5;   /* référence de marque */
-  --accent-deep: #cc00cc;   /* aplats portant du texte blanc */
-  --accent-2:    #9200a8;   /* fin de dégradé, violet */
-  --gold:        #fe00e5;
-  --lime:        #c5fd7a;   /* performance, validation, progression */
-  --good:        #c5fd7a;
-  --danger:      #ff6b6b;
-  --grad:        linear-gradient(135deg, #fe00e5 0%, #9200a8 100%);
+  --accent:    #ff6b4a;
+  --accent-2:  #e5522f;
+  --gold:      #c9a84c;
+  --good:      #3ecf8e;
+  --danger:    #ff6b6b;
+  --grad:      linear-gradient(135deg, #ff6b4a 0%, #e5522f 100%);
   --radius:    14px;
   --radius-sm: 10px;
   --shadow:    0 10px 40px rgba(0,0,0,.35);
@@ -61,7 +56,7 @@ h3 { font-size: 1.05rem; }
   font-family: var(--font);
 }
 .btn:active { transform: translateY(1px); }
-.btn-accent { background: var(--grad); color: #fff; box-shadow: 0 8px 24px rgba(254,0,229,.25); }
+.btn-accent { background: var(--grad); color: #fff; box-shadow: 0 8px 24px rgba(255,107,74,.25); }
 .btn-accent:hover { opacity: .94; }
 .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
 .btn-ghost:hover { border-color: var(--accent); }
@@ -82,9 +77,9 @@ h3 { font-size: 1.05rem; }
 .plan .price span { font-size: 1rem; color: var(--muted); font-weight: 600; }
 .plan ul { list-style: none; padding: 0; margin: 16px 0 22px; display: grid; gap: 10px; }
 .plan li { padding-left: 26px; position: relative; color: var(--ink); font-size: .95rem; }
-.plan li::before { content: "✓"; position: absolute; left: 0; color: var(--lime); font-weight: 800; }
+.plan li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: 800; }
 .plan .cta { margin-top: auto; }
-.plan.featured { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 14px 40px rgba(254,0,229,.18); }
+.plan.featured { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 14px 40px rgba(255,107,74,.18); }
 .badge {
   position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
   background: var(--grad); color: #fff; font-size: .72rem; font-weight: 700;
@@ -106,7 +101,7 @@ h3 { font-size: 1.05rem; }
   background: var(--card-2); border: 1px solid var(--line); color: var(--ink);
   border-radius: var(--radius-sm); padding: 13px 14px; font-size: 1rem; font-family: inherit; width: 100%;
 }
-.field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(254,0,229,.18); }
+.field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,107,74,.18); }
 .alert { padding: 12px 14px; border-radius: var(--radius-sm); font-size: .9rem; margin-bottom: 14px; }
 .alert-error { background: rgba(255,107,107,.12); border: 1px solid var(--danger); color: #ffc2c2; }
-.alert-ok { background: rgba(197,253,122,.12); border: 1px solid var(--lime); color: #dcffb0; }
+.alert-ok { background: rgba(62,207,142,.12); border: 1px solid var(--good); color: #b6f0d5; }

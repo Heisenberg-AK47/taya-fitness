@@ -178,7 +178,7 @@ function renderDetail(p, modules, reviews, hasAccess) {
         </div>
         <div class="detail-badges">
           <span class="badge badge-${p.niveau || 'debutant'}">${niveauLabels[p.niveau] || 'Tous niveaux'}</span>
-          ${p.categorie ? '<span class="badge" style="background:rgba(254,0,229,0.1);color:var(--gold)">' + esc(p.categorie) + '</span>' : ''}
+          ${p.categorie ? '<span class="badge" style="background:rgba(201,168,76,0.1);color:var(--gold)">' + esc(p.categorie) + '</span>' : ''}
         </div>
         <h1 class="detail-title">${esc(p.titre)}</h1>
         <p class="detail-desc">${esc(p.description_courte || content.tagline)}</p>

@@ -54,7 +54,7 @@
   /* Yes/No */
   .yesno-btns{display:flex;gap:14px;max-width:400px;}
   .yesno-btn{flex:1;padding:18px;border-radius:14px;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#fff;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.15s;text-align:center;}
-  .yesno-btn.yes:hover,.yesno-btn.yes.selected{border-color:#c5fd7a;background:rgba(197,253,122,0.1);color:#c5fd7a;}
+  .yesno-btn.yes:hover,.yesno-btn.yes.selected{border-color:#3ecf8e;background:rgba(62,207,142,0.1);color:#3ecf8e;}
   .yesno-btn.no:hover,.yesno-btn.no.selected{border-color:#ff4d6a;background:rgba(255,77,106,0.1);color:#ff4d6a;}
 
   /* Scale */
@@ -489,7 +489,7 @@ function renderPlanCards() {
   const sec = document.getElementById('plan-cards-section');
   if (!sec) return;
   sec.style.display = 'block';
-  const accent = (form.settings && form.settings.accent_color) || '#fe00e5';
+  const accent = (form.settings && form.settings.accent_color) || '#ff6b4a';
   const btnBg = (form.settings && form.settings.btn_color) || accent;
   const btnText = (form.settings && form.settings.btn_text_color) || '#000000';
   const btnRadius = (form.settings && form.settings.btn_shape) === 'pill' ? '50px' : '10px';
@@ -520,7 +520,7 @@ function openPlanModal(idx) {
   const plans = (form.settings && form.settings.plans) || [];
   const pl = plans[idx];
   if (!pl) return;
-  const accent = (form.settings && form.settings.accent_color) || '#fe00e5';
+  const accent = (form.settings && form.settings.accent_color) || '#ff6b4a';
   const btnBg = (form.settings && form.settings.btn_color) || accent;
   const btnText = (form.settings && form.settings.btn_text_color) || '#000000';
   const btnRadius = (form.settings && form.settings.btn_shape) === 'pill' ? '50px' : '10px';
