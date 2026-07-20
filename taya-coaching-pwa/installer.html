@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Installer l'app — Taya Fitness</title>
+<meta name="theme-color" content="#0d1b2a">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<link rel="icon" href="/icons/favicon-64.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<style>
+  body { padding: 0 0 40px; }
+  .wrap { width: min(560px, 92vw); margin: 0 auto; padding-top: 44px; }
+  .logo { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 32px; font-weight: 800; font-family: var(--font-head); }
+  .logo img { width: 34px; height: 34px; }
+  .logo i { color: var(--accent); font-style: normal; }
+
+  h1 { font-size: clamp(1.6rem, 5vw, 2.1rem); text-align: center; margin: 0 0 10px; }
+  .sous { text-align: center; color: var(--muted); line-height: 1.65; margin: 0 0 30px; }
+
+  .pourquoi { display: grid; gap: 10px; margin-bottom: 30px; }
+  .pourquoi div { display: flex; gap: 11px; align-items: flex-start; font-size: .93rem; line-height: 1.55; }
+  .pourquoi b { color: var(--ink); font-weight: 600; }
+
+  /* Les étapes : numérotées, avec le geste exact à faire. */
+  .etapes { counter-reset: e; display: grid; gap: 14px; margin: 0 0 26px; }
+  .etape {
+    counter-increment: e; position: relative; padding: 16px 18px 16px 56px;
+    background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+    line-height: 1.6; font-size: .95rem;
+  }
+  .etape::before {
+    content: counter(e); position: absolute; left: 16px; top: 15px;
+    width: 27px; height: 27px; border-radius: 50%; background: var(--accent);
+    color: #fff; font-weight: 800; font-size: .85rem; display: grid; place-items: center;
+  }
+  .etape b { color: var(--ink); }
+  .ic { display: inline-block; padding: 1px 7px; border-radius: 6px; background: var(--card-2);
+        border: 1px solid var(--line); font-size: .88rem; }
+
+  .ok {
+    background: rgba(62,207,142,.10); border: 1px solid var(--good);
+    border-radius: var(--radius); padding: 20px; text-align: center;
+  }
+  .ok h2 { color: var(--good); font-size: 1.15rem; margin: 0 0 8px; }
+
+  .aide { margin-top: 26px; font-size: .83rem; color: var(--muted); text-align: center; line-height: 1.6; }
+  .aide a { color: var(--accent); font-weight: 600; }
+  #bouton-android { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="logo"><img src="/icons/icon-192.png" alt=""><span>TAYA <i>Fitness</i></span></div>
+
+  <div id="contenu"><p class="sous">Chargement…</p></div>
+
+  <p class="aide">
+    Un souci ? Écris à <a href="mailto:contact@tayafitness.com">contact@tayafitness.com</a>,
+    Sarah te guide.
+  </p>
+</div>
+
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const ua = navigator.userAgent;
+
+  // Déjà installée ? (les deux façons de le détecter, iOS a la sienne)
+  const installee = window.matchMedia('(display-mode: standalone)').matches
+                 || window.navigator.standalone === true;
+
+  const estIOS     = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+  const estAndroid = /Android/.test(ua);
+  const estMobile  = estIOS || estAndroid;
+  // Sur iPhone, seul Safari sait installer. Chrome/Firefox iOS en sont incapables.
+  const safariIOS  = estIOS && /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);
+
+  const POURQUOI = `
+    <div class="pourquoi">
+      <div><span>🔔</span><span><b>Les rappels de séance</b> — une notification une heure avant, pour ne plus en manquer une.</span></div>
+      <div><span>⚡</span><span><b>Ouverture immédiate</b> — une icône sur ton écran, plus de mot de passe à ressaisir.</span></div>
+      <div><span>📴</span><span><b>Ton programme hors connexion</b> — consultable même sans réseau en salle.</span></div>
+    </div>`;
+
+  let html;
+
+  if (installee) {
+    html = `
+      <div class="ok">
+        <h2>✓ C'est déjà fait</h2>
+        <p style="margin:0;color:var(--muted)">L'app est bien installée. Tu peux y aller.</p>
+      </div>
+      <a href="/app/" class="btn btn-accent btn-block" style="margin-top:18px">Ouvrir mon coaching →</a>`;
+  }
+  else if (safariIOS) {
+    html = `
+      <h1>Installe ton coaching</h1>
+      <p class="sous">Trois gestes, dix secondes. Apple ne permet pas de le faire à ta place.</p>
+      ${POURQUOI}
+      <div class="etapes">
+        <div class="etape">Touche le bouton <b>Partager</b> <span class="ic">⬆️</span> en bas de ton écran Safari.</div>
+        <div class="etape">Fais défiler puis touche <b>« Sur l'écran d'accueil »</b> <span class="ic">➕</span>.</div>
+        <div class="etape">Touche <b>Ajouter</b> en haut à droite. L'icône Taya apparaît sur ton écran — ouvre-la, c'est terminé.</div>
+      </div>`;
+  }
+  else if (estIOS) {
+    // Chrome/Firefox sur iPhone ne savent pas installer : on redirige vers Safari.
+    html = `
+      <h1>Ouvre cette page dans Safari</h1>
+      <p class="sous">Sur iPhone, seul Safari peut installer une app. Ça prend dix secondes ensuite.</p>
+      ${POURQUOI}
+      <div class="etapes">
+        <div class="etape">Touche le menu <b>⋯</b> de ton navigateur, puis <b>« Ouvrir dans Safari »</b>.</div>
+        <div class="etape">Dans Safari, touche <b>Partager</b> <span class="ic">⬆️</span> puis <b>« Sur l'écran d'accueil »</b>.</div>
+      </div>
+      <p class="aide" style="margin-top:14px">Ou tape simplement <b>app.tayafitness.com</b> dans Safari.</p>`;
+  }
+  else if (estAndroid) {
+    html = `
+      <h1>Installe ton coaching</h1>
+      <p class="sous">Un seul geste sur Android.</p>
+      ${POURQUOI}
+      <button id="bouton-android" class="btn btn-accent btn-block">📲 Installer maintenant</button>
+      <div class="etapes" id="etapes-android">
+        <div class="etape">Touche le menu <b>⋮</b> en haut à droite de Chrome.</div>
+        <div class="etape">Choisis <b>« Installer l'application »</b> ou <b>« Ajouter à l'écran d'accueil »</b>.</div>
+      </div>`;
+  }
+  else {
+    html = `
+      <h1>Ouvre ce lien sur ton téléphone</h1>
+      <p class="sous">L'app s'installe sur mobile. Sur ordinateur, tu peux utiliser le site normalement.</p>
+      ${POURQUOI}
+      <div class="etapes">
+        <div class="etape">Sur ton téléphone, ouvre <b>app.tayafitness.com</b></div>
+        <div class="etape">Suis les deux étapes affichées : l'icône se pose sur ton écran d'accueil.</div>
+      </div>
+      <a href="/app/" class="btn btn-ghost btn-block" style="margin-top:8px">Continuer sur ordinateur</a>`;
+  }
+
+  $('#contenu').innerHTML = html;
+
+  // Android : Chrome nous laisse déclencher l'installation nous-mêmes.
+  let invite = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    invite = e;
+    const b = $('#bouton-android'), et = $('#etapes-android');
+    if (b) {
+      b.style.display = 'block';
+      if (et) et.style.display = 'none';   // le geste manuel devient inutile
+      b.onclick = async () => {
+        b.disabled = true; b.textContent = 'Installation…';
+        invite.prompt();
+        const { outcome } = await invite.userChoice;
+        if (outcome === 'accepted') {
+          b.textContent = '✓ Installée — ouvre-la depuis ton écran d\'accueil';
+        } else {
+          b.disabled = false; b.textContent = '📲 Installer maintenant';
+          if (et) et.style.display = 'grid';
+        }
+      };
+    }
+  });
+
+  // Installée pendant la visite : on le dit tout de suite.
+  window.addEventListener('appinstalled', () => {
+    $('#contenu').innerHTML = `
+      <div class="ok"><h2>✓ Installation réussie</h2>
+      <p style="margin:0;color:var(--muted)">Ouvre l'app depuis ton écran d'accueil.</p></div>`;
+  });
+
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>

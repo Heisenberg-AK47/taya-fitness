@@ -226,8 +226,33 @@ const esc = (s) => (s??'').toString().replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&
 
 const state = { user:null, sub:null, client:null, programme:null, workouts:[], week:1, weights:[], chart:null };
 
+/**
+ * Sur téléphone, l'app ne s'utilise que depuis l'écran d'accueil.
+ *
+ * Ce n'est pas un caprice : hors installation, iOS interdit purement et
+ * simplement les notifications — donc pas de rappel de séance, qui est la
+ * fonction la plus utile de l'app.
+ *
+ * On ne bloque QUE le mobile : sur ordinateur la notion d'écran d'accueil
+ * n'existe pas, et bloquer un client qui paie parce qu'il est sur son
+ * portable serait absurde.
+ */
+function exigerInstallation() {
+  const ua = navigator.userAgent;
+  const mobile = /iPad|iPhone|iPod|Android/.test(ua) && !window.MSStream;
+  if (!mobile) return false;
+
+  const installee = window.matchMedia('(display-mode: standalone)').matches
+                 || window.navigator.standalone === true;
+  if (installee) return false;
+
+  location.replace('/installer');
+  return true;
+}
+
 // ---------- bootstrap ----------
 (async () => {
+  if (exigerInstallation()) return;
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
   const gate = await requireSubscription();
   if (!gate) return;                 // redirected
