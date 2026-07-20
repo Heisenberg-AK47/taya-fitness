@@ -18,7 +18,7 @@
     font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: var(--gold, #FF5C35);
+    color: var(--gold, #fe00e5);
     margin-bottom: 14px;
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -37,7 +37,7 @@
     transition: border-color .2s;
     line-height: 1.6;
   }
-  .profil-form textarea:focus { border-color: var(--gold, #FF5C35); }
+  .profil-form textarea:focus { border-color: var(--gold, #fe00e5); }
   .profil-form select {
     width: 100%;
     background: var(--black-border, #1a2035);
@@ -51,7 +51,7 @@
     transition: border-color .2s;
     cursor: pointer;
   }
-  .profil-form select:focus { border-color: var(--gold, #FF5C35); }
+  .profil-form select:focus { border-color: var(--gold, #fe00e5); }
   .profil-form select option { background: #1a2035; }
 
   /* ── Photo de profil ─────────────────────────────────────── */
@@ -68,7 +68,7 @@
   .avatar-cam {
     position: absolute; right: -2px; bottom: -2px;
     width: 26px; height: 26px; border-radius: 50%;
-    background: var(--gold, #FF5C35); color: #fff;
+    background: var(--gold, #fe00e5); color: #fff;
     font-size: 13px; line-height: 26px; text-align: center;
     border: 2px solid #16273a; box-shadow: 0 2px 6px rgba(0,0,0,.4);
     transition: transform .2s;
@@ -97,12 +97,12 @@
     position: relative; width: 260px; height: 260px; margin: 0 auto 18px;
     border-radius: 50%; overflow: hidden; cursor: grab;
     background: #0d1b2a; touch-action: none;
-    box-shadow: 0 0 0 2px var(--gold, #FF5C35), 0 0 0 12px rgba(255,92,53,.08);
+    box-shadow: 0 0 0 2px var(--gold, #fe00e5), 0 0 0 12px rgba(254,0,229,.08);
   }
   .crop-zone:active { cursor: grabbing; }
   .crop-zone canvas { display: block; width: 100%; height: 100%; }
   .crop-range {
-    width: 100%; margin: 0 0 20px; accent-color: var(--gold, #FF5C35);
+    width: 100%; margin: 0 0 20px; accent-color: var(--gold, #fe00e5);
     display: block;
   }
   .crop-actions { display: flex; gap: 10px; }
@@ -114,16 +114,16 @@
     background: transparent; color: rgba(220,232,244,.7);
     border: 1px solid rgba(255,255,255,.14) !important;
   }
-  .crop-valider { background: var(--gold, #FF5C35); color: #fff; }
+  .crop-valider { background: var(--gold, #fe00e5); color: #fff; }
   .crop-valider:disabled { opacity: .55; cursor: default; }
   .avatar-btn:hover .sidebar-avatar { filter: brightness(.7); }
   .avatar-btn:hover .avatar-cam { transform: scale(1.12); }
-  .avatar-btn:focus-visible { outline: 2px solid var(--gold, #FF5C35); outline-offset: 3px; }
+  .avatar-btn:focus-visible { outline: 2px solid var(--gold, #fe00e5); outline-offset: 3px; }
   /* Pendant l'envoi */
   .avatar-spin {
     position: absolute; inset: 0; border-radius: 50%;
     background: rgba(0,0,0,.55);
-    border: 2px solid transparent; border-top-color: var(--gold, #FF5C35);
+    border: 2px solid transparent; border-top-color: var(--gold, #fe00e5);
     animation: avatar-turn .7s linear infinite;
   }
   @keyframes avatar-turn { to { transform: rotate(360deg); } }

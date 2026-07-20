@@ -74,7 +74,7 @@
 }
 
 .sidebar-link:hover { background: rgba(255,255,255,0.04); color: var(--white); }
-.sidebar-link.active { background: rgba(201,168,76,0.1); color: var(--gold); }
+.sidebar-link.active { background: rgba(254,0,229,0.1); color: var(--gold); }
 
 .sidebar-logout {
   margin-top: 12px;
@@ -145,7 +145,7 @@
   font-weight: 600;
 }
 .achat-status.active  { background: rgba(76,175,122,0.1);  color: #4caf7a; }
-.achat-status.pending { background: rgba(201,168,76,0.1);  color: var(--gold); }
+.achat-status.pending { background: rgba(254,0,229,0.1);  color: var(--gold); }
 
 /* Barre progression */
 .progress-bar-wrap {
@@ -211,7 +211,7 @@
 .creneau-date {
   min-width: 60px;
   text-align: center;
-  background: rgba(201,168,76,0.1);
+  background: rgba(254,0,229,0.1);
   border-radius: var(--radius);
   padding: 10px;
 }

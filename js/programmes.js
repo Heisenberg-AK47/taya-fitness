@@ -181,7 +181,7 @@ function handleMessages() {
 }
 
 function showToast(message, type = 'info') {
-  const colors = { success: '#3ecf8e', error: '#ff4d6a', info: '#ff6b4a' };
+  const colors = { success: '#3ecf8e', error: '#ff4d6a', info: '#fe00e5' };
   const textColors = { success: '#0d1b2a', error: '#fff', info: '#fff' };
   const toast = document.createElement('div');
   toast.style.cssText = `

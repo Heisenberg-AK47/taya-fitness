@@ -27,7 +27,7 @@ function navbarTemplate() {
       <!-- Logo -->
       <a href="/" class="navbar-logo">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 110" style="height:42px;width:auto;display:block">
-          <text x="8" y="92" font-family="'Black Han Sans',Arial Black,Impact,sans-serif" font-size="100" font-weight="900" fill="#E8603C" letter-spacing="-2">TAYA</text>
+          <text x="8" y="92" font-family="'Black Han Sans',Arial Black,Impact,sans-serif" font-size="100" font-weight="900" fill="#fe00e5" letter-spacing="-2">TAYA</text>
           <text x="154" y="84" font-family="'Great Vibes','Brush Script MT',cursive" font-size="46" fill="#1B2B4B" transform="rotate(-5,154,84)">Fitness</text>
         </svg>
       </a>

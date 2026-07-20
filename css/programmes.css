@@ -64,7 +64,7 @@
 }
 .prog-video-overlay h1 em {
   font-style: normal;
-  color: var(--orange, #ff6b4a);
+  color: var(--orange, #fe00e5);
 }
 .prog-video-overlay p {
   font-size: 1rem;
@@ -172,7 +172,7 @@
 .programme-card:hover {
   transform: translateY(-6px);
   box-shadow: var(--shadow);
-  border-color: rgba(201,168,76,0.3);
+  border-color: rgba(254,0,229,0.3);
 }
 
 .programme-img {

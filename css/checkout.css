@@ -27,8 +27,8 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  background: rgba(201,168,76,0.06);
-  border: 1px dashed rgba(201,168,76,0.4);
+  background: rgba(254,0,229,0.06);
+  border: 1px dashed rgba(254,0,229,0.4);
   border-radius: var(--radius);
   padding: 18px 20px;
   margin: 24px 0;

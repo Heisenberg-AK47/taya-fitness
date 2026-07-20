@@ -43,9 +43,9 @@
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--orange, #ff6b4a);
-  background: rgba(255,107,74,0.1);
-  border: 1px solid rgba(255,107,74,0.22);
+  color: var(--orange, #fe00e5);
+  background: rgba(254,0,229,0.1);
+  border: 1px solid rgba(254,0,229,0.22);
   padding: 6px 14px;
   border-radius: 100px;
   margin-bottom: 20px;
@@ -58,7 +58,7 @@
 }
 .offres-video-overlay h1 em {
   font-style: normal;
-  color: var(--orange, #ff6b4a);
+  color: var(--orange, #fe00e5);
 }
 .offres-video-overlay p {
   font-size: 1rem;
@@ -153,12 +153,12 @@
   height: 100%;
 }
 
-.offre-detail-card:hover { border-color: rgba(201,168,76,0.3); }
+.offre-detail-card:hover { border-color: rgba(254,0,229,0.3); }
 
 .offre-detail-card.featured {
   border-color: var(--gold);
   transform: scale(1.03);
-  box-shadow: 0 0 50px rgba(201,168,76,0.12);
+  box-shadow: 0 0 50px rgba(254,0,229,0.12);
 }
 
 .offre-detail-card.featured:hover { transform: scale(1.03) translateY(-4px); }
@@ -278,7 +278,7 @@
 }
 
 .comparatif-table .featured-col {
-  background: rgba(201,168,76,0.05);
+  background: rgba(254,0,229,0.05);
   color: var(--white);
 }
 
@@ -342,8 +342,8 @@
   justify-content: space-between;
   align-items: center;
   gap: 32px;
-  background: linear-gradient(135deg, rgba(201,168,76,0.08) 0%, rgba(201,168,76,0.03) 100%);
-  border: 1px solid rgba(201,168,76,0.3);
+  background: linear-gradient(135deg, rgba(254,0,229,0.08) 0%, rgba(254,0,229,0.03) 100%);
+  border: 1px solid rgba(254,0,229,0.3);
   border-radius: var(--radius-lg);
   padding: 32px 40px;
   margin-bottom: 8px;
@@ -357,12 +357,12 @@
   right: -60px;
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(201,168,76,0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(254,0,229,0.1) 0%, transparent 70%);
   pointer-events: none;
 }
 .decouverte-badge {
   display: inline-block;
-  background: rgba(201,168,76,0.15);
+  background: rgba(254,0,229,0.15);
   color: var(--gold);
   font-size: 0.72rem;
   font-weight: 700;
@@ -456,7 +456,7 @@
   .decouverte-btn { max-width: 280px; margin: 0 auto; display: flex; }
 
   .offre-detail-card { padding: 28px 20px; }
-  .offre-detail-card.featured { box-shadow: 0 0 30px rgba(201,168,76,0.1); }
+  .offre-detail-card.featured { box-shadow: 0 0 30px rgba(254,0,229,0.1); }
 
   .price-num { font-size: 2.2rem; }
 

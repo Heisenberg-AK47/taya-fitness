@@ -156,8 +156,8 @@ PROGRAMME-DETAIL.CSS
 
 /* ── Barre résultats ─────────────────────────────────────── */
 .detail-results-bar {
-  background: linear-gradient(90deg, rgba(201,168,76,0.06) 0%, rgba(201,168,76,0.02) 100%);
-  border-bottom: 1px solid rgba(201,168,76,0.15);
+  background: linear-gradient(90deg, rgba(254,0,229,0.06) 0%, rgba(254,0,229,0.02) 100%);
+  border-bottom: 1px solid rgba(254,0,229,0.15);
   padding: 16px 0;
 }
 .results-grid {
@@ -208,7 +208,7 @@ PROGRAMME-DETAIL.CSS
   border-radius: var(--radius);
   transition: border-color 0.2s;
 }
-.benefice-card:hover { border-color: rgba(201,168,76,0.3); }
+.benefice-card:hover { border-color: rgba(254,0,229,0.3); }
 .benefice-icon { font-size: 1.6rem; flex-shrink: 0; line-height: 1; }
 .benefice-card strong { display: block; font-size: 0.95rem; margin-bottom: 4px; color: var(--white); }
 .benefice-card p { font-size: 0.84rem; color: var(--white-muted); line-height: 1.6; margin: 0; }
@@ -224,8 +224,8 @@ PROGRAMME-DETAIL.CSS
   font-size: 0.95rem;
   color: var(--white-muted);
   padding: 12px 16px;
-  background: rgba(201,168,76,0.05);
-  border: 1px solid rgba(201,168,76,0.15);
+  background: rgba(254,0,229,0.05);
+  border: 1px solid rgba(254,0,229,0.15);
   border-radius: var(--radius);
 }
 
@@ -237,7 +237,7 @@ PROGRAMME-DETAIL.CSS
   background: var(--black-card);
   border: 1px solid var(--gold);
   border-radius: var(--radius-lg);
-  box-shadow: 0 0 20px rgba(201,168,76,0.08);
+  box-shadow: 0 0 20px rgba(254,0,229,0.08);
 }
 .coach-mini-img {
   width: 64px;
@@ -319,8 +319,8 @@ PROGRAMME-DETAIL.CSS
   align-items: center;
   gap: 16px;
   padding: 20px 24px;
-  background: rgba(201,168,76,0.06);
-  border: 1px solid rgba(201,168,76,0.2);
+  background: rgba(254,0,229,0.06);
+  border: 1px solid rgba(254,0,229,0.2);
   border-radius: var(--radius);
   margin-bottom: 24px;
   flex-wrap: wrap;
@@ -339,7 +339,7 @@ PROGRAMME-DETAIL.CSS
   background: var(--black-card);
   transition: border-color 0.2s;
 }
-.module-item:hover { border-color: rgba(201,168,76,0.2); }
+.module-item:hover { border-color: rgba(254,0,229,0.2); }
 
 .module-header {
   display: flex;
@@ -353,7 +353,7 @@ PROGRAMME-DETAIL.CSS
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(201,168,76,0.1);
+  background: rgba(254,0,229,0.1);
   color: var(--gold);
   font-size: 0.8rem;
   font-weight: 700;
@@ -419,7 +419,7 @@ PROGRAMME-DETAIL.CSS
 /* ── Badges ──────────────────────────────────────────────── */
 .badge { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 5px 12px; border-radius: 100px; }
 .badge-debutant { background: rgba(62,207,142,0.12); color: #3ecf8e; }
-.badge-intermediaire { background: rgba(255,107,74,0.12); color: var(--gold); }
+.badge-intermediaire { background: rgba(254,0,229,0.12); color: var(--gold); }
 .badge-avance { background: rgba(255,77,106,0.12); color: #ff4d6a; }
 
 /* ── Responsive ──────────────────────────────────────────── */

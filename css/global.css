@@ -15,9 +15,9 @@
   --black-border: rgba(255,255,255,0.07);
 
   /* Accent corail */
-  --gold:         #ff6b4a;
-  --gold-light:   #ff8c70;
-  --gold-dark:    #e5522f;
+  --gold:         #fe00e5;
+  --gold-light:   #ff66f0;
+  --gold-dark:    #cc00b8;
 
   /* Textes */
   --white:        #f0f4f8;
@@ -36,7 +36,7 @@
   --radius:       10px;
   --radius-lg:    18px;
   --shadow:       0 8px 32px rgba(0,0,0,0.35);
-  --shadow-gold:  0 4px 24px rgba(255,107,74,0.3);
+  --shadow-gold:  0 4px 24px rgba(254,0,229,0.3);
 
   --nav-height:   72px;
   --max-width:    1200px;
@@ -133,10 +133,10 @@ p {
   text-transform: uppercase;
   color: var(--gold);
   margin-bottom: 14px;
-  background: rgba(255,107,74,0.1);
+  background: rgba(254,0,229,0.1);
   padding: 6px 14px;
   border-radius: 100px;
-  border: 1px solid rgba(255,107,74,0.2);
+  border: 1px solid rgba(254,0,229,0.2);
 }
 
 .section-header h2 { margin-bottom: 16px; }
@@ -162,12 +162,12 @@ p {
 .btn-primary {
   background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(255,107,74,0.35);
+  box-shadow: 0 4px 16px rgba(254,0,229,0.35);
 }
 .btn-primary:hover {
   background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255,107,74,0.45);
+  box-shadow: 0 8px 24px rgba(254,0,229,0.45);
 }
 
 .btn-outline {
@@ -224,7 +224,7 @@ p {
 }
 
 .badge-debutant      { background: rgba(62,207,142,0.12);  color: #3ecf8e; }
-.badge-intermediaire { background: rgba(255,107,74,0.12);  color: var(--gold); }
+.badge-intermediaire { background: rgba(254,0,229,0.12);  color: var(--gold); }
 .badge-avance        { background: rgba(255,77,106,0.12);  color: var(--red); }
 
 /* ── Cards ───────────────────────────────────────────────── */
@@ -239,7 +239,7 @@ p {
 .card:hover {
   transform: translateY(-6px);
   box-shadow: 0 16px 48px rgba(0,0,0,0.4);
-  border-color: rgba(255,107,74,0.25);
+  border-color: rgba(254,0,229,0.25);
 }
 
 /* ── Formulaires ─────────────────────────────────────────── */
@@ -275,7 +275,7 @@ p {
 .form-group textarea:focus,
 .form-group select:focus {
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(255,107,74,0.12);
+  box-shadow: 0 0 0 3px rgba(254,0,229,0.12);
 }
 
 .form-group input::placeholder,
@@ -296,7 +296,7 @@ p {
 
 .alert-error   { background: rgba(255,77,106,0.1);  border: 1px solid rgba(255,77,106,0.3);  color: #ff4d6a; }
 .alert-success { background: rgba(62,207,142,0.1);  border: 1px solid rgba(62,207,142,0.3);  color: #3ecf8e; }
-.alert-info    { background: rgba(255,107,74,0.1);  border: 1px solid rgba(255,107,74,0.3);  color: var(--gold); }
+.alert-info    { background: rgba(254,0,229,0.1);  border: 1px solid rgba(254,0,229,0.3);  color: var(--gold); }
 
 /* ── Loader ──────────────────────────────────────────────── */
 .loader {
@@ -351,7 +351,7 @@ p {
   transform: translateX(-50%);
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(255,107,74,0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(254,0,229,0.06) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -380,11 +380,11 @@ main { padding-top: var(--nav-height); }
 /* ── Scrollbar ───────────────────────────────────────────── */
 ::-webkit-scrollbar       { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--black); }
-::-webkit-scrollbar-thumb { background: rgba(255,107,74,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(254,0,229,0.3); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
 /* ── Sélection texte ─────────────────────────────────────── */
-::selection { background: rgba(255,107,74,0.25); color: var(--white); }
+::selection { background: rgba(254,0,229,0.25); color: var(--white); }
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 1024px) {
