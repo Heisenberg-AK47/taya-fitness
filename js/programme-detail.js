@@ -272,7 +272,7 @@ function renderDetail(p, modules, reviews, hasAccess) {
           <img src="https://esylzsacjkimcqxllhwd.supabase.co/storage/v1/object/public/media/APC_0640.JPG" alt="Sarah" class="coach-mini-img" />
           <div>
             <strong>Sarah · Coach certifiée</strong>
-            <p>8 ans d'expérience · 200+ clients accompagnés</p>
+            <p>+3 ans d'expérience · +100 clients accompagnés</p>
           </div>
         </div>
       </div>
