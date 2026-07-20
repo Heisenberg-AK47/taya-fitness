@@ -144,7 +144,7 @@
   font-size: 0.75rem;
   font-weight: 600;
 }
-.achat-status.active  { background: rgba(76,175,122,0.1);  color: #4caf7a; }
+.achat-status.active  { background: rgba(197,253,122,0.1);  color: #c5fd7a; }
 .achat-status.pending { background: rgba(254,0,229,0.1);  color: var(--gold); }
 
 /* Barre progression */
@@ -170,7 +170,9 @@
 
 .progress-bar-fill {
   height: 100%;
-  background: var(--gold);
+  /* Lime : la progression est une performance, pas une action de marque.
+     Elle se lit instantanément sur la piste sombre (14.7:1). */
+  background: var(--lime);
   border-radius: 100px;
   transition: width 0.6s ease;
 }

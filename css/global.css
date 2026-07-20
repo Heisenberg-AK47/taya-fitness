@@ -25,13 +25,25 @@
   --gold-deep:    #cc00cc;   /* 4.7:1 · 3.7:1  fonds pleins, petit texte */
   --gold-dark:    #9200a8;   /* 7.5:1 · 2.3:1  fin de dégradé, violet    */
 
+  /* ── Accent secondaire : lime ─────────────────────────────
+     Quasi complémentaire du magenta (86° contre 306°). Le rose seul est
+     connoté ; associé à un vert acide il bascule vers le registre sportif,
+     qui parle aux deux publics.
+     RÔLES — magenta : marque, actions, navigation.
+              lime    : performance, validation, progression.
+     14.7:1 sur le fond sombre, et 14.7:1 pour du texte noir posé dessus.
+     ⚠️ Jamais de texte blanc sur le lime (1.2:1), jamais de lime sur le
+        magenta (2.8:1) : les deux ne se touchent pas directement.        */
+  --lime:         #c5fd7a;
+  --lime-dark:    #5da102;   /* si besoin de lime sur un fond clair      */
+
   /* Textes */
   --white:        #f0f4f8;
   --white-muted:  rgba(220,232,244,0.55);
 
   /* États */
   --red:          #ff4d6a;
-  --green:        #3ecf8e;
+  --green:        #c5fd7a;   /* aligné sur le lime : un seul vert dans la charte */
   --blue-accent:  #4d9fff;
 
   /* Typographie */
@@ -235,7 +247,7 @@ p {
   text-transform: uppercase;
 }
 
-.badge-debutant      { background: rgba(62,207,142,0.12);  color: #3ecf8e; }
+.badge-debutant      { background: rgba(197,253,122,0.12);  color: #c5fd7a; }
 .badge-intermediaire { background: rgba(254,0,229,0.12);  color: var(--gold); }
 .badge-avance        { background: rgba(255,77,106,0.12);  color: var(--red); }
 
@@ -307,7 +319,7 @@ p {
 .alert.show { display: block; }
 
 .alert-error   { background: rgba(255,77,106,0.1);  border: 1px solid rgba(255,77,106,0.3);  color: #ff4d6a; }
-.alert-success { background: rgba(62,207,142,0.1);  border: 1px solid rgba(62,207,142,0.3);  color: #3ecf8e; }
+.alert-success { background: rgba(197,253,122,0.1);  border: 1px solid rgba(197,253,122,0.3);  color: #c5fd7a; }
 .alert-info    { background: rgba(254,0,229,0.1);  border: 1px solid rgba(254,0,229,0.3);  color: var(--gold); }
 
 /* ── Loader ──────────────────────────────────────────────── */

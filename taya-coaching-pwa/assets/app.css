@@ -1,5 +1,5 @@
 /* Taya Fitness — Coaching Online · Shared theme
- * Charte identique au site tayafitness.com : navy #0d1b2a + accent orange #fe00e5. */
+ * Charte identique au site tayafitness.com : navy #0d1b2a + accent magenta #fe00e5 + lime #c5fd7a. */
 :root {
   --bg:        #0d1b2a;
   --bg-2:      #0a1628;
@@ -16,7 +16,8 @@
   --accent-deep: #cc00cc;   /* aplats portant du texte blanc */
   --accent-2:    #9200a8;   /* fin de dégradé, violet */
   --gold:        #fe00e5;
-  --good:        #3ecf8e;
+  --lime:        #c5fd7a;   /* performance, validation, progression */
+  --good:        #c5fd7a;
   --danger:      #ff6b6b;
   --grad:        linear-gradient(135deg, #fe00e5 0%, #9200a8 100%);
   --radius:    14px;
@@ -81,7 +82,7 @@ h3 { font-size: 1.05rem; }
 .plan .price span { font-size: 1rem; color: var(--muted); font-weight: 600; }
 .plan ul { list-style: none; padding: 0; margin: 16px 0 22px; display: grid; gap: 10px; }
 .plan li { padding-left: 26px; position: relative; color: var(--ink); font-size: .95rem; }
-.plan li::before { content: "✓"; position: absolute; left: 0; color: var(--accent); font-weight: 800; }
+.plan li::before { content: "✓"; position: absolute; left: 0; color: var(--lime); font-weight: 800; }
 .plan .cta { margin-top: auto; }
 .plan.featured { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 14px 40px rgba(254,0,229,.18); }
 .badge {
@@ -108,4 +109,4 @@ h3 { font-size: 1.05rem; }
 .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(254,0,229,.18); }
 .alert { padding: 12px 14px; border-radius: var(--radius-sm); font-size: .9rem; margin-bottom: 14px; }
 .alert-error { background: rgba(255,107,107,.12); border: 1px solid var(--danger); color: #ffc2c2; }
-.alert-ok { background: rgba(62,207,142,.12); border: 1px solid var(--good); color: #b6f0d5; }
+.alert-ok { background: rgba(197,253,122,.12); border: 1px solid var(--lime); color: #dcffb0; }
