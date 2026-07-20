@@ -193,6 +193,12 @@
       <div id="w-list"></div>
     </section>
 
+    <!-- AGENDA -->
+    <section id="v-agenda" class="view">
+      <div class="pagehead"><h1>Mon agenda</h1><p>Planifie tes séances : tu reçois un rappel 1h avant.</p></div>
+      <div id="agenda-content"></div>
+    </section>
+
     <!-- PROFIL -->
     <section id="v-profil" class="view">
       <div class="pagehead"><h1>Mon profil</h1></div>
@@ -208,6 +214,7 @@
   <nav class="bottomnav" id="bottomnav">
     <a href="#accueil" data-tab="accueil"><span class="ic">🏠</span>Accueil</a>
     <a href="#programme" data-tab="programme"><span class="ic">🏋️</span>Programme</a>
+    <a href="#agenda" data-tab="agenda"><span class="ic">📅</span>Agenda</a>
     <a href="#suivi" data-tab="suivi"><span class="ic">📈</span>Suivi</a>
     <a href="#profil" data-tab="profil"><span class="ic">👤</span>Profil</a>
   </nav>
@@ -249,6 +256,247 @@ function exigerInstallation() {
   location.replace('/installer');
   return true;
 }
+
+// ══════════════════════════════════════════════════════════════════
+//   AGENDA — planification des séances + rappels
+// ══════════════════════════════════════════════════════════════════
+const PUSH_CONFIG_URL = 'https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/push-config';
+let pushEtat = null;   // { pret, cle_publique } — chargé une fois
+
+const pad = (n) => String(n).padStart(2, '0');
+function isoLocal(d) {
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function libelleQuand(iso) {
+  const d = new Date(iso);
+  const jour = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  const heure = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return `${jour} · ${heure}`;
+}
+
+async function loadSeances() {
+  const { data } = await supabase.from('seances_planifiees')
+    .select('*').eq('user_id', state.user.id)
+    .order('date_heure', { ascending: true });
+  return data || [];
+}
+
+async function renderAgenda() {
+  const el = $('#agenda-content');
+  el.innerHTML = `<p class="note">Chargement…</p>`;
+
+  const [seances] = await Promise.all([loadSeances(), chargerPushEtat()]);
+  const maintenant = new Date();
+  const avenir = seances.filter(s => new Date(s.date_heure) >= maintenant && s.statut !== 'annulee');
+  const passees = seances.filter(s => new Date(s.date_heure) < maintenant || s.statut === 'annulee').reverse();
+
+  // Séances proposées par le programme, pour pré-remplir le titre.
+  const options = (state.workouts || []).map(w =>
+    `<option value="${esc(w.name)}">${esc(w.name)}</option>`).join('');
+
+  const min = isoLocal(new Date(maintenant.getTime() + 60*60*1000)); // au plus tôt dans 1h
+
+  el.innerHTML = `
+    ${blocRappels()}
+
+    <div class="card" style="margin-bottom:18px">
+      <h3 style="margin:0 0 12px">Planifier une séance</h3>
+      <div class="field"><label>Séance</label>
+        ${options
+          ? `<select id="ag-titre">${options}<option value="__libre">Autre / séance libre</option></select>
+             <input id="ag-titre-libre" type="text" placeholder="Nom de ta séance" style="display:none;margin-top:8px">`
+          : `<input id="ag-titre" type="text" placeholder="Ex. Haut du corps" value="Séance">`}
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="field" style="flex:1;min-width:200px"><label>Date et heure</label>
+          <input id="ag-quand" type="datetime-local" min="${min}"></div>
+        <div class="field" style="width:110px"><label>Durée (min)</label>
+          <input id="ag-duree" type="number" min="15" step="15" value="60"></div>
+      </div>
+      <button class="btn btn-accent btn-block" id="ag-add">Ajouter à mon agenda</button>
+    </div>
+
+    <h3 style="margin:6px 0 12px">À venir</h3>
+    <div id="ag-avenir">${avenir.length
+      ? avenir.map(carteSeance).join('')
+      : `<p class="note">Aucune séance planifiée. Ajoute-en une ci-dessus 💪</p>`}</div>
+
+    ${passees.length ? `<h3 style="margin:26px 0 12px;color:var(--muted)">Historique</h3>
+      <div style="opacity:.6">${passees.slice(0,10).map(carteSeance).join('')}</div>` : ''}
+  `;
+
+  brancherAgenda();
+}
+
+function carteSeance(s) {
+  const passee = new Date(s.date_heure) < new Date();
+  const rappel = s.rappel_envoye_at ? '🔔 rappel envoyé'
+             : (passee ? '' : '🔔 rappel 1h avant');
+  return `
+    <div class="list-item" style="cursor:default">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700">${esc(s.titre)}</div>
+        <div class="note" style="margin-top:3px">${libelleQuand(s.date_heure)} · ${s.duree_min} min</div>
+        ${rappel ? `<div class="pill muted" style="margin-top:6px">${rappel}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        ${passee ? '' : `<button class="iconbtn" data-ics="${s.id}" title="Ajouter à mon calendrier">📆</button>
+        <button class="iconbtn" data-del="${s.id}" title="Supprimer">✕</button>`}
+      </div>
+    </div>`;
+}
+
+function brancherAgenda() {
+  const sel = $('#ag-titre');
+  if (sel && sel.tagName === 'SELECT') {
+    sel.onchange = () => {
+      const libre = sel.value === '__libre';
+      const inp = $('#ag-titre-libre');
+      inp.style.display = libre ? 'block' : 'none';
+      if (libre) inp.focus();
+    };
+  }
+
+  $('#ag-add').onclick = async () => {
+    const sel = $('#ag-titre');
+    let titre = sel ? sel.value : 'Séance';
+    if (titre === '__libre') titre = ($('#ag-titre-libre').value || '').trim() || 'Séance libre';
+    const quand = $('#ag-quand').value;
+    const duree = parseInt($('#ag-duree').value) || 60;
+    if (!quand) { toast('Choisis une date et une heure'); return; }
+    if (new Date(quand) <= new Date()) { toast('Choisis un créneau à venir'); return; }
+
+    const btn = $('#ag-add'); btn.disabled = true; btn.textContent = '...';
+    const { error } = await supabase.from('seances_planifiees').insert({
+      user_id: state.user.id, titre, date_heure: new Date(quand).toISOString(), duree_min: duree,
+    });
+    if (error) { toast('Erreur : ' + error.message); btn.disabled = false; btn.textContent = 'Ajouter à mon agenda'; return; }
+    toast('Séance planifiée 📅');
+    renderAgenda();
+  };
+
+  $$('[data-del]').forEach(b => b.onclick = async () => {
+    if (!confirm('Supprimer cette séance de ton agenda ?')) return;
+    await supabase.from('seances_planifiees').delete().eq('id', b.dataset.del).eq('user_id', state.user.id);
+    renderAgenda();
+  });
+
+  $$('[data-ics]').forEach(b => b.onclick = async () => {
+    const { data } = await supabase.from('seances_planifiees').select('*').eq('id', b.dataset.ics).maybeSingle();
+    if (data) telechargerICS(data);
+  });
+}
+
+/* ── Ajout au calendrier du téléphone : marche partout, sans permission ── */
+function telechargerICS(s) {
+  const debut = new Date(s.date_heure);
+  const fin = new Date(debut.getTime() + (s.duree_min || 60) * 60000);
+  const z = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const ics = [
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Taya Fitness//FR',
+    'BEGIN:VEVENT',
+    `UID:${s.id}@tayafitness.com`,
+    `DTSTAMP:${z(new Date())}`,
+    `DTSTART:${z(debut)}`, `DTEND:${z(fin)}`,
+    `SUMMARY:🏋️ ${s.titre} — Taya Fitness`,
+    'DESCRIPTION:Ta séance de coaching Taya Fitness.',
+    // Rappel natif du calendrier, 1h avant — indépendant des notifications push.
+    'BEGIN:VALARM', 'TRIGGER:-PT1H', 'ACTION:DISPLAY',
+    'DESCRIPTION:Ta séance Taya Fitness dans 1h', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR',
+  ].join('\r\n');
+  const url = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = 'seance-taya.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/* ── Rappels push : bandeau selon l'état d'autorisation ──────────── */
+function blocRappels() {
+  if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+    return `<div class="card" style="margin-bottom:18px"><p class="note">
+      📆 Ajoute chaque séance à ton calendrier (bouton 📆) pour un rappel — les notifications ne sont pas disponibles sur cet appareil.</p></div>`;
+  }
+  if (pushEtat && !pushEtat.pret) {
+    return `<div class="card" style="margin-bottom:18px"><p class="note">
+      📆 Utilise le bouton 📆 sur chaque séance pour un rappel dans ton calendrier.</p></div>`;
+  }
+  if (Notification.permission === 'granted') {
+    return `<div class="card" style="margin-bottom:18px;border-color:var(--good)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:1.3rem">🔔</span>
+        <div><b>Rappels activés</b><div class="note">Tu recevras une notification 1h avant chaque séance.</div></div>
+      </div></div>`;
+  }
+  if (Notification.permission === 'denied') {
+    return `<div class="card" style="margin-bottom:18px"><p class="note">
+      🔕 Les notifications sont bloquées dans les réglages de ton téléphone. Tu peux quand même ajouter chaque séance à ton calendrier avec le bouton 📆.</p></div>`;
+  }
+  return `<div class="card" style="margin-bottom:18px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <span style="font-size:1.3rem">🔔</span>
+      <div><b>Active les rappels</b><div class="note">Une notification 1h avant chaque séance, pour ne plus en manquer.</div></div>
+    </div>
+    <button class="btn btn-accent btn-block" id="ag-notif">Activer les notifications</button>
+  </div>`;
+}
+
+async function chargerPushEtat() {
+  if (pushEtat) return pushEtat;
+  try {
+    const r = await fetch(PUSH_CONFIG_URL);
+    pushEtat = await r.json();
+  } catch (_) { pushEtat = { pret: false, cle_publique: null }; }
+  return pushEtat;
+}
+
+// base64url -> Uint8Array, format attendu par pushManager.subscribe
+function urlB64ToUint8(base64) {
+  const p = '='.repeat((4 - base64.length % 4) % 4);
+  const b = (base64 + p).replace(/-/g, '+').replace(/_/g, '/');
+  const raw = atob(b);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+async function activerNotifications() {
+  const btn = $('#ag-notif');
+  if (btn) { btn.disabled = true; btn.textContent = '...'; }
+  try {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { toast('Notifications refusées'); renderAgenda(); return; }
+
+    const etat = await chargerPushEtat();
+    if (!etat.pret || !etat.cle_publique) { toast('Rappels bientôt disponibles'); renderAgenda(); return; }
+
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlB64ToUint8(etat.cle_publique),
+      });
+    }
+    const j = sub.toJSON();
+    await supabase.from('push_abonnements').upsert({
+      user_id: state.user.id,
+      endpoint: sub.endpoint,
+      p256dh: j.keys.p256dh,
+      auth: j.keys.auth,
+      appareil: navigator.userAgent.slice(0, 120),
+    }, { onConflict: 'endpoint' });
+
+    toast('Rappels activés 🔔');
+  } catch (e) {
+    console.error(e); toast("Impossible d'activer les notifications");
+  }
+  renderAgenda();
+}
+
+// Délégation : le bouton d'activation est recréé à chaque rendu.
+document.addEventListener('click', (e) => {
+  if (e.target && e.target.id === 'ag-notif') activerNotifications();
+});
 
 // ---------- bootstrap ----------
 (async () => {
@@ -311,6 +559,7 @@ function route() {
   $$('.bottomnav a').forEach(a => a.classList.toggle('active', a.dataset.tab===tab));
   if (tab==='accueil') renderHome();
   if (tab==='programme') renderProgramme();
+  if (tab==='agenda') renderAgenda();
   if (tab==='suivi') renderSuivi();
   if (tab==='profil') renderProfil();
 }
