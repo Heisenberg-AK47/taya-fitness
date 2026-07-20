@@ -54,30 +54,125 @@ function setAvatar(url, name) {
   }
 }
 
-/**
- * Réduit l'image AVANT l'envoi : une photo de téléphone fait 3 à 8 Mo,
- * un avatar de 400 px en pèse moins de 100 Ko. Ça évite d'exploser le
- * stockage et l'affichage est instantané, même en 4G.
- */
-function redimensionner(file, taille = 400) {
+/** Charge un fichier image en objet Image exploitable. */
+function chargerImage(file) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      // Recadrage carré centré, pour un rendu propre dans le cercle.
-      const cote = Math.min(img.width, img.height);
-      const cx = (img.width - cote) / 2;
-      const cy = (img.height - cote) / 2;
-      const canvas = document.createElement('canvas');
-      canvas.width = canvas.height = taille;
-      const ctx = canvas.getContext('2d');
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(img, cx, cy, cote, cote, 0, 0, taille, taille);
-      canvas.toBlob(b => b ? resolve(b) : reject(new Error('Conversion impossible')), 'image/jpeg', 0.88);
-    };
+    img.onload  = () => { URL.revokeObjectURL(url); resolve(img); };
     img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image illisible')); };
     img.src = url;
+  });
+}
+
+const AVATAR_PX = 400;   // taille finale enregistrée
+
+/**
+ * Ouvre l'outil de recadrage : l'image se déplace au doigt/à la souris sous
+ * un disque, la molette ou le curseur règle le zoom. Renvoie l'image finale
+ * (400 px, JPEG) ou null si l'utilisateur annule.
+ *
+ * On n'envoie que le disque visible : une photo de téléphone de 5 Mo
+ * ressort sous les 100 Ko.
+ */
+function ouvrirRecadrage(img) {
+  return new Promise((resolve) => {
+    const D = 260;                                   // diamètre affiché
+    // Échelle minimale : l'image doit toujours couvrir tout le disque.
+    const echelleMin = Math.max(D / img.width, D / img.height);
+    let echelle = echelleMin;
+    let x = (D - img.width  * echelle) / 2;          // décalage courant
+    let y = (D - img.height * echelle) / 2;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'crop-overlay';
+    overlay.innerHTML = `
+      <div class="crop-box" role="dialog" aria-label="Recadrer ma photo">
+        <h3>Recadre ta photo</h3>
+        <p class="crop-aide">Fais glisser l'image pour la positionner,<br>et utilise le curseur pour zoomer.</p>
+        <div class="crop-zone" id="crop-zone"><canvas id="crop-canvas" width="${D}" height="${D}"></canvas></div>
+        <input type="range" class="crop-range" id="crop-range" min="1" max="4" step="0.01" value="1">
+        <div class="crop-actions">
+          <button type="button" class="crop-annuler" id="crop-annuler">Annuler</button>
+          <button type="button" class="crop-valider" id="crop-valider">Utiliser cette photo</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    const zone   = overlay.querySelector('#crop-zone');
+    const canvas = overlay.querySelector('#crop-canvas');
+    const range  = overlay.querySelector('#crop-range');
+    const ctx    = canvas.getContext('2d');
+
+    // Empêche de laisser un bord vide : l'image reste toujours couvrante.
+    function borner() {
+      const l = img.width * echelle, h = img.height * echelle;
+      x = Math.min(0, Math.max(D - l, x));
+      y = Math.min(0, Math.max(D - h, y));
+    }
+    function dessiner() {
+      borner();
+      ctx.clearRect(0, 0, D, D);
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, x, y, img.width * echelle, img.height * echelle);
+    }
+    dessiner();
+
+    // ── Déplacement (souris et tactile via Pointer Events) ──
+    let actif = false, px = 0, py = 0;
+    zone.addEventListener('pointerdown', (e) => {
+      actif = true; px = e.clientX; py = e.clientY;
+      zone.setPointerCapture(e.pointerId);
+    });
+    zone.addEventListener('pointermove', (e) => {
+      if (!actif) return;
+      x += e.clientX - px; y += e.clientY - py;
+      px = e.clientX; py = e.clientY;
+      dessiner();
+    });
+    const relacher = () => { actif = false; };
+    zone.addEventListener('pointerup', relacher);
+    zone.addEventListener('pointercancel', relacher);
+
+    // ── Zoom : curseur, molette, et pincement à deux doigts ──
+    function zoomer(facteur, cx = D / 2, cy = D / 2) {
+      const avant = echelle;
+      echelle = Math.min(echelleMin * 4, Math.max(echelleMin, echelle * facteur));
+      // On zoome autour du point visé, pas du coin.
+      x = cx - (cx - x) * (echelle / avant);
+      y = cy - (cy - y) * (echelle / avant);
+      range.value = (echelle / echelleMin).toFixed(2);
+      dessiner();
+    }
+    range.addEventListener('input', () => {
+      const cible = echelleMin * parseFloat(range.value);
+      zoomer(cible / echelle);
+    });
+    zone.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const r = zone.getBoundingClientRect();
+      zoomer(e.deltaY < 0 ? 1.08 : 1 / 1.08, e.clientX - r.left, e.clientY - r.top);
+    }, { passive: false });
+
+    // ── Sortie ──
+    function fermer(resultat) { overlay.remove(); resolve(resultat); }
+    overlay.querySelector('#crop-annuler').addEventListener('click', () => fermer(null));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) fermer(null); });
+    document.addEventListener('keydown', function esc(e) {
+      if (e.key === 'Escape') { document.removeEventListener('keydown', esc); fermer(null); }
+    });
+
+    overlay.querySelector('#crop-valider').addEventListener('click', (e) => {
+      e.target.disabled = true;
+      // On rejoue le même cadrage à la taille finale.
+      const out = document.createElement('canvas');
+      out.width = out.height = AVATAR_PX;
+      const k = AVATAR_PX / D;
+      const octx = out.getContext('2d');
+      octx.imageSmoothingQuality = 'high';
+      octx.drawImage(img, x * k, y * k, img.width * echelle * k, img.height * echelle * k);
+      out.toBlob(b => fermer(b), 'image/jpeg', 0.9);
+    });
   });
 }
 
@@ -98,9 +193,19 @@ function initAvatarUpload() {
     if (!file.type.startsWith('image/')) { alert('Choisis une image.'); return; }
     if (file.size > 15 * 1024 * 1024)    { alert('Image trop lourde (15 Mo maximum).'); return; }
 
+    // Recadrage avant tout envoi : rien ne part si l'utilisateur annule.
+    let blob;
+    try {
+      blob = await ouvrirRecadrage(await chargerImage(file));
+    } catch (err) {
+      console.error('Lecture de l\'image:', err);
+      alert("Cette image n'a pas pu être ouverte. Essaie avec une autre.");
+      return;
+    }
+    if (!blob) return;
+
     spin.hidden = false;
     try {
-      const blob = await redimensionner(file);
       // Un dossier par utilisateur : la règle de sécurité n'autorise que le sien.
       const chemin = `${currentUser.id}/avatar.jpg`;
 

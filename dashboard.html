@@ -67,12 +67,55 @@
   }
   .avatar-cam {
     position: absolute; right: -2px; bottom: -2px;
-    width: 22px; height: 22px; border-radius: 50%;
+    width: 26px; height: 26px; border-radius: 50%;
     background: var(--gold, #FF5C35); color: #fff;
-    font-size: 11px; line-height: 22px; text-align: center;
+    font-size: 13px; line-height: 26px; text-align: center;
     border: 2px solid #16273a; box-shadow: 0 2px 6px rgba(0,0,0,.4);
     transition: transform .2s;
   }
+
+  /* ── Recadrage de la photo ───────────────────────────────── */
+  .crop-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(6,12,20,.86); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .crop-box {
+    background: #16273a; border: 1px solid rgba(255,255,255,.09);
+    border-radius: 18px; padding: 24px; width: 100%; max-width: 380px;
+    box-shadow: 0 24px 60px rgba(0,0,0,.5);
+  }
+  .crop-box h3 {
+    margin: 0 0 4px; font-size: 1.05rem; color: #f0f4f8; text-align: center;
+  }
+  .crop-box .crop-aide {
+    margin: 0 0 18px; font-size: .78rem; color: rgba(220,232,244,.5);
+    text-align: center; line-height: 1.5;
+  }
+  /* Zone ronde : l'image se déplace dessous, le disque sert de fenêtre. */
+  .crop-zone {
+    position: relative; width: 260px; height: 260px; margin: 0 auto 18px;
+    border-radius: 50%; overflow: hidden; cursor: grab;
+    background: #0d1b2a; touch-action: none;
+    box-shadow: 0 0 0 2px var(--gold, #FF5C35), 0 0 0 12px rgba(255,92,53,.08);
+  }
+  .crop-zone:active { cursor: grabbing; }
+  .crop-zone canvas { display: block; width: 100%; height: 100%; }
+  .crop-range {
+    width: 100%; margin: 0 0 20px; accent-color: var(--gold, #FF5C35);
+    display: block;
+  }
+  .crop-actions { display: flex; gap: 10px; }
+  .crop-actions button {
+    flex: 1; padding: 12px; border-radius: 10px; font-size: .9rem;
+    font-weight: 600; cursor: pointer; border: none;
+  }
+  .crop-annuler {
+    background: transparent; color: rgba(220,232,244,.7);
+    border: 1px solid rgba(255,255,255,.14) !important;
+  }
+  .crop-valider { background: var(--gold, #FF5C35); color: #fff; }
+  .crop-valider:disabled { opacity: .55; cursor: default; }
   .avatar-btn:hover .sidebar-avatar { filter: brightness(.7); }
   .avatar-btn:hover .avatar-cam { transform: scale(1.12); }
   .avatar-btn:focus-visible { outline: 2px solid var(--gold, #FF5C35); outline-offset: 3px; }
@@ -107,10 +150,10 @@
 </div>
 </div>
 <nav class="sidebar-nav">
+<a href="#profil" class="sidebar-link" data-tab="profil">👤 Mon profil</a>
 <a href="#mes-programmes" class="sidebar-link active" data-tab="mes-programmes">🏋️ Mes programmes</a>
 <a href="#progression" class="sidebar-link" data-tab="progression">📈 Ma progression</a>
 <a href="#creneaux" class="sidebar-link" data-tab="creneaux">📅 Mes créneaux</a>
-<a href="#profil" class="sidebar-link" data-tab="profil">👤 Mon profil</a>
 </nav>
 <button class="sidebar-logout" id="sidebar-logout">🚪 Déconnexion</button>
 </aside>

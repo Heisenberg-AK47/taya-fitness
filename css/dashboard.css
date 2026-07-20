@@ -38,13 +38,14 @@
 }
 
 .sidebar-avatar {
-  width: 44px;
-  height: 44px;
+  /* 44px à l'origine, agrandi de 30 % */
+  width: 57px;
+  height: 57px;
   border-radius: 50%;
   background: var(--gold);
   color: var(--black);
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 1.3rem;
   display: flex;
   align-items: center;
   justify-content: center;
