@@ -102,10 +102,13 @@ function authZoneUser(user) {
       <span>${user.user_metadata?.full_name?.split(' ')[0] || 'Mon espace'}</span>
       ▾
     </button>
+    <!-- Ce menu sert à ENTRER dans l'espace membre et à en sortir.
+         La navigation à l'intérieur appartient à la colonne de gauche :
+         dupliquer les deux laissait croire à des destinations différentes,
+         et le menu était de toute façon incomplet (ni programmes, ni
+         créneaux). Un seul endroit pour naviguer, un seul pour entrer. -->
     <div class="navbar-dropdown">
       <a href="/dashboard">🏠 Mon espace</a>
-      <a href="/dashboard?tab=progression">📈 Ma progression</a>
-      <a href="/dashboard?tab=profil">👤 Mon profil</a>
       <div class="divider"></div>
       <button id="logout-btn">🚪 Se déconnecter</button>
     </div>

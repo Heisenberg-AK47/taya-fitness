@@ -25,7 +25,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 function getDefaultTab() {
   const hash = window.location.hash.replace('#', '');
   const param = new URLSearchParams(window.location.search).get('tab');
-  return param || hash || 'mes-programmes';
+  // « Mon espace » ouvre sur le profil : c'est la première chose qu'un
+  // nouveau membre doit compléter, et le premier onglet de la colonne.
+  return param || hash || 'profil';
 }
 
 /* ── Info utilisateur sidebar ────────────────────────────── */
