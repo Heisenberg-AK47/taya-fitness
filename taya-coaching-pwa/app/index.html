@@ -15,6 +15,16 @@
   .appbar { position: sticky; top: 0; z-index: 40; background: rgba(13,27,42,.92); backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--line); }
   .appbar-in { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; }
+  .appbar-user { display: flex; align-items: center; gap: 10px; }
+  /* Photo de profil : remplace les initiales dès qu'elle existe. */
+  .app-avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .78rem; font-weight: 800; overflow: hidden;
+  }
+  .app-avatar.has-photo { background: transparent; }
+  .app-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
   .brand { display: flex; align-items: center; gap: 9px; font-weight: 800; font-family: var(--font-head); }
   .brand img { width: 30px; height: 30px; }
   .brand i { color: var(--accent); font-style: normal; }
@@ -148,7 +158,10 @@
   <header class="appbar">
     <div class="container appbar-in">
       <div class="brand"><img src="/icons/icon-192.png" alt=""><span>TAYA <i>Fitness</i></span></div>
-      <button class="iconbtn" id="logout">Déconnexion</button>
+      <div class="appbar-user">
+        <div class="app-avatar" id="app-avatar" title="Mon profil"></div>
+        <button class="iconbtn" id="logout">Déconnexion</button>
+      </div>
     </div>
   </header>
 
@@ -220,6 +233,29 @@ const state = { user:null, sub:null, client:null, programme:null, workouts:[], w
   if (!gate) return;                 // redirected
   state.user = gate.user; state.sub = gate.subscription;
 
+  /**
+   * Photo de profil dans l'en-tête. Elle est déposée depuis l'espace client
+   * du site, qui l'enregistre à la fois dans profiles.avatar_url et dans le
+   * compte lui-même — on lit donc le compte, sans requête supplémentaire.
+   * À défaut de photo : les initiales.
+   */
+  function renderAvatar() {
+    const el = $('#app-avatar');
+    if (!el) return;
+    const photo = state.user?.user_metadata?.avatar_url;
+    if (photo) {
+      el.classList.add('has-photo');
+      el.innerHTML = `<img src="${esc(photo)}" alt="Ma photo de profil">`;
+      return;
+    }
+    el.classList.remove('has-photo');
+    const source = state.client?.prenom
+      || state.user?.user_metadata?.full_name
+      || state.user?.email
+      || '?';
+    el.textContent = source.trim().split(/\s+/).map(m => m[0]).join('').toUpperCase().slice(0, 2);
+  }
+
   const { data: client } = await supabase.from('clients').select('*').eq('email', state.user.email).maybeSingle();
   state.client = client;
 
@@ -228,6 +264,7 @@ const state = { user:null, sub:null, client:null, programme:null, workouts:[], w
 
   $('#loading').style.display = 'none';
   $('#shell').style.display = 'block';
+  renderAvatar();
 
   // Onboarding required if no objective recorded yet
   if (!client || !client.objectif) { showOnboarding(); }

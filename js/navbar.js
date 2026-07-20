@@ -89,10 +89,16 @@ function authZoneUser(user) {
     .toUpperCase()
     .slice(0, 2);
 
+  // La photo de profil remplace les initiales dès qu'elle existe.
+  const photo = user.user_metadata?.avatar_url;
+  const avatar = photo
+    ? `<div class="navbar-user-avatar has-photo"><img src="${photo}" alt=""></div>`
+    : `<div class="navbar-user-avatar">${initials}</div>`;
+
   return `
   <div class="navbar-user" id="navbar-user">
     <button class="navbar-user-btn" id="user-btn" aria-expanded="false">
-      <div class="navbar-user-avatar">${initials}</div>
+      ${avatar}
       <span>${user.user_metadata?.full_name?.split(' ')[0] || 'Mon espace'}</span>
       ▾
     </button>

@@ -169,6 +169,16 @@
   font-weight: 700;
   color: var(--black);
   flex-shrink: 0;
+  overflow: hidden;
+}
+/* Avec une photo, le fond doré ne doit plus transparaître. */
+.navbar-user-avatar.has-photo { background: transparent; }
+.navbar-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
 }
 
 .navbar-dropdown {
