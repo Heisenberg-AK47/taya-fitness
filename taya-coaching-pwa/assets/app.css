@@ -9,12 +9,16 @@
   --muted:     rgba(220,232,244,.6);
   --muted-2:   rgba(220,232,244,.4);
   --line:      rgba(255,255,255,.08);
-  --accent:    #fe00e5;
-  --accent-2:  #cc00b8;
-  --gold:      #fe00e5;
-  --good:      #3ecf8e;
-  --danger:    #ff6b6b;
-  --grad:      linear-gradient(135deg, #fe00e5 0%, #cc00b8 100%);
+  /* Même gamme magenta que le site (décalage de teinte vers le violet
+     dans les tons sombres, vers le rose dans les clairs). */
+  --accent-pale: #ff70d4;
+  --accent:      #fe00e5;   /* référence de marque */
+  --accent-deep: #cc00cc;   /* aplats portant du texte blanc */
+  --accent-2:    #9200a8;   /* fin de dégradé, violet */
+  --gold:        #fe00e5;
+  --good:        #3ecf8e;
+  --danger:      #ff6b6b;
+  --grad:        linear-gradient(135deg, #fe00e5 0%, #9200a8 100%);
   --radius:    14px;
   --radius-sm: 10px;
   --shadow:    0 10px 40px rgba(0,0,0,.35);
