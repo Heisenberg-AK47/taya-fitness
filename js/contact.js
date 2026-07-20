@@ -4,7 +4,7 @@
 
 import { initNavbar } from './navbar.js';
 import { initFooter } from './footer.js';
-import { supabase } from './supabase.js';
+const CONTACT_URL = 'https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/contact-message';
 
 document.addEventListener('DOMContentLoaded', () => {
   initNavbar();
@@ -31,12 +31,21 @@ function initContactForm() {
       tel:      document.getElementById('contact-tel').value.trim(),
       sujet:    document.getElementById('contact-sujet').value,
       message:  document.getElementById('contact-message').value.trim(),
-      created_at: new Date().toISOString()
+      // Piège à robots : invisible pour un humain, donc toujours vide.
+      website:  document.getElementById('contact-website')?.value || '',
     };
 
     try {
-      const { error } = await supabase.from('contacts').insert(payload);
-      if (error) throw error;
+      // On passe par une fonction serveur : elle filtre le spam, enregistre
+      // le message ET prévient Sarah par e-mail. L'écriture directe en base
+      // ne notifiait personne — 66 messages y ont dormi sans réponse.
+      const res = await fetch(CONTACT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Envoi impossible');
       ok.textContent = '✅ Message envoyé ! Sarah vous répondra sous 24h.';
       ok.classList.add('show');
       e.target.reset();

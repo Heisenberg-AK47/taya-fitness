@@ -95,6 +95,12 @@
                 <label>Ton message</label>
                 <textarea id="contact-message" rows="5" placeholder="Décris ton objectif, ton niveau actuel, tes disponibilités..." required></textarea>
               </div>
+              <!-- Piège à robots : invisible et hors du parcours clavier.
+                   Un humain ne le remplira jamais, un robot si. -->
+              <div style="position:absolute;left:-9999px" aria-hidden="true">
+                <label for="contact-website">Ne pas remplir</label>
+                <input type="text" id="contact-website" name="website" tabindex="-1" autocomplete="off">
+              </div>
               <button type="submit" class="btn btn-primary" id="btn-contact">Envoyer le message</button>
             </form>
           </div>
