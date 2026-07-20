@@ -192,6 +192,7 @@
       <div class="hero-head">
         <div class="hero-head-txt"><h1 id="hello">Salut 👋</h1><p id="sub-status"></p></div>
       </div>
+      <div id="home-cta" style="margin-bottom:18px"></div>
       <div class="stat-row" id="home-stats"></div>
       <div style="margin-top:18px" id="home-program"></div>
     </section>
@@ -626,13 +627,17 @@ function renderHome() {
     <div class="mini"><div class="k">Niveau</div><div class="v" style="font-size:1.1rem">${esc(pretty(state.client?.niveau))}</div></div>
     <div class="mini"><div class="k">Poids actuel</div><div class="v">${last? esc(last.poids)+' kg':'—'}</div></div>`;
 
+  // Bouton d'accès aux séances, juste sous la bannière.
+  $('#home-cta').innerHTML = state.programme
+    ? `<a class="btn btn-accent btn-block" href="#programme">Voir mes séances →</a>`
+    : '';
+
   const c = $('#home-program');
   const prevHtml = state.client?.objectif ? `<div class="card" style="margin-bottom:14px"><div class="pill">🎯 Ton prévisionnel</div><p style="margin:9px 0 0;line-height:1.5">${previsionnel(state.client)}</p></div>` : '';
   if (state.programme) {
     c.innerHTML = prevHtml + `<div class="card"><div class="pill">Semaine ${state.week}</div>
       <h3 style="margin:10px 0 4px">${esc(state.programme.titre)}</h3>
-      <p class="note">${esc(state.programme.description_courte||state.programme.objectif||'')}</p>
-      <a class="btn btn-accent btn-block" href="#programme" style="margin-top:12px">Voir mes séances →</a></div>`;
+      <p class="note">${esc(state.programme.description_courte||state.programme.objectif||'')}</p></div>`;
   } else {
     c.innerHTML = prevHtml + emptyProgram();
   }
