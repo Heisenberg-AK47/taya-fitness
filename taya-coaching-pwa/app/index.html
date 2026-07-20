@@ -671,7 +671,10 @@ async function finishOb() {
   const numOr = (v) => { const n = parseFloat(String(v ?? '').replace(',', '.')); return isFinite(n) ? n : null; };
   const payload = {
     email: state.user.email,
+    // On repart du nom complet du compte pour ne pas laisser la fiche CRM
+    // vide : le prenom seul ne suffit pas a Sarah pour identifier quelqu'un.
     prenom: state.client?.prenom || (state.user.user_metadata?.full_name || '').split(' ')[0] || null,
+    nom:    state.client?.nom    || (state.user.user_metadata?.full_name || '').split(' ').slice(1).join(' ') || null,
     objectif: obData.objectif, niveau: obData.niveau, genre: obData.genre,
     age: numOr(obData.age), poids_kg: numOr(obData.poids), taille_cm: numOr(obData.taille),
     zones_cibles: zones, contraintes: contraintes,
