@@ -143,18 +143,22 @@ p {
   margin-bottom: 60px;
 }
 
+/* Ces pastilles annoncent une section : elles doivent situer, pas crier.
+   En magenta (texte + fond + bordure) elles pesaient 21 touches à elles
+   seules et diluaient le signal des vraies actions. Neutres, elles
+   laissent la couleur aux boutons et aux chiffres. */
 .section-header .label {
   display: inline-block;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: rgba(255,255,255,0.72);
   margin-bottom: 14px;
-  background: rgba(254,0,229,0.1);
+  background: rgba(255,255,255,0.05);
   padding: 6px 14px;
   border-radius: 100px;
-  border: 1px solid rgba(254,0,229,0.2);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 
 .section-header h2 { margin-bottom: 16px; }

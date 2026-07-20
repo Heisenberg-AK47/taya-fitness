@@ -7,9 +7,14 @@
 .hero-gradient { position: absolute; inset: 0; background: linear-gradient(105deg, rgba(13,27,42,0.95) 0%, rgba(13,27,42,0.75) 50%, rgba(13,27,42,0.25) 100%); }
 .hero-gradient::after { content: ''; position: absolute; bottom: -100px; left: -100px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(254,0,229,0.08) 0%, transparent 70%); pointer-events: none; }
 .hero-content { position: relative; z-index: 2; max-width: 700px; padding: 120px 0 80px; }
-.hero-label { display: inline-flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 20px; background: rgba(254,0,229,0.1); border: 1px solid rgba(254,0,229,0.2); padding: 7px 16px; border-radius: 100px; animation: fadeUp 0.6s ease both; }
+.hero-label { display: inline-flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.78); margin-bottom: 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.14); padding: 7px 16px; border-radius: 100px; animation: fadeUp 0.6s ease both; }
+/* L'étoile garde une étincelle lime : un seul caractère coloré suffit. */
+.hero-label::first-letter { color: var(--lime); }
 .hero-title { margin-bottom: 24px; animation: fadeUp 0.6s 0.1s ease both; }
-.hero-title em { font-style: normal; color: var(--gold); }
+/* Le titre redevient blanc : c'était la plus grosse masse magenta de la page.
+   Seul le point final garde l'accent — une signature, pas un aplat. */
+.hero-title em { font-style: normal; color: var(--white); }
+.hero-title em i { font-style: normal; color: var(--gold); }
 .hero-subtitle { font-size: 1.1rem; color: rgba(220,232,244,0.75); margin-bottom: 40px; line-height: 1.75; animation: fadeUp 0.6s 0.2s ease both; }
 .hero-cta { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 56px; animation: fadeUp 0.6s 0.3s ease both; }
 .hero-stats { display: flex; align-items: center; gap: 32px; animation: fadeUp 0.6s 0.4s ease both; }
