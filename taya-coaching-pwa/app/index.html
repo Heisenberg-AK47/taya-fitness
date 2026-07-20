@@ -35,23 +35,24 @@
   .pagehead h1 { font-size: 1.7rem; margin: 0; }
   .pagehead p { margin: 4px 0 0; color: var(--muted); font-size: .92rem; }
 
-  /* En-tête illustré de l'accueil : photo en fond, texte en surimpression. */
+  /* En-tête illustré : la photo occupe le haut (padding-top), le texte
+     s'installe en bas. La hauteur suit le contenu — le texte ne peut donc
+     jamais être coupé, quelle que soit sa longueur. */
   .hero-head {
     position: relative; margin: 6px 0 18px;
     border-radius: 16px; overflow: hidden;
-    min-height: 190px; display: flex; align-items: flex-end;
+    padding: 120px 20px 18px;   /* 120px en haut réservés à l'image */
     background:
-      linear-gradient(180deg, rgba(13,27,42,.15) 0%, rgba(13,27,42,.55) 55%, rgba(13,27,42,.94) 100%),
+      linear-gradient(180deg, rgba(13,27,42,.10) 0%, rgba(13,27,42,.55) 58%, rgba(13,27,42,.95) 100%),
       url('https://esylzsacjkimcqxllhwd.supabase.co/storage/v1/object/public/media/istockphoto-2075354173-612x612.jpg')
-        center 28% / cover no-repeat;
+        center 25% / cover no-repeat;
     border: 1px solid var(--line);
   }
-  .hero-head-txt { padding: 18px 20px; }
-  .hero-head-txt h1 { font-size: 1.7rem; margin: 0; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.5); }
-  .hero-head-txt p  { margin: 5px 0 0; color: rgba(240,244,248,.9); font-size: .92rem; text-shadow: 0 1px 8px rgba(0,0,0,.5); }
+  .hero-head-txt h1 { font-size: 1.7rem; margin: 0; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.55); }
+  .hero-head-txt p  { margin: 6px 0 0; color: rgba(240,244,248,.92); font-size: .92rem; line-height: 1.5; text-shadow: 0 1px 8px rgba(0,0,0,.55); }
   .hero-head-txt p b { color: #fff !important; }
   @media (max-width: 480px) {
-    .hero-head { min-height: 160px; }
+    .hero-head { padding: 100px 18px 16px; }
     .hero-head-txt h1 { font-size: 1.45rem; }
     .hero-head-txt p { font-size: .85rem; }
   }
@@ -619,7 +620,7 @@ function renderHome() {
   $('#hello').textContent = `Salut ${prenom} 💪`;
   const planName = ({online_essentiel:'Essentiel',online_transformation:'Transformation',online_premium:'Premium'})[state.sub.plan] || state.sub.plan || 'Coaching online';
   const end = state.sub.current_period_end ? new Date(state.sub.current_period_end).toLocaleDateString('fr-FR') : '—';
-  $('#sub-status').innerHTML = `Formule <b style="color:var(--ink)">${esc(planName)}</b> · prochaine échéance ${end}`;
+  $('#sub-status').innerHTML = `Formule <b style="color:var(--ink)">${esc(planName)}</b> · jusqu'au ${end}`;
 
   const last = state.weights[0];
   $('#home-stats').innerHTML = `
