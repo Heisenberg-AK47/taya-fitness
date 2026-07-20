@@ -53,6 +53,37 @@
   }
   .profil-form select:focus { border-color: var(--gold, #FF5C35); }
   .profil-form select option { background: #1a2035; }
+
+  /* ── Photo de profil ─────────────────────────────────────── */
+  .avatar-btn {
+    position: relative; padding: 0; border: none; background: none;
+    cursor: pointer; border-radius: 50%; flex-shrink: 0; line-height: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .avatar-btn .sidebar-avatar { overflow: hidden; transition: filter .2s; }
+  .avatar-btn img {
+    width: 100%; height: 100%; object-fit: cover;
+    border-radius: 50%; display: block;
+  }
+  .avatar-cam {
+    position: absolute; right: -2px; bottom: -2px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--gold, #FF5C35); color: #fff;
+    font-size: 11px; line-height: 22px; text-align: center;
+    border: 2px solid #16273a; box-shadow: 0 2px 6px rgba(0,0,0,.4);
+    transition: transform .2s;
+  }
+  .avatar-btn:hover .sidebar-avatar { filter: brightness(.7); }
+  .avatar-btn:hover .avatar-cam { transform: scale(1.12); }
+  .avatar-btn:focus-visible { outline: 2px solid var(--gold, #FF5C35); outline-offset: 3px; }
+  /* Pendant l'envoi */
+  .avatar-spin {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: rgba(0,0,0,.55);
+    border: 2px solid transparent; border-top-color: var(--gold, #FF5C35);
+    animation: avatar-turn .7s linear infinite;
+  }
+  @keyframes avatar-turn { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -63,7 +94,13 @@
 <!-- Sidebar -->
 <aside class="dashboard-sidebar">
 <div class="sidebar-user" id="sidebar-user">
+<!-- Photo de profil : un clic ouvre la galerie sur mobile, l'explorateur sur ordinateur. -->
+<button type="button" class="avatar-btn" id="avatar-btn" title="Changer ma photo" aria-label="Changer ma photo de profil">
 <div class="sidebar-avatar" id="sidebar-avatar">?</div>
+<span class="avatar-cam" aria-hidden="true">📷</span>
+<span class="avatar-spin" id="avatar-spin" hidden></span>
+</button>
+<input type="file" id="avatar-input" accept="image/*" hidden>
 <div>
 <strong id="sidebar-name">Chargement...</strong>
 <small id="sidebar-email"></small>

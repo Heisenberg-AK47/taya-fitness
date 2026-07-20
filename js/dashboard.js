@@ -32,11 +32,97 @@ function getDefaultTab() {
 async function loadUserInfo() {
   const name = currentUser.user_metadata?.full_name || currentUser.email || 'Utilisateur';
   const email = currentUser.email;
-  const init = name[0].toUpperCase();
 
-  document.getElementById('sidebar-avatar').textContent = init;
+  setAvatar(currentUser.user_metadata?.avatar_url || null, name);
   document.getElementById('sidebar-name').textContent = name.split(' ')[0];
   document.getElementById('sidebar-email').textContent = email;
+  initAvatarUpload();
+}
+
+/* ── Photo de profil ─────────────────────────────────────── */
+
+/** Affiche la photo si elle existe, sinon l'initiale du prénom. */
+function setAvatar(url, name) {
+  const el = document.getElementById('sidebar-avatar');
+  if (!el) return;
+  const initiale = (name || currentUser?.email || '?')[0].toUpperCase();
+  if (url) {
+    // Le paramètre force le navigateur à recharger l'image après un changement.
+    el.innerHTML = `<img src="${url}" alt="Ma photo de profil">`;
+  } else {
+    el.textContent = initiale;
+  }
+}
+
+/**
+ * Réduit l'image AVANT l'envoi : une photo de téléphone fait 3 à 8 Mo,
+ * un avatar de 400 px en pèse moins de 100 Ko. Ça évite d'exploser le
+ * stockage et l'affichage est instantané, même en 4G.
+ */
+function redimensionner(file, taille = 400) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      // Recadrage carré centré, pour un rendu propre dans le cercle.
+      const cote = Math.min(img.width, img.height);
+      const cx = (img.width - cote) / 2;
+      const cy = (img.height - cote) / 2;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = taille;
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, cx, cy, cote, cote, 0, 0, taille, taille);
+      canvas.toBlob(b => b ? resolve(b) : reject(new Error('Conversion impossible')), 'image/jpeg', 0.88);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Image illisible')); };
+    img.src = url;
+  });
+}
+
+function initAvatarUpload() {
+  const btn = document.getElementById('avatar-btn');
+  const input = document.getElementById('avatar-input');
+  const spin = document.getElementById('avatar-spin');
+  if (!btn || !input || btn.dataset.pret) return;
+  btn.dataset.pret = '1';
+
+  btn.addEventListener('click', () => input.click());
+
+  input.addEventListener('change', async () => {
+    const file = input.files?.[0];
+    input.value = '';                       // permet de re-choisir le même fichier
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) { alert('Choisis une image.'); return; }
+    if (file.size > 15 * 1024 * 1024)    { alert('Image trop lourde (15 Mo maximum).'); return; }
+
+    spin.hidden = false;
+    try {
+      const blob = await redimensionner(file);
+      // Un dossier par utilisateur : la règle de sécurité n'autorise que le sien.
+      const chemin = `${currentUser.id}/avatar.jpg`;
+
+      const { error: upErr } = await supabase.storage
+        .from('avatars')
+        .upload(chemin, blob, { upsert: true, contentType: 'image/jpeg', cacheControl: '3600' });
+      if (upErr) throw upErr;
+
+      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(chemin);
+      const url = `${publicUrl}?v=${Date.now()}`;   // contourne le cache navigateur
+
+      await supabase.from('profiles').upsert({ id: currentUser.id, avatar_url: url, updated_at: new Date().toISOString() });
+      await supabase.auth.updateUser({ data: { avatar_url: url } });
+
+      setAvatar(url, currentUser.user_metadata?.full_name);
+    } catch (err) {
+      console.error('Envoi de la photo:', err);
+      alert("La photo n'a pas pu être enregistrée. Réessaie dans un instant.");
+    } finally {
+      spin.hidden = true;
+    }
+  });
 }
 
 /* ── Navigation sidebar ──────────────────────────────────── */
@@ -247,7 +333,8 @@ async function initProfilForm() {
 
       const displayName = profile.prenom || profile.full_name?.split(' ')[0] || currentUser.email.split('@')[0];
       document.getElementById('sidebar-name').textContent = displayName;
-      document.getElementById('sidebar-avatar').textContent = displayName[0].toUpperCase();
+      // La photo enregistrée prime sur l'initiale.
+      setAvatar(profile.avatar_url || currentUser.user_metadata?.avatar_url || null, displayName);
     } else {
       const name = currentUser.user_metadata?.full_name || '';
       const parts = name.split(' ');
@@ -296,12 +383,15 @@ async function initProfilForm() {
       alertEl.classList.add('show');
       if (prenom) {
         document.getElementById('sidebar-name').textContent = prenom;
-        document.getElementById('sidebar-avatar').textContent = prenom[0].toUpperCase();
+        // Ne pas écraser une photo déjà en place.
+        if (!document.querySelector('#sidebar-avatar img')) setAvatar(null, prenom);
       }
       setTimeout(() => alertEl.classList.remove('show'), 3000);
     } catch (err) {
       console.error(err);
-      alertEl.textContent = 'Erreur lors de la mise à jour.';
+      // Message précis : « Erreur lors de la mise à jour » masquait la vraie
+      // cause (3 colonnes inexistantes) et rendait le bug indiagnosticable.
+      alertEl.textContent = 'Enregistrement impossible : ' + (err?.message || 'erreur inconnue');
       alertEl.style.background = 'rgba(239,68,68,0.15)';
       alertEl.style.color = '#f87171';
       alertEl.classList.add('show');
