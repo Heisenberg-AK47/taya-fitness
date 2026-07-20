@@ -35,6 +35,27 @@
   .pagehead h1 { font-size: 1.7rem; margin: 0; }
   .pagehead p { margin: 4px 0 0; color: var(--muted); font-size: .92rem; }
 
+  /* En-tête illustré de l'accueil : photo en fond, texte en surimpression. */
+  .hero-head {
+    position: relative; margin: 6px 0 18px;
+    border-radius: 16px; overflow: hidden;
+    min-height: 190px; display: flex; align-items: flex-end;
+    background:
+      linear-gradient(180deg, rgba(13,27,42,.15) 0%, rgba(13,27,42,.55) 55%, rgba(13,27,42,.94) 100%),
+      url('https://esylzsacjkimcqxllhwd.supabase.co/storage/v1/object/public/media/istockphoto-2075354173-612x612.jpg')
+        center 28% / cover no-repeat;
+    border: 1px solid var(--line);
+  }
+  .hero-head-txt { padding: 18px 20px; }
+  .hero-head-txt h1 { font-size: 1.7rem; margin: 0; color: #fff; text-shadow: 0 2px 12px rgba(0,0,0,.5); }
+  .hero-head-txt p  { margin: 5px 0 0; color: rgba(240,244,248,.9); font-size: .92rem; text-shadow: 0 1px 8px rgba(0,0,0,.5); }
+  .hero-head-txt p b { color: #fff !important; }
+  @media (max-width: 480px) {
+    .hero-head { min-height: 160px; }
+    .hero-head-txt h1 { font-size: 1.45rem; }
+    .hero-head-txt p { font-size: .85rem; }
+  }
+
   /* bottom nav */
   .bottomnav { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: var(--bg-2);
     border-top: 1px solid var(--line); display: flex; justify-content: space-around; padding: 8px 0 calc(8px + env(safe-area-inset-bottom)); }
@@ -168,7 +189,9 @@
   <main class="container">
     <!-- ACCUEIL -->
     <section id="v-accueil" class="view">
-      <div class="pagehead"><h1 id="hello">Salut 👋</h1><p id="sub-status"></p></div>
+      <div class="hero-head">
+        <div class="hero-head-txt"><h1 id="hello">Salut 👋</h1><p id="sub-status"></p></div>
+      </div>
       <div class="stat-row" id="home-stats"></div>
       <div style="margin-top:18px" id="home-program"></div>
     </section>
