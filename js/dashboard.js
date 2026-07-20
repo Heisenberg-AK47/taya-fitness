@@ -538,7 +538,46 @@ async function loadCreneaux() {
 }
 
 /* ── Profil ──────────────────────────────────────────────── */
+/**
+ * Auto-complétion ville d'après le code postal, via l'API officielle
+ * geo.api.gouv.fr (gratuite, sans clé, France). Un code postal peut couvrir
+ * plusieurs communes : dans ce cas on propose un menu de choix.
+ */
+function initAutocompleteVille() {
+  const cp = document.getElementById('profil-code-postal');
+  const ville = document.getElementById('profil-ville');
+  const choix = document.getElementById('profil-ville-choix');
+  if (!cp || cp.dataset.pret) return;
+  cp.dataset.pret = '1';
+
+  // Chiffres uniquement
+  cp.addEventListener('input', () => { cp.value = cp.value.replace(/\D/g, '').slice(0, 5); });
+
+  cp.addEventListener('change', async () => {
+    const code = cp.value.trim();
+    choix.style.display = 'none';
+    if (!/^\d{5}$/.test(code)) return;
+    try {
+      const r = await fetch(`https://geo.api.gouv.fr/communes?codePostal=${code}&fields=nom&format=json`);
+      const communes = await r.json();
+      if (!Array.isArray(communes) || communes.length === 0) return;   // code inconnu : on ne touche à rien
+
+      if (communes.length === 1) {
+        ville.value = communes[0].nom;
+      } else {
+        // Plusieurs communes : menu de choix, la première pré-remplie.
+        choix.innerHTML = communes.map(c => `<option value="${c.nom}">${c.nom}</option>`).join('');
+        choix.style.display = 'block';
+        ville.value = communes[0].nom;
+        choix.value = communes[0].nom;
+        choix.onchange = () => { ville.value = choix.value; };
+      }
+    } catch (_) { /* réseau indisponible : la saisie manuelle reste possible */ }
+  });
+}
+
 async function initProfilForm() {
+  initAutocompleteVille();
   try {
     const { data: profile } = await supabase
       .from('profiles')
@@ -555,6 +594,8 @@ async function initProfilForm() {
       document.getElementById('profil-date-naissance').value = profile.date_naissance || '';
       document.getElementById('profil-gender').value = profile.gender || '';
       document.getElementById('profil-adresse').value = profile.adresse || '';
+      document.getElementById('profil-code-postal').value = profile.code_postal || '';
+      document.getElementById('profil-ville').value = profile.ville || '';
       document.getElementById('profil-weight').value = profile.weight_kg || '';
       document.getElementById('profil-height').value = profile.height_cm || '';
       document.getElementById('profil-notes').value = profile.notes || '';
@@ -584,6 +625,8 @@ async function initProfilForm() {
     const date_naissance = document.getElementById('profil-date-naissance').value || null;
     const gender = document.getElementById('profil-gender').value || null;
     const adresse = document.getElementById('profil-adresse').value.trim() || null;
+    const code_postal = document.getElementById('profil-code-postal').value.trim() || null;
+    const ville = document.getElementById('profil-ville').value.trim() || null;
     const weight_kg = parseFloat(document.getElementById('profil-weight').value) || null;
     const height_cm = parseInt(document.getElementById('profil-height').value) || null;
     const notes = document.getElementById('profil-notes').value.trim() || null;
@@ -597,7 +640,7 @@ async function initProfilForm() {
         id: currentUser.id,
         email: currentUser.email,
         prenom, nom, full_name, telephone,
-        date_naissance, gender, adresse,
+        date_naissance, gender, adresse, code_postal, ville,
         weight_kg, height_cm, notes,
         updated_at: new Date().toISOString(),
       });
