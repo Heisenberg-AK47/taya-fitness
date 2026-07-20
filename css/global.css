@@ -235,7 +235,9 @@ p {
 .gold-divider {
   width: 48px;
   height: 3px;
-  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  /* Pur ornement : six de ces traits consommaient du magenta sans
+     rien signaler. En blanc estompe ils separent sans hurler. */
+  background: linear-gradient(90deg, rgba(255,255,255,0.35), transparent);
   border-radius: 2px;
   margin: 16px auto;
 }

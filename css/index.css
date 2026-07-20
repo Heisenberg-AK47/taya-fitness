@@ -50,7 +50,9 @@
 .programme-body h3 { font-size: 1.1rem; margin-bottom: 8px; }
 .programme-body p { font-size: 0.87rem; flex: 1; margin-bottom: 20px; }
 .programme-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
-.programme-price { font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; color: var(--gold); }
+/* Le prix est une donnee : il se lit en blanc. C'est le bouton
+   d'achat a cote qui doit capter le magenta. */
+.programme-price { font-family: var(--font-title); font-size: 1.3rem; font-weight: 700; color: var(--white); }
 .programme-price small { font-family: var(--font-body); font-size: 0.75rem; color: var(--white-muted); font-weight: 400; }
 .programme-price .prix-promo { text-decoration: line-through; font-size: 0.9rem; color: var(--white-muted); margin-right: 6px; }
 .section-footer { text-align: center; margin-top: 48px; }
@@ -91,10 +93,12 @@
 .temoignages-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .temoignage { background: var(--black-card); border: 1px solid var(--black-border); border-radius: var(--radius-lg); padding: 32px; transition: border-color 0.3s, transform 0.3s; }
 .temoignage:hover { border-color: rgba(254,0,229,0.2); transform: translateY(-3px); }
-.temoignage-stars { color: var(--gold); font-size: 1rem; letter-spacing: 2px; margin-bottom: 16px; }
+/* Une note est une mesure, pas une action : elle releve du lime,
+   comme le 4.9 du bandeau. */
+.temoignage-stars { color: var(--lime); font-size: 1rem; letter-spacing: 2px; margin-bottom: 16px; }
 .temoignage p { font-size: 0.92rem; font-style: italic; line-height: 1.75; margin-bottom: 24px; }
 .temoignage-author { display: flex; align-items: center; gap: 12px; }
-.author-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; }
+.author-avatar { width: 42px; height: 42px; border-radius: 50%; background: rgba(255,255,255,0.10); color: var(--white); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; }
 .temoignage-author strong { display: block; font-size: 0.9rem; color: var(--white); }
 .temoignage-author small  { font-size: 0.78rem; color: var(--white-muted); }
 
