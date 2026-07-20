@@ -302,8 +302,8 @@
     </div>
     <div class="guarantee">
       <div class="guarantee-icon">🚫</div>
-      <div class="guarantee-title">Sans engagement</div>
-      <div class="guarantee-desc">Résiliation à tout moment</div>
+      <div class="guarantee-title">Engagement 3 mois</div>
+      <div class="guarantee-desc">Puis résiliable à tout moment</div>
     </div>
     <div class="guarantee">
       <div class="guarantee-icon">📱</div>
@@ -316,17 +316,17 @@
     <h2>Questions fréquentes</h2>
     <div class="faq-item">
       <div class="faq-question" onclick="toggleFaq(this)">
-        <span>Comment fonctionne l'essai gratuit ?</span>
+        <span>Y a-t-il une durée d'engagement ?</span>
         <span class="faq-icon">+</span>
       </div>
-      <div class="faq-answer">Tu accèdes à toutes les fonctionnalités de ta formule pendant 7 jours sans débourser un centime. Aucune carte bancaire requise pour démarrer.</div>
+      <div class="faq-answer">Oui, 3 mois minimum. C'est le temps nécessaire pour obtenir des résultats visibles et durables — en dessous, l'entraînement ne produit pas ses effets. Passé ce délai, ta formule se reconduit au mois et tu peux la résilier quand tu veux depuis ton espace.</div>
     </div>
     <div class="faq-item">
       <div class="faq-question" onclick="toggleFaq(this)">
         <span>Puis-je changer de formule à tout moment ?</span>
         <span class="faq-icon">+</span>
       </div>
-      <div class="faq-answer">Oui ! Tu peux upgrader ou downgrader ta formule à n'importe quel moment. La différence de prix est automatiquement calculée au prorata.</div>
+      <div class="faq-answer">Oui. Le changement prend effet à la période de facturation suivante — contacte Sarah pour le mettre en place.</div>
     </div>
     <div class="faq-item">
       <div class="faq-question" onclick="toggleFaq(this)">
@@ -353,7 +353,7 @@
     <div class="modal">
       <div id="modal-form">
         <h2 id="modal-title">Démarrer mon essai</h2>
-        <p id="modal-subtitle">7 jours gratuits, sans engagement. Tu recevras tes accès par email.</p>
+        <p id="modal-subtitle">Engagement 3 mois minimum. Tu recevras tes accès par email.</p>
         <input type="text" id="input-nom" placeholder="Prénom et nom" required>
         <input type="email" id="input-email" placeholder="Adresse email" required>
         <input type="tel" id="input-tel" placeholder="Téléphone (optionnel)">
@@ -486,7 +486,7 @@
     function openModal(planId, planName, price) {
       selectedPlan = { id: planId, name: planName, price };
       document.getElementById('modal-title').textContent = `Formule ${planName} — ${price}€/mois`;
-      document.getElementById('modal-subtitle').textContent = '7 jours gratuits, sans engagement. Tu recevras tes accès par email.';
+      document.getElementById('modal-subtitle').textContent = 'Engagement 3 mois minimum. Tu recevras tes accès par email.';
       document.getElementById('modal-form').style.display = 'block';
       document.getElementById('success-msg').style.display = 'none';
       document.getElementById('modal').classList.add('open');

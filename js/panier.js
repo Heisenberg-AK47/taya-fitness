@@ -44,7 +44,7 @@ function renderPanier() {
           </div>
           <div class="panier-item-info">
             <h3>${item.titre}</h3>
-            <small>Abonnement mensuel · Sans engagement</small>
+            <small>Abonnement mensuel · Engagement 3 mois</small>
           </div>
           <div class="panier-item-price">${item.prix}€<small style="font-size:0.7rem;font-family:var(--font-body);font-weight:400;color:var(--white-muted)">/mois</small></div>
           <button class="panier-item-remove" data-remove="${item.id}" aria-label="Retirer">✕</button>

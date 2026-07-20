@@ -229,7 +229,7 @@ function renderDetail(p, modules, reviews, hasAccess) {
         <div class="buy-guarantees">
           <div class="buy-guarantee-item">✅ Accès immédiat après paiement</div>
           <div class="buy-guarantee-item">📱 Mobile &amp; desktop</div>
-          <div class="buy-guarantee-item">🔄 Sans engagement</div>
+          <div class="buy-guarantee-item">♾️ Accès à vie, achat unique</div>
           <div class="buy-guarantee-item">💳 Paiement sécurisé</div>
         </div>
       </div>
