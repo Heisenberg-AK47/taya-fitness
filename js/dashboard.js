@@ -257,34 +257,155 @@ function initTab(tab) {
 }
 
 /* ── Mes programmes ──────────────────────────────────────── */
+const ABO_URL = 'https://esylzsacjkimcqxllhwd.supabase.co/functions/v1/gerer-abonnement';
+
+/** Appelle la fonction serveur qui gère l'abonnement (état, résiliation, reprise). */
+async function appelAbonnement(action) {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Session expirée. Reconnecte-toi.');
+  const res = await fetch(ABO_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+    body: JSON.stringify({ action }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Opération impossible.');
+  return data;
+}
+
+const dateFr = (d) => d ? new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—';
+const euros  = (n) => (n === null || n === undefined) ? '—' : Number(n).toFixed(2).replace('.00', '') + ' €';
+
+/**
+ * Panneau « Mes formules & achats » : l'abonnement en cours et tout ce qui a
+ * été acheté à l'unité, avec la gestion de la résiliation.
+ */
 async function loadMesProgrammes() {
   const el = document.getElementById('mes-programmes-list');
   el.innerHTML = `<div class="loader"><div class="spinner"></div></div>`;
 
   try {
-    const { data: achats, error } = await supabase
-      .from('achats')
-      .select('*, programmes(id, titre, slug, image_url, nb_modules)')
-      .eq('user_id', currentUser.id)
-      .order('created_at', { ascending: false });
+    // L'état de l'abonnement vient du serveur : c'est lui qui fait autorité
+    // sur l'engagement, le navigateur ne fait qu'afficher.
+    const [etat, achatsRes] = await Promise.all([
+      appelAbonnement('etat').catch(err => ({ erreur: err.message })),
+      supabase.from('achats')
+        .select('*, programmes(id, titre, slug, image_url, nb_modules)')
+        .or(`user_id.eq.${currentUser.id},email.ilike.${currentUser.email}`)
+        .order('created_at', { ascending: false }),
+    ]);
 
-    if (error) throw error;
+    const achats = (achatsRes.data || []).filter(a => a.programme_id && a.programmes);
+    const html = [carteAbonnement(etat), blocAchats(achats)].filter(Boolean).join('');
 
-    if (!achats || achats.length === 0) {
-      el.innerHTML = `
-        <div class="dash-empty">
-          <span>🎯</span>
-          <p>Tu n'as pas encore de programme.</p>
-          <a href="/programmes" class="btn btn-primary">Découvrir les programmes</a>
-        </div>`;
-      return;
-    }
+    el.innerHTML = html || `
+      <div class="dash-empty">
+        <span>🎯</span>
+        <p>Tu n'as encore souscrit à aucune formule ni acheté de programme.</p>
+        <a href="/offres" class="btn btn-primary">Découvrir les offres</a>
+      </div>`;
 
-    el.innerHTML = `<div class="mes-programmes-grid">${achats.map(a => achatCard(a)).join('')}</div>`;
+    brancherActionsAbonnement();
   } catch (err) {
     console.error(err);
-    el.innerHTML = `<p style="color:var(--white-muted)">Erreur de chargement.</p>`;
+    el.innerHTML = `<p style="color:var(--white-muted)">Erreur de chargement : ${err.message}</p>`;
   }
+}
+
+/* ── L'abonnement en cours ───────────────────────────────── */
+function carteAbonnement(etat) {
+  if (etat?.erreur) {
+    return `<div class="formule-card"><p class="formule-note">Impossible de charger ton abonnement : ${etat.erreur}</p></div>`;
+  }
+  const a = etat?.abonnement;
+  if (!a) {
+    return `
+      <div class="formule-card">
+        <div class="formule-kicker">Abonnement</div>
+        <p class="formule-none">Tu n'as pas d'abonnement en cours.</p>
+        <a href="/offres" class="btn btn-primary btn-sm">Voir les formules</a>
+      </div>`;
+  }
+
+  const periode = a.billing === 'annual' ? 'an' : 'mois';
+  const enEchec = a.statut === 'past_due';
+
+  // Trois situations distinctes, trois messages distincts.
+  let etatBloc, action;
+  if (a.resiliation_programmee) {
+    etatBloc = `<div class="formule-etat ferme">
+      🔔 Résiliation enregistrée — ton accès reste ouvert jusqu'au <strong>${dateFr(a.periode_fin)}</strong>,
+      puis l'abonnement s'arrête. Aucun prélèvement ne sera fait ensuite.</div>`;
+    action = `<button class="btn btn-primary btn-sm" data-abo="reprendre">Reprendre mon abonnement</button>`;
+  } else if (!a.engagement_termine) {
+    etatBloc = `<div class="formule-etat bloque">
+      🔒 Engagement de ${a.engagement_mois} mois en cours, jusqu'au <strong>${dateFr(a.engagement_fin)}</strong>.
+      La résiliation sera possible à partir de cette date.</div>`;
+    action = `<button class="btn btn-outline btn-sm" disabled>Résilier</button>`;
+  } else {
+    etatBloc = `<div class="formule-etat libre">
+      ✓ Engagement terminé — tu peux résilier quand tu veux.</div>`;
+    action = `<button class="btn btn-outline btn-sm" data-abo="resilier">Résilier mon abonnement</button>`;
+  }
+
+  return `
+    <div class="formule-card${enEchec ? ' alerte' : ''}">
+      <div class="formule-kicker">Abonnement${enEchec ? ' · paiement en échec' : ''}</div>
+      <div class="formule-titre">
+        <h3>${escapeHtml(a.nom)}</h3>
+        <span class="formule-prix">${euros(a.prix)}<small>/${periode}</small></span>
+      </div>
+      ${enEchec ? `<div class="formule-etat alerte-txt">
+        ⚠️ Ton dernier prélèvement a échoué. Mets ta carte à jour pour ne pas perdre ton accès — écris à Sarah.</div>` : ''}
+      <dl class="formule-infos">
+        <div><dt>Souscrit le</dt><dd>${dateFr(a.debut)}</dd></div>
+        <div><dt>Période en cours jusqu'au</dt><dd>${dateFr(a.periode_fin)}</dd></div>
+        <div><dt>Formule</dt><dd>${a.mode === 'online' ? 'Coaching en ligne' : 'Coaching en salle'}</dd></div>
+      </dl>
+      ${etatBloc}
+      <div class="formule-actions">${action}<span class="formule-msg" id="abo-msg"></span></div>
+    </div>`;
+}
+
+/* ── Les programmes achetés à l'unité ────────────────────── */
+function blocAchats(achats) {
+  if (!achats.length) return '';
+  return `
+    <div class="formule-kicker" style="margin:32px 0 14px">Programmes achetés · accès à vie</div>
+    <div class="mes-programmes-grid">${achats.map(a => achatCard(a)).join('')}</div>`;
+}
+
+/* ── Résiliation / reprise ───────────────────────────────── */
+function brancherActionsAbonnement() {
+  document.querySelectorAll('[data-abo]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const action = btn.dataset.abo;
+      const msg = document.getElementById('abo-msg');
+
+      if (action === 'resilier' &&
+          !confirm("Confirmer la résiliation ?\n\nTon accès reste ouvert jusqu'à la fin de la période déjà payée. Tu pourras revenir sur ta décision jusqu'à cette date.")) {
+        return;
+      }
+
+      const texte = btn.textContent;
+      btn.disabled = true; btn.textContent = '...';
+      if (msg) { msg.textContent = ''; msg.className = 'formule-msg'; }
+
+      try {
+        const r = await appelAbonnement(action);
+        if (msg) { msg.textContent = r.message || 'C\'est fait.'; msg.className = 'formule-msg ok'; }
+        setTimeout(loadMesProgrammes, 1400);   // on réaffiche l'état réel
+      } catch (err) {
+        if (msg) { msg.textContent = err.message; msg.className = 'formule-msg ko'; }
+        btn.disabled = false; btn.textContent = texte;
+      }
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function achatCard(achat) {

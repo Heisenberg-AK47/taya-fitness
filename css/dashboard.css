@@ -258,3 +258,61 @@
   .mes-programmes-grid { grid-template-columns: 1fr; }
   .form-row { grid-template-columns: 1fr; }
 }
+
+/* ── Mes formules & achats ───────────────────────────────── */
+.formule-kicker {
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--gold);
+}
+.formule-card {
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+}
+.formule-card.alerte { border-color: rgba(255,77,106,0.4); }
+.formule-none { color: var(--white-muted); margin: 10px 0 18px; }
+
+.formule-titre {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; margin: 10px 0 20px;
+}
+.formule-titre h3 { font-size: 1.4rem; }
+.formule-prix {
+  font-family: var(--font-title); font-size: 1.5rem;
+  font-weight: 700; color: var(--gold); white-space: nowrap;
+}
+.formule-prix small { font-size: 0.8rem; color: var(--white-muted); font-weight: 400; }
+
+/* Les repères de date : ce sont eux qu'on vient chercher en cas de doute. */
+.formule-infos {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px; margin-bottom: 20px;
+  border-top: 1px solid var(--black-border);
+  border-bottom: 1px solid var(--black-border);
+  padding: 18px 0;
+}
+.formule-infos dt { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--white-muted); }
+.formule-infos dd { font-size: 0.94rem; color: var(--white); margin-top: 3px; font-weight: 600; }
+
+/* Trois situations, trois couleurs : bloqué, libre, résilié. */
+.formule-etat {
+  border-radius: var(--radius); padding: 14px 16px;
+  font-size: 0.88rem; line-height: 1.6; margin-bottom: 18px;
+}
+.formule-etat.bloque    { background: rgba(255,255,255,0.04); color: var(--white-muted); }
+.formule-etat.libre     { background: rgba(62,207,142,0.10);  color: var(--green); }
+.formule-etat.ferme     { background: rgba(255,107,74,0.10);  color: var(--gold); }
+.formule-etat.alerte-txt{ background: rgba(255,77,106,0.10);  color: var(--red); }
+.formule-etat strong { color: var(--white); }
+
+.formule-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.formule-msg { font-size: 0.85rem; line-height: 1.5; }
+.formule-msg.ok { color: var(--green); }
+.formule-msg.ko { color: var(--red); }
+.formule-note { color: var(--white-muted); font-size: 0.88rem; }
+
+@media (max-width: 640px) {
+  .formule-card { padding: 20px; }
+  .formule-actions .btn { width: 100%; }
+}
