@@ -196,6 +196,9 @@
       <div id="home-cta" style="margin-bottom:18px"></div>
       <div class="stat-row" id="home-stats"></div>
       <div style="margin-top:18px" id="home-program"></div>
+      <h2 style="font-size:1.25rem;margin:28px 0 4px">Mon agenda</h2>
+      <p class="note" style="margin:0 0 14px">Planifie tes séances : tu reçois un rappel 1h avant.</p>
+      <div id="agenda-content"></div>
     </section>
 
     <!-- PROGRAMME -->
@@ -218,11 +221,6 @@
       <div id="w-list"></div>
     </section>
 
-    <!-- AGENDA -->
-    <section id="v-agenda" class="view">
-      <div class="pagehead"><h1>Mon agenda</h1><p>Planifie tes séances : tu reçois un rappel 1h avant.</p></div>
-      <div id="agenda-content"></div>
-    </section>
 
     <!-- PROFIL -->
     <section id="v-profil" class="view">
@@ -246,7 +244,6 @@
     <a href="#accueil" data-tab="accueil"><span class="ic">🏠</span>Accueil</a>
     <a href="#programme" data-tab="programme"><span class="ic">🏋️</span>Programme</a>
     <a href="#nutrition" data-tab="nutrition"><span class="ic">🍽️</span>Repas</a>
-    <a href="#agenda" data-tab="agenda"><span class="ic">📅</span>Agenda</a>
     <a href="#suivi" data-tab="suivi"><span class="ic">📈</span>Suivi</a>
     <a href="#profil" data-tab="profil"><span class="ic">👤</span>Profil</a>
   </nav>
@@ -891,15 +888,15 @@ function brancherNutrition() {
 // ---------- routing ----------
 function route() {
   if ($('#v-onboarding').classList.contains('active')) return; // stay in onboarding
-  const tab = (location.hash.replace('#','') || 'accueil');
+  let tab = (location.hash.replace('#','') || 'accueil');
+  if (tab === 'agenda' || tab === 'seance') tab = 'accueil';   // l'agenda a rejoint l'accueil
   $$('.view').forEach(v => v.classList.remove('active'));
   const view = $('#v-'+tab) || $('#v-accueil');
   view.classList.add('active');
   $$('.bottomnav a').forEach(a => a.classList.toggle('active', a.dataset.tab===tab));
-  if (tab==='accueil') renderHome();
+  if (tab==='accueil') { renderHome(); renderAgenda(); }   // l'agenda vit dans l'accueil
   if (tab==='programme') renderProgramme();
   if (tab==='nutrition') renderNutrition();
-  if (tab==='agenda') renderAgenda();
   if (tab==='suivi') renderSuivi();
   if (tab==='profil') renderProfil();
 }
