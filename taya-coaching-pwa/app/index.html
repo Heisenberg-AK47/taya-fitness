@@ -230,6 +230,12 @@
       <div id="profil-content"></div>
     </section>
 
+    <!-- NUTRITION / MEAL PLANNER -->
+    <section id="v-nutrition" class="view">
+      <div class="pagehead"><h1>Mes repas</h1><p>Compose ta journée, l'app calcule tout automatiquement.</p></div>
+      <div id="nutrition-content"><p class="note">Chargement…</p></div>
+    </section>
+
     <!-- ONBOARDING -->
     <section id="v-onboarding" class="view">
       <div class="ob" id="ob-root"></div>
@@ -239,6 +245,7 @@
   <nav class="bottomnav" id="bottomnav">
     <a href="#accueil" data-tab="accueil"><span class="ic">🏠</span>Accueil</a>
     <a href="#programme" data-tab="programme"><span class="ic">🏋️</span>Programme</a>
+    <a href="#nutrition" data-tab="nutrition"><span class="ic">🍽️</span>Repas</a>
     <a href="#agenda" data-tab="agenda"><span class="ic">📅</span>Agenda</a>
     <a href="#suivi" data-tab="suivi"><span class="ic">📈</span>Suivi</a>
     <a href="#profil" data-tab="profil"><span class="ic">👤</span>Profil</a>
@@ -523,6 +530,309 @@ document.addEventListener('click', (e) => {
   if (e.target && e.target.id === 'ag-notif') activerNotifications();
 });
 
+// ══════════════════════════════════════════════════════════════════
+//   NUTRITION — meal planner (repris du fichier Excel QwikMilPlanner)
+// ══════════════════════════════════════════════════════════════════
+const NUT = {
+  aliments: null,     // catalogue chargé une fois
+  plan: null,         // réglages diète du client
+  lignes: [],         // aliments de tous les repas
+  repas: 1,           // repas affiché
+};
+
+// Niveaux d'activité (NAP) — facteur multiplicateur du métabolisme de base.
+const NAP_OPTS = [
+  { v: 1.2,   l: 'Sédentaire (peu ou pas de sport)' },
+  { v: 1.375, l: 'Léger (sport 1-3j/sem)' },
+  { v: 1.55,  l: 'Modéré (sport 3-5j/sem)' },
+  { v: 1.725, l: 'Intense (sport 6-7j/sem)' },
+  { v: 1.9,   l: 'Très intense (sport + métier physique)' },
+];
+
+// Ajustement calorique déduit de l'objectif du client (modifiable ensuite).
+function ajustementParDefaut(objectif) {
+  const o = (objectif || '').toLowerCase();
+  if (o.includes('perdre') || o.includes('poids') || o.includes('seche')) return -400;
+  if (o.includes('muscle') || o.includes('masse')) return 250;
+  if (o.includes('performance')) return 150;
+  return 0;
+}
+
+/**
+ * Calcule les objectifs du jour à partir du profil (poids/taille/âge/sexe)
+ * et des réglages. MB = Mifflin-St Jeor, DEJ = MB×NAP, objectif = DEJ±ajust.
+ * Répartition : protéines selon g/kg, lipides 1 g/kg, glucides = le reste.
+ */
+function calculerObjectifs() {
+  const c = NUT.plan, cl = state.client || {};
+  const poids  = Number(cl.poids_kg) || null;
+  const taille = Number(cl.taille_cm) || null;
+  const age    = Number(cl.age) || null;
+  const homme  = (cl.genre || '').toLowerCase() === 'homme';
+
+  if (!poids || !taille || !age) return null;   // profil incomplet
+
+  const mb  = 10*poids + 6.25*taille - 5*age + (homme ? 5 : -161);
+  const dej = mb * (c.nap || 1.55);
+  const kcal = Math.round(dej + (c.ajustement_kcal || 0));
+
+  const prot_g = Math.round(poids * (c.prot_g_par_kg || 1.8));
+  const lip_g  = Math.round(poids * 1);
+  const glu_g  = Math.max(0, Math.round((kcal - prot_g*4 - lip_g*9) / 4));
+
+  return { mb: Math.round(mb), dej: Math.round(dej), kcal,
+           proteines: prot_g, lipides: lip_g, glucides: glu_g };
+}
+
+/** Macros d'une ligne d'aliment (valeur BDD pour 100 g × quantité/100). */
+function macrosLigne(l) {
+  const a = NUT.aliments?.find(x => x.id === l.aliment_id);
+  if (!a) return { kcal:0, prot:0, lip:0, glu:0 };
+  const k = (l.quantite_g || 0) / 100;
+  return {
+    kcal: (a.calories||0)*k, prot: (a.proteines||0)*k,
+    lip: (a.lipides||0)*k,   glu: (a.glucides||0)*k,
+  };
+}
+
+async function chargerNutrition() {
+  if (!NUT.aliments) {
+    const { data } = await supabase.from('aliments').select('*').eq('actif', true).order('categorie').order('nom');
+    NUT.aliments = data || [];
+  }
+  const [{ data: plan }, { data: lignes }] = await Promise.all([
+    supabase.from('plan_nutrition').select('*').eq('user_id', state.user.id).maybeSingle(),
+    supabase.from('repas_aliments').select('*').eq('user_id', state.user.id).order('position'),
+  ]);
+  // Premier passage : on crée le réglage avec un ajustement déduit de l'objectif.
+  if (!plan) {
+    const defaut = { user_id: state.user.id, nap: 1.55,
+      ajustement_kcal: ajustementParDefaut(state.client?.objectif), prot_g_par_kg: 1.8, nb_repas: 4 };
+    await supabase.from('plan_nutrition').upsert(defaut);
+    NUT.plan = defaut;
+  } else { NUT.plan = plan; }
+  NUT.lignes = lignes || [];
+  if (NUT.repas > NUT.plan.nb_repas) NUT.repas = 1;
+}
+
+async function renderNutrition() {
+  const el = $('#nutrition-content');
+  el.innerHTML = `<p class="note">Chargement…</p>`;
+  await chargerNutrition();
+
+  const obj = calculerObjectifs();
+  if (!obj) {
+    el.innerHTML = `<div class="card"><p style="margin:0 0 12px">Pour calculer tes objectifs, complète d'abord ton <b>poids</b>, ta <b>taille</b>, ton <b>âge</b> et ton <b>sexe</b>.</p>
+      <a class="btn btn-accent" href="#profil">Compléter mon profil →</a></div>`;
+    return;
+  }
+
+  // Totaux de la journée (tous repas confondus)
+  const jour = NUT.lignes.reduce((t, l) => {
+    const m = macrosLigne(l);
+    t.kcal += m.kcal; t.prot += m.prot; t.lip += m.lip; t.glu += m.glu; return t;
+  }, { kcal:0, prot:0, lip:0, glu:0 });
+
+  el.innerHTML =
+    carteObjectifs(obj) +
+    barreSynthese(jour, obj) +
+    selecteurRepas() +
+    blocRepas(obj);
+
+  brancherNutrition();
+}
+
+function pastilleMacro(nom, val, cible, unite, couleur) {
+  const pct = cible ? Math.min(100, Math.round(val/cible*100)) : 0;
+  return `<div style="flex:1;min-width:120px">
+    <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px">
+      <span class="muted">${nom}</span><span style="font-weight:700">${Math.round(val)}/${cible}${unite}</span></div>
+    <div style="height:7px;background:var(--card-2);border-radius:999px;overflow:hidden">
+      <div style="height:100%;width:${pct}%;background:${couleur};border-radius:999px;transition:width .3s"></div></div>
+  </div>`;
+}
+
+function carteObjectifs(obj) {
+  return `<div class="card" style="margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+      <div class="pill">🎯 Objectif du jour</div>
+      <button class="iconbtn" id="nut-reglages" style="font-size:.8rem">⚙️ Réglages</button>
+    </div>
+    <div style="font-size:2.2rem;font-weight:800;font-family:var(--font-head)">${obj.kcal} <span style="font-size:1rem;color:var(--muted);font-weight:600">kcal / jour</span></div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px">
+      <div><span class="muted" style="font-size:.75rem">PROTÉINES</span><div style="font-weight:700">${obj.proteines} g</div></div>
+      <div><span class="muted" style="font-size:.75rem">LIPIDES</span><div style="font-weight:700">${obj.lipides} g</div></div>
+      <div><span class="muted" style="font-size:.75rem">GLUCIDES</span><div style="font-weight:700">${obj.glucides} g</div></div>
+    </div>
+    <div class="note" style="margin-top:10px">Métabolisme de base ${obj.mb} kcal · dépense estimée ${obj.dej} kcal</div>
+    <div id="nut-reglages-panel" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)"></div>
+  </div>`;
+}
+
+function barreSynthese(jour, obj) {
+  return `<div class="card" style="margin-bottom:18px">
+    <div class="pill muted" style="margin-bottom:12px">Ta journée</div>
+    <div style="display:flex;flex-wrap:wrap;gap:14px">
+      ${pastilleMacro('Calories', jour.kcal, obj.kcal, ' kcal', 'var(--accent)')}
+      ${pastilleMacro('Protéines', jour.prot, obj.proteines, ' g', '#4d9fff')}
+      ${pastilleMacro('Lipides', jour.lip, obj.lipides, ' g', '#ffb04d')}
+      ${pastilleMacro('Glucides', jour.glu, obj.glucides, ' g', '#c5fd7a')}
+    </div>
+  </div>`;
+}
+
+function selecteurRepas() {
+  const n = NUT.plan.nb_repas;
+  return `<div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:14px;padding-bottom:4px">
+    ${Array.from({length:n}, (_,i)=>i+1).map(r => {
+      const tot = Math.round(NUT.lignes.filter(l=>l.repas_num===r).reduce((s,l)=>s+macrosLigne(l).kcal,0));
+      const on = r===NUT.repas;
+      return `<button class="nut-tab" data-repas="${r}" style="flex-shrink:0;padding:9px 15px;border-radius:10px;border:1px solid ${on?'var(--accent)':'var(--line)'};background:${on?'var(--accent)':'transparent'};color:${on?'#fff':'var(--ink)'};font-weight:600;font-size:.88rem;cursor:pointer">
+        Repas ${r}${tot?` · ${tot}kcal`:''}</button>`;
+    }).join('')}
+  </div>`;
+}
+
+function blocRepas(obj) {
+  const lignes = NUT.lignes.filter(l => l.repas_num === NUT.repas);
+  const tot = lignes.reduce((t,l)=>{const m=macrosLigne(l);t.kcal+=m.kcal;t.prot+=m.prot;t.lip+=m.lip;t.glu+=m.glu;return t;},{kcal:0,prot:0,lip:0,glu:0});
+
+  const rows = lignes.map(l => {
+    const a = NUT.aliments.find(x=>x.id===l.aliment_id);
+    const m = macrosLigne(l);
+    return `<div class="list-item" style="cursor:default">
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:600">${esc(a?.nom||'?')}</div>
+        <div class="note" style="margin-top:2px">${Math.round(m.kcal)} kcal · P${Math.round(m.prot)} L${Math.round(m.lip)} G${Math.round(m.glu)}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+        <input type="number" class="nut-qte" data-id="${l.id}" value="${l.quantite_g}" min="0" step="5"
+          style="width:64px;background:var(--card-2);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:7px;font-size:.85rem;text-align:right">
+        <span class="muted" style="font-size:.8rem">g</span>
+        <button class="iconbtn nut-del" data-id="${l.id}" title="Retirer">✕</button>
+      </div>
+    </div>`;
+  }).join('') || `<p class="note">Aucun aliment dans ce repas. Ajoute-en un ci-dessous 👇</p>`;
+
+  return `<div class="card">
+    <h3 style="margin:0 0 12px">Repas ${NUT.repas}</h3>
+    ${rows}
+    <button class="btn btn-accent btn-block" id="nut-add" style="margin-top:14px">+ Ajouter un aliment</button>
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;font-weight:700">
+      <span>Total repas ${NUT.repas}</span>
+      <span>${Math.round(tot.kcal)} kcal · P${Math.round(tot.prot)} L${Math.round(tot.lip)} G${Math.round(tot.glu)}</span>
+    </div>
+  </div>`;
+}
+
+/* ── Recherche et ajout d'un aliment ─────────────────────────────── */
+function ouvrirRechercheAliment() {
+  const cats = [...new Set(NUT.aliments.map(a=>a.categorie))].sort();
+  const overlay = document.createElement('div');
+  overlay.className = 'vidmodal open';
+  overlay.style.alignItems = 'flex-start';
+  overlay.innerHTML = `
+    <div class="vidmodal-in" style="max-width:520px;background:var(--card);border-radius:16px;padding:18px;margin-top:40px;max-height:85vh;display:flex;flex-direction:column">
+      <div class="vidmodal-head"><b>Ajouter au repas ${NUT.repas}</b><button class="vm-close" id="nut-close">✕</button></div>
+      <input id="nut-search" placeholder="Rechercher un aliment…" autocomplete="off"
+        style="background:var(--card-2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:12px;font-size:1rem;margin-bottom:10px">
+      <select id="nut-cat" style="background:var(--card-2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:10px;margin-bottom:12px">
+        <option value="">Toutes les catégories</option>
+        ${cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')}
+      </select>
+      <div id="nut-results" style="overflow-y:auto;flex:1"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const search = overlay.querySelector('#nut-search');
+  const catSel = overlay.querySelector('#nut-cat');
+  const results = overlay.querySelector('#nut-results');
+
+  function rendre() {
+    const q = search.value.trim().toLowerCase();
+    const cat = catSel.value;
+    const liste = NUT.aliments
+      .filter(a => (!cat || a.categorie===cat) && (!q || a.nom.toLowerCase().includes(q)))
+      .slice(0, 60);
+    results.innerHTML = liste.length ? liste.map(a => `
+      <button class="nut-pick" data-id="${a.id}" style="width:100%;text-align:left;background:var(--card-2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:7px;cursor:pointer;color:var(--ink)">
+        <div style="font-weight:600">${esc(a.nom)}</div>
+        <div class="note" style="margin-top:2px">${a.calories||0} kcal · P${a.proteines||0} L${a.lipides||0} G${a.glucides||0} <span style="opacity:.6">/ 100g</span></div>
+      </button>`).join('') : `<p class="note">Aucun aliment trouvé.</p>`;
+    results.querySelectorAll('.nut-pick').forEach(b => b.onclick = async () => {
+      const pos = NUT.lignes.filter(l=>l.repas_num===NUT.repas).length;
+      await supabase.from('repas_aliments').insert({
+        user_id: state.user.id, repas_num: NUT.repas, aliment_id: Number(b.dataset.id), quantite_g: 100, position: pos });
+      overlay.remove();
+      renderNutrition();
+    });
+  }
+  search.oninput = rendre; catSel.onchange = rendre; rendre();
+  search.focus();
+  overlay.querySelector('#nut-close').onclick = () => overlay.remove();
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+}
+
+/* ── Panneau de réglages de la diète ─────────────────────────────── */
+function ouvrirReglages() {
+  const p = $('#nut-reglages-panel');
+  if (!p) return;
+  if (p.style.display === 'block') { p.style.display = 'none'; return; }
+  const c = NUT.plan;
+  p.innerHTML = `
+    <div class="field"><label>Niveau d'activité</label>
+      <select id="rg-nap">${NAP_OPTS.map(o=>`<option value="${o.v}" ${o.v==c.nap?'selected':''}>${o.l}</option>`).join('')}</select></div>
+    <div class="field"><label>Objectif calorique (kcal / jour)</label>
+      <select id="rg-ajust">
+        <option value="-500" ${c.ajustement_kcal<=-500?'selected':''}>Perte de poids marquée (-500)</option>
+        <option value="-300" ${c.ajustement_kcal>-500&&c.ajustement_kcal<0?'selected':''}>Perte de poids (-300)</option>
+        <option value="0" ${c.ajustement_kcal===0?'selected':''}>Maintien (0)</option>
+        <option value="250" ${c.ajustement_kcal>0&&c.ajustement_kcal<400?'selected':''}>Prise de muscle (+250)</option>
+        <option value="500" ${c.ajustement_kcal>=400?'selected':''}>Prise de masse (+500)</option>
+      </select></div>
+    <div class="field"><label>Protéines (g par kg de poids) : <b id="rg-prot-val">${c.prot_g_par_kg}</b></label>
+      <input type="range" id="rg-prot" min="1.2" max="2.5" step="0.1" value="${c.prot_g_par_kg}" style="width:100%;accent-color:var(--accent)"></div>
+    <div class="field"><label>Nombre de repas</label>
+      <select id="rg-nb">${[3,4,5,6].map(n=>`<option value="${n}" ${n==c.nb_repas?'selected':''}>${n} repas</option>`).join('')}</select></div>
+    <button class="btn btn-accent btn-block" id="rg-save">Enregistrer</button>`;
+  p.style.display = 'block';
+
+  p.querySelector('#rg-prot').oninput = (e) => { p.querySelector('#rg-prot-val').textContent = e.target.value; };
+  p.querySelector('#rg-save').onclick = async () => {
+    const maj = {
+      user_id: state.user.id,
+      nap: Number(p.querySelector('#rg-nap').value),
+      ajustement_kcal: Number(p.querySelector('#rg-ajust').value),
+      prot_g_par_kg: Number(p.querySelector('#rg-prot').value),
+      nb_repas: Number(p.querySelector('#rg-nb').value),
+      updated_at: new Date().toISOString(),
+    };
+    await supabase.from('plan_nutrition').upsert(maj);
+    NUT.plan = maj;
+    toast('Réglages enregistrés');
+    renderNutrition();
+  };
+}
+
+function brancherNutrition() {
+  $('#nut-reglages')?.addEventListener('click', ouvrirReglages);
+  $('#nut-add')?.addEventListener('click', ouvrirRechercheAliment);
+  $$('.nut-tab').forEach(b => b.onclick = () => { NUT.repas = Number(b.dataset.repas); renderNutrition(); });
+  $$('.nut-del').forEach(b => b.onclick = async () => {
+    await supabase.from('repas_aliments').delete().eq('id', b.dataset.id).eq('user_id', state.user.id);
+    renderNutrition();
+  });
+  $$('.nut-qte').forEach(inp => {
+    inp.onchange = async () => {
+      const q = Math.max(0, Number(inp.value) || 0);
+      await supabase.from('repas_aliments').update({ quantite_g: q }).eq('id', inp.dataset.id).eq('user_id', state.user.id);
+      const l = NUT.lignes.find(x => String(x.id) === inp.dataset.id);
+      if (l) l.quantite_g = q;
+      renderNutrition();
+    };
+  });
+}
+
 // ---------- bootstrap ----------
 (async () => {
   if (exigerInstallation()) return;
@@ -584,6 +894,7 @@ function route() {
   $$('.bottomnav a').forEach(a => a.classList.toggle('active', a.dataset.tab===tab));
   if (tab==='accueil') renderHome();
   if (tab==='programme') renderProgramme();
+  if (tab==='nutrition') renderNutrition();
   if (tab==='agenda') renderAgenda();
   if (tab==='suivi') renderSuivi();
   if (tab==='profil') renderProfil();
