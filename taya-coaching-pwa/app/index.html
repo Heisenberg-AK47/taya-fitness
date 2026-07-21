@@ -228,9 +228,13 @@
       <div id="profil-content"></div>
     </section>
 
-    <!-- NUTRITION / MEAL PLANNER -->
+    <!-- NUTRITION / MEAL PLANNER + RECETTES -->
     <section id="v-nutrition" class="view">
-      <div class="pagehead"><h1>Mes repas</h1><p>Compose ta journée, l'app calcule tout automatiquement.</p></div>
+      <div class="pagehead"><h1 id="nut-title">Mes repas</h1><p id="nut-sub">Compose ta journée, l'app calcule tout automatiquement.</p></div>
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="nut-mode" data-mode="planning" style="flex:1;padding:10px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-weight:700;cursor:pointer">📋 Mon planning</button>
+        <button class="nut-mode" data-mode="recettes" style="flex:1;padding:10px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink);font-weight:700;cursor:pointer">📖 Recettes</button>
+      </div>
       <div id="nutrition-content"><p class="note">Chargement…</p></div>
     </section>
 
@@ -834,6 +838,121 @@ function brancherNutrition() {
   });
 }
 
+// ══════════════════════════════════════════════════════════════════
+//   RECETTES — catalogue diète (entrées, plats, desserts…)
+// ══════════════════════════════════════════════════════════════════
+const REC = { mode: 'planning', liste: null, filtre: '', cat: '' };
+
+const CAT_REC = [
+  { v:'', l:'Toutes' }, { v:'petit_dejeuner', l:'Petit-déj' },
+  { v:'entree', l:'Entrées' }, { v:'plat', l:'Plats' },
+  { v:'dessert', l:'Desserts' }, { v:'snack', l:'Snacks' },
+];
+const DIFF_LBL = { facile:'Facile', moyen:'Moyen', avance:'Avancé' };
+
+async function chargerRecettes() {
+  if (REC.liste) return;
+  const { data } = await supabase.from('recettes').select('*').eq('actif', true).order('categorie').order('titre');
+  REC.liste = data || [];
+}
+
+async function renderRecettes() {
+  const el = $('#nutrition-content');
+  el.innerHTML = `<p class="note">Chargement…</p>`;
+  await chargerRecettes();
+
+  const liste = REC.liste.filter(r =>
+    (!REC.cat || r.categorie === REC.cat) &&
+    (!REC.filtre || r.titre.toLowerCase().includes(REC.filtre.toLowerCase())));
+
+  el.innerHTML = `
+    <input id="rec-search" placeholder="Rechercher une recette…" value="${esc(REC.filtre)}" autocomplete="off"
+      style="width:100%;background:var(--card-2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:12px;font-size:1rem;margin-bottom:10px">
+    <div style="display:flex;gap:7px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px">
+      ${CAT_REC.map(c => `<button class="rec-cat" data-cat="${c.v}" style="flex-shrink:0;padding:7px 14px;border-radius:999px;border:1px solid ${c.v===REC.cat?'var(--accent)':'var(--line)'};background:${c.v===REC.cat?'var(--accent)':'transparent'};color:${c.v===REC.cat?'#fff':'var(--ink)'};font-size:.85rem;font-weight:600;cursor:pointer;white-space:nowrap">${c.l}</button>`).join('')}
+    </div>
+    ${liste.length ? `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px">
+      ${liste.map(carteRecette).join('')}</div>`
+      : `<p class="note">Aucune recette trouvée.</p>`}
+    <p class="note" style="margin-top:18px;text-align:center;opacity:.7">${REC.liste.length} recettes disponibles · le catalogue s'agrandit régulièrement</p>`;
+
+  $('#rec-search').oninput = (e) => { REC.filtre = e.target.value; clearTimeout(REC._t); REC._t = setTimeout(renderRecettes, 250); };
+  $$('.rec-cat').forEach(b => b.onclick = () => { REC.cat = b.dataset.cat; renderRecettes(); });
+  $$('.rec-card').forEach(b => b.onclick = () => ouvrirRecette(Number(b.dataset.id)));
+}
+
+function carteRecette(r) {
+  return `<button class="rec-card" data-id="${r.id}" style="text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;padding:0;color:var(--ink);display:flex;flex-direction:column">
+    <div style="aspect-ratio:4/3;background:var(--card-2) url('${esc(r.image_url||'')}') center/cover no-repeat"></div>
+    <div style="padding:11px 12px">
+      <div style="font-weight:700;font-size:.92rem;line-height:1.3">${esc(r.titre)}</div>
+      <div class="note" style="margin-top:5px;font-size:.78rem">${Math.round(r.kcal_portion)} kcal · ${r.temps_min} min</div>
+    </div>
+  </button>`;
+}
+
+function ouvrirRecette(id) {
+  const r = REC.liste.find(x => x.id === id);
+  if (!r) return;
+  const ing = Array.isArray(r.ingredients) ? r.ingredients : [];
+  const etapes = Array.isArray(r.etapes) ? r.etapes : [];
+
+  const overlay = document.createElement('div');
+  overlay.className = 'vidmodal open';
+  overlay.style.alignItems = 'flex-start';
+  overlay.innerHTML = `
+    <div class="vidmodal-in" style="max-width:560px;background:var(--card);border-radius:16px;overflow:hidden;margin-top:24px;max-height:90vh;display:flex;flex-direction:column">
+      <div style="position:relative">
+        <div style="aspect-ratio:16/9;background:var(--card-2) url('${esc(r.image_url||'')}') center/cover no-repeat"></div>
+        <button class="vm-close" id="rec-close" style="position:absolute;top:12px;right:12px">✕</button>
+      </div>
+      <div style="padding:20px;overflow-y:auto">
+        <h2 style="margin:0 0 6px">${esc(r.titre)}</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <span class="pill">${Math.round(r.kcal_portion)} kcal / portion</span>
+          <span class="pill muted">⏱️ ${r.temps_min} min</span>
+          <span class="pill muted">${DIFF_LBL[r.difficulte]||''}</span>
+          <span class="pill muted">${r.portions} portion${r.portions>1?'s':''}</span>
+        </div>
+        <div style="display:flex;gap:14px;margin-bottom:20px;font-size:.85rem">
+          <div><b>${Math.round(r.prot_portion)}g</b><div class="muted">protéines</div></div>
+          <div><b>${Math.round(r.lip_portion)}g</b><div class="muted">lipides</div></div>
+          <div><b>${Math.round(r.glu_portion)}g</b><div class="muted">glucides</div></div>
+        </div>
+        <h3 style="font-size:1rem;margin:0 0 10px">🧺 Ingrédients${r.portions>1?` (pour ${r.portions})`:''}</h3>
+        <div style="margin-bottom:22px">
+          ${ing.map(i => `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:.9rem">
+            <span>${esc(i.nom)}</span><span class="muted">${i.quantite} g · ${i.kcal} kcal</span></div>`).join('')}
+        </div>
+        <h3 style="font-size:1rem;margin:0 0 10px">👩‍🍳 Préparation</h3>
+        <ol style="margin:0;padding-left:20px;line-height:1.7">
+          ${etapes.map(e => `<li style="margin-bottom:8px">${esc(e)}</li>`).join('')}
+        </ol>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#rec-close').onclick = () => overlay.remove();
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+}
+
+/* Bascule entre le planning et les recettes dans l'onglet Repas. */
+function brancherModesNutrition() {
+  $$('.nut-mode').forEach(b => b.onclick = () => {
+    REC.mode = b.dataset.mode;
+    $$('.nut-mode').forEach(x => {
+      const on = x.dataset.mode === REC.mode;
+      x.style.background = on ? 'var(--accent)' : 'transparent';
+      x.style.color = on ? '#fff' : 'var(--ink)';
+      x.style.border = on ? 'none' : '1px solid var(--line)';
+    });
+    $('#nut-title').textContent = REC.mode==='recettes' ? 'Recettes' : 'Mes repas';
+    $('#nut-sub').textContent = REC.mode==='recettes'
+      ? 'Des idées healthy avec les calories déjà calculées.'
+      : 'Compose ta journée, l\'app calcule tout automatiquement.';
+    REC.mode==='recettes' ? renderRecettes() : renderNutrition();
+  });
+}
+
 // ---------- bootstrap ----------
 (async () => {
   if (exigerInstallation()) return;
@@ -896,7 +1015,7 @@ function route() {
   $$('.bottomnav a').forEach(a => a.classList.toggle('active', a.dataset.tab===tab));
   if (tab==='accueil') { renderHome(); renderAgenda(); }   // l'agenda vit dans l'accueil
   if (tab==='programme') renderProgramme();
-  if (tab==='nutrition') renderNutrition();
+  if (tab==='nutrition') { brancherModesNutrition(); REC.mode==='recettes' ? renderRecettes() : renderNutrition(); }
   if (tab==='suivi') renderSuivi();
   if (tab==='profil') renderProfil();
 }
