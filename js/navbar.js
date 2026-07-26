@@ -26,7 +26,7 @@ function navbarTemplate() {
 
       <!-- Logo -->
       <a href="/" class="navbar-logo">
-        <img src="/assets/logo.png" alt="Taya Fitness" style="height:40px;width:auto;display:block">
+        <img src="/assets/logo.png" alt="Taya Fitness" style="height:60px;width:auto;display:block">
 
       </a>
 
