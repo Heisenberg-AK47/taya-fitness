@@ -10,7 +10,7 @@ export function initFooter() {
 
         <!-- Marque -->
         <div class="footer-brand">
-          <a href="/" class="footer-logo">Taya<span>Fitness</span></a>
+          <a href="/" class="footer-logo"><img src="/assets/logo.png" alt="Taya Fitness" style="height:36px;width:auto;display:block"></a>
           <p>Coach sportive certifiée, spécialisée en coaching personnalisé, nutrition et développement personnel. Transforme ton corps et ton esprit.</p>
           <div class="footer-socials">
             <a href="https://instagram.com/tayafitness" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
