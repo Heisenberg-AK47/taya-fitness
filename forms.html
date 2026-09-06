@@ -211,10 +211,6 @@ function renderPaiementConfirme() {
 }
 
 async function init() {
-  // Retour depuis Stripe : le questionnaire est deja envoye, on confirme.
-  const paiement = new URLSearchParams(location.search).get('paiement');
-  if (paiement === 'success') { renderPaiementConfirme(); return; }
-
   if (!slug) { renderError('Formulaire introuvable','Aucun identifiant spécifié.'); return; }
   try {
     const forms = await api(`forms?slug=eq.${encodeURIComponent(slug)}&limit=1`);
@@ -253,6 +249,14 @@ async function init() {
     root.style.setProperty('--title-color', s.title_color||'#ffffff');
     root.style.setProperty('--desc-color', s.desc_color||'rgba(255,255,255,0.65)');
     loadFont(s.font_family);
+
+    // Retour depuis Stripe : les reponses sont deja enregistrees, on affiche
+    // la confirmation aux couleurs du questionnaire au lieu de tout rejouer.
+    if (new URLSearchParams(location.search).get('paiement') === 'success') {
+      renderPaiementConfirme();
+      return;
+    }
+
     const qs = await api(`form_questions?form_id=eq.${form.id}&order=order_index`);
     questions = qs || [];
     if (form.homepage_title || form.description) {
