@@ -132,6 +132,9 @@
   transition: all 0.2s;
 }
 
+/* Filtre sans aucun programme : masqué par le JS. */
+.filtre-btn[hidden] { display: none; }
+
 .filtre-btn:hover {
   border-color: var(--gold);
   color: var(--white);
