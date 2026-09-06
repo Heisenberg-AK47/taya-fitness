@@ -9,6 +9,8 @@ import { signIn, signUp, resetPassword, getCurrentUser } from './auth.js';
 document.addEventListener('DOMContentLoaded', async () => {
   initNavbar();
   initFooter();
+  // Avant l'appel réseau : les yeux restent fonctionnels même si Supabase traîne.
+  initPasswordToggles();
 
   // Rediriger si déjà connecté — vers là d'où il vient s'il était en plein achat.
   const user = await getCurrentUser();
@@ -51,6 +53,56 @@ function setLoading(btnId, loading) {
   if (!btn) return;
   btn.disabled = loading;
   btn.textContent = loading ? '...' : (btnId === 'btn-login' ? 'Se connecter' : 'Créer mon compte');
+}
+
+/* ── Afficher / masquer le mot de passe ──────────────────── */
+/* Un seul tracé d'œil, plus une barre oblique qui se dessine
+   quand le mot de passe est visible. Pas d'emoji, pas d'image :
+   le SVG hérite de la couleur du bouton. */
+const EYE_SVG = `
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+       stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    <path d="M2.5 12S6.2 5.8 12 5.8 21.5 12 21.5 12 17.8 18.2 12 18.2 2.5 12 2.5 12Z" />
+    <circle cx="12" cy="12" r="2.9" />
+    <line class="pw-slash" x1="4.5" y1="19.5" x2="19.5" y2="4.5" />
+  </svg>`;
+
+function initPasswordToggles() {
+  document.querySelectorAll('.auth-form input[type="password"]').forEach(input => {
+    if (input.closest('.pw-field')) return;
+
+    // On enveloppe le champ pour pouvoir poser le bouton par-dessus.
+    const field = document.createElement('div');
+    field.className = 'pw-field';
+    input.parentNode.insertBefore(field, input);
+    field.appendChild(input);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pw-toggle';
+    btn.innerHTML = EYE_SVG;
+    setToggleState(btn, false);
+
+    btn.addEventListener('click', () => {
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      setToggleState(btn, show);
+      // On rend la main au champ sans perdre la position du curseur.
+      const pos = input.value.length;
+      input.focus();
+      try { input.setSelectionRange(pos, pos); } catch (_) {}
+    });
+
+    field.appendChild(btn);
+  });
+}
+
+function setToggleState(btn, visible) {
+  btn.classList.toggle('is-visible', visible);
+  btn.setAttribute('aria-pressed', String(visible));
+  const label = visible ? 'Masquer le mot de passe' : 'Afficher le mot de passe';
+  btn.setAttribute('aria-label', label);
+  btn.setAttribute('title', label);
 }
 
 /* ── Onglets ─────────────────────────────────────────────── */
