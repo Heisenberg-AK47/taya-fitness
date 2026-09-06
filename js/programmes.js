@@ -45,12 +45,39 @@ async function loadProgrammes() {
 
     if (error) throw error;
     allProgrammes = data || [];
+    updateFiltresDisponibles();
     renderProgrammes();
   } catch (err) {
     console.error(err);
     document.getElementById('programmes-grid').innerHTML =
       `<div class="empty-state"><span>⚠️</span><p>Impossible de charger les programmes.</p></div>`;
   }
+}
+
+/* Un filtre qui ne peut rien renvoyer n'a rien à faire à l'écran : on masque
+   son bouton tant qu'aucun programme ne porte cette valeur. Il réapparaît
+   tout seul dès qu'un programme est classé dedans. */
+function updateFiltresDisponibles() {
+  filtreCategorie = masquerFiltresVides('#filtres-categorie', filtreCategorie, p => p.categorie);
+  filtreNiveau    = masquerFiltresVides('#filtres-niveau',    filtreNiveau,    p => p.niveau);
+}
+
+function masquerFiltresVides(selecteur, filtreActif, valeurDe) {
+  const disponibles = new Set(allProgrammes.map(valeurDe).filter(Boolean));
+
+  document.querySelectorAll(`${selecteur} .filtre-btn`).forEach(btn => {
+    const valeur = btn.dataset.filter;
+    btn.hidden = valeur !== 'all' && !disponibles.has(valeur);
+  });
+
+  // Le filtre en cours vient d'être masqué (lien externe vers une catégorie
+  // vide, par exemple) : on retombe sur « Tous » plutôt que sur une page vide.
+  if (filtreActif !== 'all' && !disponibles.has(filtreActif)) {
+    document.querySelectorAll(`${selecteur} .filtre-btn`).forEach(b => b.classList.remove('active'));
+    document.querySelector(`${selecteur} .filtre-btn[data-filter="all"]`)?.classList.add('active');
+    return 'all';
+  }
+  return filtreActif;
 }
 
 function renderProgrammes() {
@@ -71,6 +98,13 @@ function renderProgrammes() {
   }
 
   const niveauLabels = { debutant: 'Débutant', intermediaire: 'Intermédiaire', avance: 'Avancé' };
+  const categorieLabels = {
+    'perte-de-poids': 'Perte de poids',
+    musculation:      'Musculation',
+    grossesse:        'Grossesse',
+    'post-partum':    'Post-partum',
+    nutrition:        'Nutrition',
+  };
 
   grid.innerHTML = filtered.map(p => {
     const prix = p.prix_promo ?? p.prix;
@@ -86,7 +120,7 @@ function renderProgrammes() {
         <div class="programme-meta">
           <span>⏱ ${p.duree_heures || '?'}h</span>
           <span>📚 ${p.nb_modules || '?'} modules</span>
-          <span>🏷 ${p.categorie || 'Fitness'}</span>
+          <span>🏷 ${categorieLabels[p.categorie] || p.categorie || 'Fitness'}</span>
         </div>
         <h3>${p.titre}</h3>
         <p>${p.description_courte || ''}</p>
