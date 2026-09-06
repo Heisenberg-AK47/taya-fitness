@@ -155,6 +155,21 @@
 
 .offre-detail-card:hover { border-color: rgba(201,168,76,0.3); }
 
+/* Formule ciblée par un lien de questionnaire ou d'email (?plan=…) :
+   on la signale quelques secondes pour que le visiteur la repère. */
+.offre-detail-card.plan-cible {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(255,107,74,0.25), 0 0 60px rgba(255,107,74,0.18);
+  animation: planCible 1.4s ease 2;
+}
+@keyframes planCible {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(255,107,74,0.25), 0 0 60px rgba(255,107,74,0.18); }
+  50%      { box-shadow: 0 0 0 6px rgba(255,107,74,0.10), 0 0 60px rgba(255,107,74,0.28); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .offre-detail-card.plan-cible { animation: none; }
+}
+
 .offre-detail-card.featured {
   border-color: var(--gold);
   transform: scale(1.03);
