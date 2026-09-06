@@ -188,6 +188,12 @@ section{padding:72px 0}
 /* La couleur de base du site s'applique aux deux blocs ; :where() garde une
    specificite nulle pour que navbar.css et footer.css restent prioritaires. */
 .navbar, .navbar-mobile, .footer{color:var(--white-muted)}
+
+/* La navbar du site est semi-transparente : au-dessus du fond creme de cette
+   page elle vire au gris. On la rend opaque pour retrouver le meme marine que
+   sur les autres pages. */
+.navbar, .navbar.scrolled{background:var(--black)}
+
 :where(.navbar, .navbar-mobile, .footer) a{color:inherit;text-decoration:none}
 :where(.navbar, .navbar-mobile, .footer) ul{list-style:none}
 :where(.navbar, .navbar-mobile, .footer) p{color:inherit}
