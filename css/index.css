@@ -192,3 +192,48 @@
 .toggle-track::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: var(--white-muted); border-radius: 50%; transition: transform 0.3s, background 0.3s; }
 .toggle-switch input:checked + .toggle-track { background: rgba(255,107,74,0.2); border-color: var(--gold); }
 .toggle-switch input:checked + .toggle-track::before { transform: translateX(22px); background: var(--gold); }
+
+/* ── Bandeau eBook ─────────────────────────────────────── */
+/* La nouveauté doit se voir d'un coup d'oeil : pastille pleine,
+   pas un simple label gris comme les autres sections. */
+.ebook-flags { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+
+.ebook-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--gold);
+  color: var(--black);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  border-radius: 100px;
+  box-shadow: var(--shadow-gold);
+}
+
+.ebook-flag-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--black);
+  animation: ebookPulse 1.9s ease-in-out infinite;
+}
+
+@keyframes ebookPulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.3; transform: scale(0.7); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ebook-flag-pulse { animation: none; }
+}
+
+.ebook-kicker {
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--white-muted);
+}
