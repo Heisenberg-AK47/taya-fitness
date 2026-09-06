@@ -46,6 +46,23 @@ async function loadPlans() {
   currentPlans = plans || [];
   renderPlans(currentPlans);
   updateComparatifPrices(currentPlans);
+  mettreEnAvantPlanDemande();
+}
+
+/* Arrivée depuis un questionnaire ou un email de relance (?plan=progression) :
+   on amène le visiteur sur la bonne carte au lieu de le lâcher en haut de page. */
+function mettreEnAvantPlanDemande() {
+  const demande = new URLSearchParams(window.location.search).get('plan');
+  if (!demande) return;
+
+  // Chaque carte porte déjà le slug de sa formule comme id.
+  const carte = document.getElementById(demande);
+  if (!carte || !carte.classList.contains('offre-detail-card')) return;
+
+  carte.classList.add('plan-cible');
+  // Le temps que la grille finisse de se peindre avant de mesurer la position.
+  requestAnimationFrame(() => carte.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+  setTimeout(() => carte.classList.remove('plan-cible'), 4000);
 }
 
 // ── Mise à jour du tableau comparatif ────────────────────────
