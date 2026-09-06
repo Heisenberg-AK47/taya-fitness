@@ -553,6 +553,27 @@ function shakeInput() {
   setTimeout(() => { el.style.borderBottomColor = ''; el.style.borderColor = ''; }, 900);
 }
 
+function nouvelId() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+/* Filet de securite : si l'enregistrement echoue malgre tout, la personne
+   ne doit pas repartir en croyant que ses reponses sont parties. */
+function alerteEnvoiRate() {
+  const sec = document.getElementById('plan-cards-section');
+  const bloc = document.createElement('p');
+  bloc.style.cssText = 'margin:18px auto 0;max-width:460px;font-size:13px;line-height:1.6;color:#ffb4a0;';
+  bloc.innerHTML = "Tes réponses n'ont pas pu être enregistrées. Écris-moi à " +
+    '<a href="mailto:contact@tayafitness.com" style="color:inherit;text-decoration:underline;">contact@tayafitness.com</a>' +
+    ' et je reprends tout avec toi.';
+  const cible = document.querySelector('.ending-screen');
+  if (cible) cible.insertBefore(bloc, sec || null);
+}
+
 async function submitResponses() {
   if (submitting || submitted) return;
   submitting = true;
@@ -580,25 +601,27 @@ async function submitResponses() {
     if (answers[q.id] !== undefined) cleanAnswers[q.id] = answers[q.id];
   }
   try {
-    const created = await api('form_responses', {
+    const responseId = nouvelId();
+    await api('form_responses', {
       method: 'POST',
-      headers: { Prefer: 'return=representation' },
-      body: JSON.stringify({ form_id: form.id, answers: cleanAnswers, respondent_name, respondent_email, completed_at: new Date().toISOString() })
+      body: JSON.stringify({ id: responseId, form_id: form.id, answers: cleanAnswers, respondent_name, respondent_email, completed_at: new Date().toISOString() })
     });
     submitted = true;
 
     // Prévenir Sarah avec le récapitulatif des réponses, et armer la série
     // de relances. Si cet appel échoue, la réponse est déjà enregistrée :
     // on ne bloque surtout pas l'écran de fin pour autant.
-    const responseId = Array.isArray(created) ? created[0]?.id : created?.id;
-    if (responseId) {
-      fetch(SUPABASE_URL + '/functions/v1/form-notify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ response_id: responseId })
-      }).catch(e => console.error('Notify error', e));
-    }
-  } catch(e) { console.error('Submit error', e); }
+    fetch(SUPABASE_URL + '/functions/v1/form-notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ response_id: responseId })
+    }).catch(e => console.error('Notify error', e));
+  } catch(e) {
+    console.error('Submit error', e);
+    // Une reponse perdue en silence est pire qu'un message d'erreur : on
+    // previent la personne et on lui laisse un moyen de nous joindre.
+    alerteEnvoiRate();
+  }
   submitting = false;
 }
 
