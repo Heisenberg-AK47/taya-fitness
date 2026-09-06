@@ -443,8 +443,14 @@ async function submitResponses() {
     if (q.type === 'short_answer' && answers[q.id] && !respondent_name) respondent_name = answers[q.id];
     if (q.type === 'multi_fields' && answers[q.id] && typeof answers[q.id] === 'object') {
       const fields = q.settings?.fields || [];
-      const nomF = fields.find(f => /nom|pr[eé]nom|name/i.test(f.label));
-      if (nomF && answers[q.id][nomF.label] && !respondent_name) respondent_name = answers[q.id][nomF.label];
+      /* « Nom » et « Prénom » sont deux cases distinctes : on recompose
+         « Prénom Nom » au lieu de ne garder que la première des deux. */
+      const champ = (re) => {
+        const f = fields.find(x => re.test((x.label || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()));
+        return f ? String(answers[q.id][f.label] ?? '').trim() : '';
+      };
+      const complet = [champ(/^prenom/i), champ(/^nom\b/i)].filter(Boolean).join(' ') || champ(/nom|prenom|name/i);
+      if (complet && !respondent_name) respondent_name = complet;
       const emailF = fields.find(f => /email|mail|@/i.test(f.label));
       if (emailF && answers[q.id][emailF.label] && !respondent_email) respondent_email = answers[q.id][emailF.label];
     }
