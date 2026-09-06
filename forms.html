@@ -244,7 +244,7 @@ function renderStep() {
           <div class="ending-icon">✅</div>
           <div class="q-title" style="text-align:center;">${esc(q.title)}</div>
           ${q.description ? `<div class="q-desc" style="text-align:center;max-width:480px;margin:0 auto 8px;">${esc(q.description)}</div>` : ''}
-          <div id="plan-cards-section" style="display:none;width:100%;max-width:560px;margin:0 auto 28px;"></div>
+          <div id="plan-cards-section" style="display:none;width:100%;max-width:560px;margin:26px auto 28px;padding-top:22px;border-top:1px solid rgba(255,255,255,0.09);"></div>
           <div id="plan-modal-overlay" onclick="closePlanModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:999;align-items:center;justify-content:center;padding:20px;">
             <div onclick="event.stopPropagation()" id="plan-modal-box" style="background:#1a2332;border-radius:20px;padding:28px;max-width:440px;width:100%;max-height:80vh;overflow-y:auto;position:relative;">
               <button onclick="closePlanModal()" style="position:absolute;top:14px;right:16px;background:transparent;border:none;color:rgba(255,255,255,0.5);font-size:22px;cursor:pointer;line-height:1;">✕</button>
