@@ -273,6 +273,9 @@ function renderStep() {
           </div>
         </div>
       </div>`;
+    // L'ecran de fin porte la proposition de formule : sans cet appel,
+    // le bloc reste vide et la personne repart sans rien a souscrire.
+    renderPlanCards();
   } else if (q.type === 'info_screen') {
     root.innerHTML = `
       <div class="progress-bar" style="width:${progress}%"></div>
@@ -501,6 +504,31 @@ document.addEventListener('keydown', e => {
 });
 
 init();
+/* Le forfait « adapté » : on relit les réponses (accompagnement souhaité,
+   fréquence de contact, objectif) et on en déduit le rythme qui colle.
+   Sans signal exploitable, on retombe sur la formule intermédiaire. */
+function planRecommande(plans) {
+  const morceaux = [];
+  for (const q of questions) {
+    const a = answers[q.id];
+    if (a === undefined || a === null || typeof a === 'object' && !Array.isArray(a)) continue;
+    morceaux.push((q.title || '') + ' :: ' + (Array.isArray(a) ? a.join(' | ') : String(a)));
+  }
+  const tout = morceaux.join('\n').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  /* On part de la formule intermediaire : c'est ce qu'on propose quand
+     rien dans les reponses ne penche d'un cote ou de l'autre. */
+  let score = 2;
+  if (/combo/.test(tout)) score += 1;                                  // sportif + nutrition
+  if (/hybride/.test(tout)) score += 1;                                // salle + en ligne
+  if (/hebdomadaire/.test(tout)) score += 1;                           // veut du suivi rapproche
+  if (/prise de masse|masse musculaire/.test(tout)) score += 1;        // objectif exigeant
+  if (/mensuelle/.test(tout)) score -= 1;                              // suivi espace
+  if (/uniquement (sportif|nutrition)/.test(tout)) score -= 1;         // un seul axe
+  if (/en ligne via l.appli|programme personnalise/.test(tout)) score -= 1; // sans seances encadrees
+  const rang = score <= 1 ? 0 : (score >= 5 ? 2 : 1);
+  return Math.max(0, Math.min(rang, plans.length - 1));
+}
+
 function renderPlanCards() {
   const plans = (form.settings && form.settings.plans) || [];
   if (!plans.length) return;
@@ -511,24 +539,34 @@ function renderPlanCards() {
   const btnBg = (form.settings && form.settings.btn_color) || accent;
   const btnText = (form.settings && form.settings.btn_text_color) || '#000000';
   const btnRadius = (form.settings && form.settings.btn_shape) === 'pill' ? '50px' : '10px';
-  let html = `<div style="font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${accent};margin-bottom:16px;text-align:center;">Nos formules</div>`;
-  html += `<div style="display:flex;flex-direction:column;gap:12px;">`;
-  plans.forEach((pl, i) => {
-    const hl = pl.highlighted;
-    html += `<div style="background:rgba(255,255,255,${hl?'0.1':'0.05'});border-radius:16px;padding:16px 18px;border:${hl?`2px solid ${accent}`:'1px solid rgba(255,255,255,0.1)'};position:relative;">
-      ${hl ? `<div style="position:absolute;top:-10px;left:18px;background:${accent};color:#000;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;letter-spacing:0.05em;">⭐ POPULAIRE</div>` : ''}
+  const reco = planRecommande(plans);
+
+  const carte = (pl, i, conseille) => `
+    <div style="background:rgba(255,255,255,${conseille ? '0.1' : '0.05'});border-radius:16px;padding:${conseille ? '20px 18px 16px' : '16px 18px'};border:${conseille ? `2px solid ${accent}` : '1px solid rgba(255,255,255,0.1)'};position:relative;${conseille ? `box-shadow:0 12px 34px rgba(0,0,0,0.35);` : ''}">
+      ${conseille ? `<div style="position:absolute;top:-11px;left:18px;background:${accent};color:${btnText};font-size:10px;font-weight:800;padding:4px 12px;border-radius:20px;letter-spacing:0.06em;">⭐ RECOMMANDÉ POUR TOI</div>` : ''}
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
         <div>
-          <div style="font-size:15px;font-weight:700;color:#fff;">${esc(pl.name||'Formule')}</div>
+          <div style="font-size:${conseille ? '17px' : '15px'};font-weight:700;color:#fff;">${esc(pl.name || 'Formule')}</div>
           ${pl.subtitle ? `<div style="font-size:12px;color:rgba(255,255,255,0.55);margin-top:2px;">${esc(pl.subtitle)}</div>` : ''}
         </div>
-        <div style="font-size:20px;font-weight:800;color:${accent};">${esc(pl.price||'')}</div>
+        <div style="font-size:${conseille ? '22px' : '20px'};font-weight:800;color:${accent};">${esc(pl.price || '')}</div>
       </div>
       <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
         ${pl.details ? `<button onclick="openPlanModal(${i})" style="flex:1;min-width:120px;padding:9px 14px;border-radius:${btnRadius};border:1px solid rgba(255,255,255,0.25);background:transparent;color:#fff;cursor:pointer;font-size:12px;font-weight:600;">Voir les détails</button>` : ''}
-        ${pl.btn_url ? `<a href="${esc(pl.btn_url)}" target="_blank" rel="noopener" style="flex:2;min-width:140px;display:flex;align-items:center;justify-content:center;padding:9px 14px;border-radius:${btnRadius};background:${btnBg};color:${btnText};font-size:12px;font-weight:700;text-decoration:none;">${esc(pl.btn_label||'Choisir cette formule')} →</a>` : ''}
+        ${pl.btn_url ? `<a href="${esc(pl.btn_url)}" target="_blank" rel="noopener" style="flex:2;min-width:140px;display:flex;align-items:center;justify-content:center;padding:${conseille ? '12px 14px' : '9px 14px'};border-radius:${btnRadius};background:${btnBg};color:${btnText};font-size:${conseille ? '13px' : '12px'};font-weight:700;text-decoration:none;">${esc(pl.btn_label || 'Choisir cette formule')} →</a>` : ''}
       </div>
     </div>`;
+
+  // La formule conseillee passe en tete, les deux autres restent visibles dessous.
+  const ordre = [reco, ...plans.map((_, i) => i).filter((i) => i !== reco)];
+  let html = `<div style="font-size:13px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:${accent};margin-bottom:6px;text-align:center;">Ta formule conseillée</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.55);margin:0 auto 16px;max-width:420px;line-height:1.6;">D'après tes réponses, voici le rythme qui correspond le mieux à ton objectif. Tu peux bien sûr partir sur une autre formule.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;text-align:left;">`;
+  ordre.forEach((i, rang) => {
+    if (rang === 1) {
+      html += `<div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin:12px 0 -2px;text-align:center;">Les autres formules</div>`;
+    }
+    html += carte(plans[i], i, i === reco);
   });
   html += `</div>`;
   sec.innerHTML = html;
