@@ -115,6 +115,9 @@
   .error-box h2{font-size:22px;margin-bottom:10px;color:#fff;}
   .error-box p{color:rgba(255,255,255,0.4);font-size:14px;line-height:1.6;}
 
+  .rgpd{margin-top:22px;max-width:560px;font-size:11px;line-height:1.6;color:rgba(255,255,255,0.32);}
+  .rgpd a{color:rgba(255,255,255,0.5);text-decoration:underline;}
+
   /* Branding */
   .brand{position:fixed;top:18px;left:22px;pointer-events:none;z-index:5;font-size:12px;font-weight:700;color:rgba(255,255,255,0.2);letter-spacing:0.08em;}
 
@@ -148,8 +151,21 @@ async function api(path, opts={}) {
 const slug = new URLSearchParams(location.search).get('slug');
 let form = null, questions = [], answers = {}, currentIdx = 0;
 let submitting = false, submitted = false;
+// Identite laissee dans le questionnaire : elle sert au CRM puis a Stripe.
+let identiteProspect = null;
 const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 const PAGE_URL = location.href;
+
+/* Information RGPD (art. 13) affichee avant la premiere question : qui
+   collecte, pourquoi, combien de temps, et comment exercer ses droits.
+   Le detail complet vit dans les mentions legales du site. */
+const MENTION_RGPD =
+  'En poursuivant, tu acceptes que Sarah Paulmier — Taya Fitness enregistre tes réponses et tes coordonnées ' +
+  'pour établir ton bilan, te recontacter et te présenter ses offres de coaching. Tes données ne sont ni ' +
+  'vendues ni transmises à des tiers, et sont conservées 3 ans après notre dernier échange. Tu peux à tout ' +
+  'moment y accéder, les corriger, les supprimer ou t\'opposer à leur utilisation en écrivant à ' +
+  '<a href="mailto:contact@tayafitness.com">contact@tayafitness.com</a>, et te désinscrire des emails en un clic. ' +
+  '<a href="/mentions-legales#donnees" target="_blank" rel="noopener">En savoir plus</a>.';
 
 /* Une couleur d'accent peut arriver en #abc, #aabbcc ou deja en rgb() :
    on en tire une version translucide pour le halo de selection. */
@@ -178,7 +194,27 @@ function loadFont(family) {
   document.body.style.fontFamily = `${cssFamily}, sans-serif`;
 }
 
+function renderPaiementConfirme() {
+  document.getElementById('root').innerHTML = `
+    <div class="progress-bar" style="width:100%"></div>
+    <div class="brand">TAYA FITNESS</div>
+    <div class="screen" style="text-align:center;">
+      <div class="ending-screen">
+        <div class="ending-mark"><svg viewBox="0 0 44 44" width="44" height="44" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="22" cy="22" r="20"/><path d="M14 22.5l5.5 5.5L30 17"/></svg></div>
+        <div class="q-title" style="text-align:center;">Ton coaching est confirmé</div>
+        <div class="q-desc" style="text-align:center;max-width:460px;margin:0 auto 8px;">Paiement bien reçu. Sarah te contacte sous 24 h pour caler ta première séance. Un récapitulatif vient d'arriver dans ta boîte mail.</div>
+        <div class="social-share">
+          <a class="share-btn wa" href="https://wa.me/33749071781?text=${encodeURIComponent("Bonjour Sarah, je viens de souscrire mon coaching, quand pouvons-nous commencer ?")}" target="_blank" rel="noopener">Écrire à Sarah</a>
+        </div>
+      </div>
+    </div>`;
+}
+
 async function init() {
+  // Retour depuis Stripe : le questionnaire est deja envoye, on confirme.
+  const paiement = new URLSearchParams(location.search).get('paiement');
+  if (paiement === 'success') { renderPaiementConfirme(); return; }
+
   if (!slug) { renderError('Formulaire introuvable','Aucun identifiant spécifié.'); return; }
   try {
     const forms = await api(`forms?slug=eq.${encodeURIComponent(slug)}&limit=1`);
@@ -275,6 +311,7 @@ function renderStep() {
           <div class="q-title">${esc(q.title)}</div>
           ${q.description ? `<div class="q-desc">${esc(q.description)}</div>` : ''}
           <button class="cta-btn" onclick="goNext()">${esc(form.homepage_button||'Commencer')} <span>→</span></button>
+          <p class="rgpd">${MENTION_RGPD}</p>
         </div>
       </div>`;
   } else if (q.type === '__end') {
@@ -449,10 +486,49 @@ function validate(q) {
   return true;
 }
 
+/* Lit un champ du bloc « Informations » par son libelle, sans se soucier
+   des accents ni de la casse : « Prénom », « prenom » ou « PRENOM ». */
+function champInfo(bloc, motif) {
+  for (const [libelle, valeur] of Object.entries(bloc || {})) {
+    const c = libelle.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    if (motif.test(c)) return String(valeur ?? '').trim();
+  }
+  return '';
+}
+
+/* Des que la personne a laisse son identite et passe a la suite, sa fiche
+   existe dans le CRM. Elle n'a plus rien a saisir ensuite, meme si elle
+   abandonne le questionnaire en cours de route. */
+let prospectEnvoye = '';
+function enregistrerProspect(q) {
+  if (q.type !== 'multi_fields') return;
+  const bloc = answers[q.id];
+  if (!bloc || typeof bloc !== 'object' || Array.isArray(bloc)) return;
+  const email = champInfo(bloc, /mail/).toLowerCase();
+  if (!email || email === prospectEnvoye) return;
+  prospectEnvoye = email;
+  identiteProspect = {
+    email,
+    prenom: champInfo(bloc, /^prenom/),
+    nom: champInfo(bloc, /^nom\b/),
+    telephone: champInfo(bloc, /tel|portable|mobile/),
+    age: champInfo(bloc, /^age/),
+    source: 'questionnaire-' + (slug || ''),
+  };
+  // Appel volontairement non bloquant : le questionnaire ne doit jamais
+  // attendre le CRM pour afficher la question suivante.
+  fetch(SUPABASE_URL + '/functions/v1/form-prospect', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(identiteProspect),
+  }).catch(e => console.error('Prospect error', e));
+}
+
 function goNext() {
   const q = questions[currentIdx];
   if (q && !q._isHome && q.type !== 'info_screen' && q.type !== '__end') {
     if (!validate(q)) { shakeInput(); return; }
+    enregistrerProspect(q);
   }
   if (currentIdx < questions.length - 1) {
     currentIdx++;
@@ -583,17 +659,40 @@ function selectionnerCarte(el) {
   el.classList.add('selected');
 }
 
-/* Paiement direct : on part vers Stripe sans repasser par la page d'offres.
-   Si le module de paiement n'a pas pu se charger, le lien configure sert
-   de secours pour ne jamais laisser le visiteur sans issue. */
-function payerPlan(btn) {
+/* Paiement direct, sans creation de compte prealable.
+   L'email laisse dans le questionnaire suffit : Stripe le pre-remplit, et
+   le webhook rattache ensuite l'abonnement et la fiche client sur cet email.
+   En cas de pepin, le lien configure sert de secours pour ne jamais laisser
+   le visiteur sans issue. */
+async function payerPlan(btn) {
   const carte = btn.closest('.plan-card');
   if (carte) selectionnerCarte(carte);
   const plan = btn.dataset.plan;
-  if (window.tayaPaiement && plan) {
-    window.tayaPaiement(plan, btn);
-  } else if (btn.dataset.url) {
-    window.location.href = btn.dataset.url;
+  if (!plan) { if (btn.dataset.url) window.location.href = btn.dataset.url; return; }
+
+  const libelle = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Redirection...';
+  try {
+    const retour = location.origin + '/forms?slug=' + encodeURIComponent(slug || '');
+    const r = await fetch(SUPABASE_URL + '/functions/v1/stripe-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        type: 'abonnement', plan, billing: 'monthly',
+        user_id: '', user_email: (identiteProspect && identiteProspect.email) || '',
+        success_url: retour + '&paiement=success',
+        cancel_url: retour + '&paiement=annule',
+      }),
+    });
+    const d = await r.json();
+    if (!r.ok || !d.url) throw new Error(d.error || 'Erreur de paiement');
+    window.location.href = d.url;
+  } catch (e) {
+    console.error('Checkout error', e);
+    btn.disabled = false;
+    btn.textContent = libelle;
+    if (btn.dataset.url) window.location.href = btn.dataset.url;
   }
 }
 
@@ -660,15 +759,6 @@ function closePlanModal() {
   document.getElementById('plan-modal-overlay').style.display = 'none';
 }
 
-</script>
-<script type="module">
-  /* Tunnel direct : la formule choisie part vers Stripe sans detour par la
-     page d'offres. Le compte est cree avant le paiement (comme sur le site) ;
-     au retour de la creation de compte, l'achat en attente repart tout seul. */
-  import { startCheckout, reprendreAchatEnAttente } from '/js/stripe.js';
-  reprendreAchatEnAttente().catch(() => { /* rien en attente */ });
-  window.tayaPaiement = (plan, btn) =>
-    startCheckout({ type: 'abonnement', plan, billing: 'monthly', btnEl: btn });
 </script>
 </body>
 </html>
