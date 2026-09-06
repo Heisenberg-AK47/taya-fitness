@@ -454,12 +454,24 @@ async function submitResponses() {
     if (answers[q.id] !== undefined) cleanAnswers[q.id] = answers[q.id];
   }
   try {
-    await api('form_responses', {
+    const created = await api('form_responses', {
       method: 'POST',
-      headers: { Prefer: 'return=minimal' },
+      headers: { Prefer: 'return=representation' },
       body: JSON.stringify({ form_id: form.id, answers: cleanAnswers, respondent_name, respondent_email, completed_at: new Date().toISOString() })
     });
     submitted = true;
+
+    // Prévenir Sarah avec le récapitulatif des réponses, et armer la série
+    // de relances. Si cet appel échoue, la réponse est déjà enregistrée :
+    // on ne bloque surtout pas l'écran de fin pour autant.
+    const responseId = Array.isArray(created) ? created[0]?.id : created?.id;
+    if (responseId) {
+      fetch(SUPABASE_URL + '/functions/v1/form-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ response_id: responseId })
+      }).catch(e => console.error('Notify error', e));
+    }
   } catch(e) { console.error('Submit error', e); }
   submitting = false;
 }
