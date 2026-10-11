@@ -95,6 +95,7 @@
 .programmes-grid-inner { }  /* override sur mobile via media query */
 
 .coach-section { background: var(--black); }
+.coach-mobile { display: none; }
 .coach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
 .coach-image-wrap { position: relative; }
 .coach-badge-float { position: absolute; bottom: -20px; right: -20px; background: var(--black-card); border: 1px solid var(--gold); border-radius: var(--radius); padding: 16px 20px; display: flex; align-items: center; gap: 12px; font-size: 1.5rem; box-shadow: var(--shadow-gold); }
@@ -214,7 +215,73 @@
     margin-right: 12px;
   }
 
-  /* Coach */
+  /* Coach — masquer la version desktop, afficher la mobile */
+  .coach-grid { display: none !important; }
+  .coach-mobile { display: block; }
+
+  .coach-mobile-header {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+  }
+
+  .coach-mobile-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: var(--radius-lg);
+    object-fit: cover;
+    object-position: center top;
+    border: 1px solid var(--black-border);
+    flex-shrink: 0;
+  }
+
+  .coach-mobile-identity {
+    flex: 1;
+    padding-top: 2px;
+  }
+
+  .coach-mobile-identity h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--white);
+    margin: 0 0 4px;
+    line-height: 1.2;
+  }
+
+  .coach-mobile-sub {
+    font-size: 0.8rem;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+
+  .coach-mobile-bio {
+    font-size: 0.82rem;
+    color: var(--white-muted);
+    line-height: 1.5;
+  }
+
+  .coach-certifs-mobile {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--black-border);
+    border: 1px solid var(--black-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .coach-certifs-mobile .certif {
+    border-radius: 0;
+    border: none;
+    background: var(--black-card);
+    font-size: 0.8rem;
+    padding: 12px 14px;
+    color: var(--white-muted);
+  }
+
+  /* Temoignages */
   .temoignages-grid { grid-template-columns: 1fr; }
   .newsletter-box { padding: 40px 24px; }
   .newsletter-form { flex-direction: column; }
