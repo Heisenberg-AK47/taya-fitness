@@ -13,6 +13,18 @@ let selectedHeure = null;
 let currentYear   = new Date().getFullYear();
 let currentMonth  = new Date().getMonth();
 
+const isMobile = () => window.innerWidth <= 900;
+
+function revealMobile(el, scrollTo = true) {
+  if (!isMobile() || !el) return;
+  el.classList.add('mobile-visible');
+  if (scrollTo) {
+    setTimeout(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }
+}
+
 const CRENEAUX = ['08:00','09:00','10:00','11:00','14:00','15:00','16:00','17:00','18:00','19:00'];
 
 const TYPE_LABELS = {
@@ -35,6 +47,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   initTypeCards();
   renderCalendrier();
   initBtnReserver();
+
+  // Sur mobile : révéler le calendrier d'entrée (étape 1 = lieu déjà visible)
+  // Le calendrier s'affiche immédiatement car le lieu est pré-sélectionné
+  if (isMobile()) {
+    setTimeout(() => revealMobile(document.querySelector('.resa-cal'), false), 200);
+  }
 });
 
 /* ── Types de séance ─────────────────────────────────────── */
@@ -118,6 +136,10 @@ async function renderCreneaux(dateStr) {
   const section = document.getElementById('creneaux-section');
   const grid    = document.getElementById('creneaux-horaires');
   section.style.display = 'block';
+  // Sur mobile : retirer mobile-visible pour re-animer si changement de date
+  if (isMobile()) {
+    section.classList.remove('mobile-visible');
+  }
 
   let indispo = [];
   try {
@@ -154,8 +176,13 @@ async function renderCreneaux(dateStr) {
       selectedHeure = btn.dataset.heure;
       updateSummary();
       checkReady();
+      // Sur mobile : révéler le récap après sélection d'une heure
+      revealMobile(document.getElementById('resa-summary'));
     });
   });
+
+  // Sur mobile : révéler les créneaux après chargement
+  setTimeout(() => revealMobile(section), 100);
 }
 
 /* ── Résumé ──────────────────────────────────────────────── */
