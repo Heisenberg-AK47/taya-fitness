@@ -45,8 +45,11 @@ function initOffresSlider() {
     });
   });
 
-  // Mise à jour des dots au scroll
-  const updateDots = () => {
+  // Mise à jour des dots et flèches au scroll
+  const prevBtn = document.getElementById('offres-prev');
+  const nextBtn = document.getElementById('offres-next');
+
+  const getClosest = () => {
     const cards = grid.querySelectorAll('.offre-card');
     let closest = 0;
     let minDist = Infinity;
@@ -55,8 +58,32 @@ function initOffresSlider() {
       const dist = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
       if (dist < minDist) { minDist = dist; closest = i; }
     });
-    dots.forEach((d, i) => d.classList.toggle('active', i === closest));
+    return { closest, total: cards.length, cards };
   };
+
+  const updateDots = () => {
+    const { closest, total } = getClosest();
+    dots.forEach((d, i) => d.classList.toggle('active', i === closest));
+    if (prevBtn) prevBtn.classList.toggle('hidden', closest === 0);
+    if (nextBtn) nextBtn.classList.toggle('hidden', closest === total - 1);
+  };
+
+  const scrollToIdx = (idx) => {
+    const { cards } = getClosest();
+    if (cards[idx]) {
+      grid.scrollTo({ left: cards[idx].offsetLeft - grid.offsetLeft - (grid.offsetWidth - cards[idx].offsetWidth) / 2, behavior: 'smooth' });
+    }
+  };
+
+  prevBtn?.addEventListener('click', () => {
+    const { closest } = getClosest();
+    if (closest > 0) scrollToIdx(closest - 1);
+  });
+
+  nextBtn?.addEventListener('click', () => {
+    const { closest, total } = getClosest();
+    if (closest < total - 1) scrollToIdx(closest + 1);
+  });
 
   grid.addEventListener('scroll', updateDots, { passive: true });
   updateDots();

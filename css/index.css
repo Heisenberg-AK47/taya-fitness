@@ -87,6 +87,7 @@
 
 /* Dots pagination (mobile only) */
 .offres-dots { display: none; justify-content: center; gap: 8px; margin-top: 20px; }
+.offres-arrow { display: none; }
 .offre-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--black-border); transition: all 0.2s; cursor: pointer; }
 .offre-dot.active { background: var(--gold); width: 24px; border-radius: 4px; }
 
@@ -168,7 +169,40 @@
   .why-item-icon svg { width: 16px; height: 16px; }
 
   /* Offres sur la home — slider horizontal */
-  .offres-slider-wrap { margin: 0 -16px; }
+  .offres-slider-wrap { margin: 0 -16px; position: relative; }
+
+  .offres-arrow {
+    display: flex;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--black-card);
+    border: 1px solid var(--black-border);
+    color: var(--white);
+    font-size: 1.6rem;
+    line-height: 1;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .offres-arrow:active {
+    background: rgba(201,168,76,0.15);
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  .offres-arrow-prev { left: 4px; }
+  .offres-arrow-next { right: 4px; }
+
+  .offres-arrow.hidden { opacity: 0; pointer-events: none; }
   .offres-grid {
     display: flex;
     flex-direction: row;
