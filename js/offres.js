@@ -105,9 +105,9 @@ function renderPlans(plans) {
     <div class="decouverte-right">
       <div class="decouverte-price">69€ <span>/ séance unique</span></div>
       <p class="decouverte-note">Paiement sécurisé</p>
-      <button class="btn btn-primary decouverte-btn" data-checkout="decouverte" data-plan="seance-decouverte">
+      <a href="/reservation" class="btn btn-primary decouverte-btn">
         Réserver ma séance
-      </button>
+      </a>
     </div>
   </div>`;
 
