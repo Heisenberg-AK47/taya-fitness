@@ -22,6 +22,20 @@
 @keyframes scrollPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 .why-section { background: var(--black-soft); position: relative; overflow: hidden; }
+
+/* Nouvelle grille compacte 2 colonnes */
+.why-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2px; background: var(--black-border); border: 1px solid var(--black-border); border-radius: var(--radius-lg); overflow: hidden; }
+
+.why-item { display: flex; align-items: flex-start; gap: 14px; padding: 20px 18px; background: var(--black-card); transition: background 0.2s; }
+.why-item:hover { background: var(--black-soft); }
+
+.why-item-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--gold); }
+
+.why-item-body { display: flex; flex-direction: column; gap: 4px; }
+.why-item-body strong { font-size: 0.88rem; font-weight: 700; color: var(--white); line-height: 1.3; font-family: var(--font-title); }
+.why-item-body span { font-size: 0.78rem; color: var(--white-muted); line-height: 1.45; }
+
+/* Ancien layout — conservé pour compatibilité éventuelle */
 .why-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .why-card { background: var(--black-card); border: 1px solid var(--black-border); border-radius: var(--radius-lg); padding: 36px 28px; transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s; position: relative; overflow: hidden; }
 .why-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--gold-light)); opacity: 0; transition: opacity 0.3s; }
@@ -138,6 +152,9 @@
   /* Sections générales */
   .why-grid { grid-template-columns: 1fr; }
   .why-card { padding: 28px 20px; }
+  .why-item { padding: 16px 14px; gap: 10px; }
+  .why-item-icon { width: 30px; height: 30px; border-radius: 8px; }
+  .why-item-icon svg { width: 16px; height: 16px; }
 
   /* Offres sur la home */
   .offres-grid { max-width: 100%; gap: 16px; }
@@ -174,6 +191,8 @@
   /* Why cards */
   .why-card { padding: 24px 16px; }
   .why-icon { font-size: 1.8rem; margin-bottom: 12px; }
+  .why-list { grid-template-columns: 1fr; }
+  .why-item { padding: 14px 12px; }
 
   /* Newsletter */
   .newsletter-box { padding: 32px 16px; }
