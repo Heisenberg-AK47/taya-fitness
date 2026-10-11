@@ -7,7 +7,7 @@ import { initFooter } from './footer.js';
 import { getCurrentUser } from './auth.js';
 import { supabase } from './supabase.js';
 
-let selectedType  = 'stade-de-france';
+let selectedType  = 'aubervilliers';
 let selectedDate  = null;
 let selectedHeure = null;
 let currentYear   = new Date().getFullYear();
@@ -16,15 +16,11 @@ let currentMonth  = new Date().getMonth();
 const CRENEAUX = ['08:00','09:00','10:00','11:00','14:00','15:00','16:00','17:00','18:00','19:00'];
 
 const TYPE_LABELS = {
-  'stade-de-france': 'Fitness Park Stade de France',
-  'aubervilliers':   'Fitness Park Aubervilliers',
-  'carnot':          'Fitness Park rue Carnot · Saint-Denis',
+  'aubervilliers': 'Fitness Park Aubervilliers',
 };
 
 const TYPE_ADDRESSES = {
-  'stade-de-france': '7 Av. Jules Rimet, 93200 Saint-Denis',
-  'aubervilliers':   '174 Av. Jean Jaurès, 93300 Aubervilliers',
-  'carnot':          '17 Rue Carnot, 93200 Saint-Denis',
+  'aubervilliers': '174 Av. Jean Jaurès, 93300 Aubervilliers',
 };
 
 document.addEventListener('DOMContentLoaded', async () => {

@@ -95,7 +95,7 @@ function renderPlans(plans) {
     <div class="decouverte-left">
       <span class="decouverte-badge">✨ Séance découverte</span>
       <h3>Essaie avant de t'engager</h3>
-      <p>Une séance de coaching personnalisé avec Sarah à La Défense ou au Stade de France. Sans engagement, sans surprise.</p>
+      <p>Une séance de coaching personnalisé avec Sarah à Fitness Park Aubervilliers. Sans engagement, sans surprise.</p>
       <ul class="decouverte-list">
         <li>✓ Bilan de forme & objectifs</li>
         <li>✓ 1 séance complète en salle</li>
@@ -141,7 +141,7 @@ function renderPlans(plans) {
     const durationNote = `<div class="engagement-badge">
       🔒 Engagement ${engagementMois} mois minimum
     </div>
-    <div class="plan-location">📍 Stade de France · La Défense</div>`;
+    <div class="plan-location">📍 Fitness Park Aubervilliers</div>`;
 
     const referralHtml = plan.referral_enabled ? `
       <div style="margin-top:12px;padding:9px 12px;background:rgba(232,197,71,0.07);border:1px solid rgba(232,197,71,0.2);border-radius:10px;font-size:12px;color:rgba(255,255,255,0.65);">
