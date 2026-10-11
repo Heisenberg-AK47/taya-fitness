@@ -158,10 +158,11 @@
 @media (max-width: 768px) {
   /* Hero */
   .hero-content { padding: 80px 0 60px; }
-  .hero-cta { flex-direction: column; gap: 12px; }
+  .hero-cta { flex-direction: column; gap: 10px; }
   .hero-cta .btn { width: 100%; text-align: center; justify-content: center; }
-  .hero-cta-mobile { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; animation: fadeUp 0.6s 0.3s ease both; }
+  .hero-cta-mobile { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; animation: fadeUp 0.6s 0.3s ease both; }
   .hero-cta-mobile .btn { width: 100%; text-align: center; justify-content: center; }
+  .hero-cta .btn-lg, .hero-cta-mobile .btn-lg { padding: 13px 20px; font-size: 0.9rem; }
   .hero-stats { gap: 20px; }
   .hero-stats .stat-number { font-size: 1.5rem; }
 
