@@ -573,3 +573,6 @@
   /* Overlay always slightly visible on mobile */
   .insta-overlay { opacity: 0.7; }
 }
+
+/* ── Behold widget wrap ──────────────────────────────────────── */
+.behold-wrap { width: 100%; }
