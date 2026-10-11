@@ -470,3 +470,106 @@
   text-transform: uppercase;
   color: var(--white-muted);
 }
+
+/* ── Instagram Feed ──────────────────────────────────────── */
+.insta-section { background: var(--black); }
+
+.insta-handle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--white-muted);
+  text-decoration: none;
+  margin-top: 4px;
+  transition: color 0.2s;
+}
+.insta-handle:hover { color: var(--white); }
+.insta-handle svg { flex-shrink: 0; }
+
+/* Desktop grid: 4 colonnes carrées */
+.insta-feed {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.insta-post { display: block; text-decoration: none; }
+
+.insta-post-img {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  background: var(--black-card);
+}
+
+.insta-post-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.45s ease;
+}
+
+.insta-post:hover .insta-post-img img {
+  transform: scale(1.07);
+}
+
+.insta-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(13,27,42,0.15) 0%, rgba(13,27,42,0.65) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  color: var(--white);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.insta-post:hover .insta-overlay { opacity: 1; }
+
+.insta-cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.insta-cta .btn { display: inline-flex; align-items: center; gap: 10px; }
+
+/* Mobile: carousel horizontal */
+@media (max-width: 768px) {
+  .insta-feed {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 10px;
+    border-radius: 0;
+    padding: 4px 0;
+  }
+  .insta-feed::-webkit-scrollbar { display: none; }
+
+  .insta-post {
+    flex: 0 0 72vw;
+    scroll-snap-align: center;
+  }
+
+  .insta-post-img {
+    border-radius: var(--radius);
+  }
+
+  /* Overlay always slightly visible on mobile */
+  .insta-overlay { opacity: 0.7; }
+}
