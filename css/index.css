@@ -105,7 +105,8 @@
 .coach-content .label { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; background: rgba(255,107,74,0.1); padding: 6px 14px; border-radius: 100px; border: 1px solid rgba(255,107,74,0.2); }
 .coach-content h2 em { font-style: italic; color: var(--gold); }
 .coach-certifs { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
-.certif { background: var(--black-card); border: 1px solid var(--black-border); border-radius: 100px; padding: 8px 16px; font-size: 0.82rem; color: var(--white-muted); transition: border-color 0.2s, color 0.2s; }
+.certif { background: var(--black-card); border: 1px solid var(--black-border); border-radius: 100px; padding: 8px 16px; font-size: 0.82rem; color: var(--white-muted); transition: border-color 0.2s, color 0.2s; display: flex; align-items: center; gap: 7px; }
+.certif svg { flex-shrink: 0; color: var(--gold); }
 .certif:hover { border-color: var(--gold); color: var(--white); }
 
 .temoignages-section { background: var(--black-soft); }
