@@ -196,6 +196,18 @@ p {
 .btn-sm  { padding: 9px 20px;  font-size: 0.84rem; }
 .btn-lg  { padding: 18px 44px; font-size: 1.05rem; }
 
+.btn-green {
+  background: var(--green);
+  color: #0d1b2a;
+  font-weight: 700;
+  box-shadow: 0 4px 16px rgba(62,207,142,0.35);
+}
+.btn-green:hover {
+  background: #52dba0;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(62,207,142,0.5);
+}
+
 .btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
