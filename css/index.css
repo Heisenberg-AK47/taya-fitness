@@ -108,7 +108,10 @@
 .certif:hover { border-color: var(--gold); color: var(--white); }
 
 .temoignages-section { background: var(--black-soft); }
+.temoignages-slider-wrap { position: relative; }
 .temoignages-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.temoignages-arrow { display: none; }
+.temoignages-dots { display: none; }
 .temoignage { background: var(--black-card); border: 1px solid var(--black-border); border-radius: var(--radius-lg); padding: 32px; transition: border-color 0.3s, transform 0.3s; }
 .temoignage:hover { border-color: rgba(255,107,74,0.2); transform: translateY(-3px); }
 .temoignage-stars { color: var(--gold); font-size: 1rem; letter-spacing: 2px; margin-bottom: 16px; }
@@ -294,8 +297,51 @@
     padding: 11px 12px;
   }
 
-  /* Temoignages */
-  .temoignages-grid { grid-template-columns: 1fr; }
+  /* Temoignages slider mobile */
+  .temoignages-grid {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0;
+    grid-template-columns: unset;
+  }
+  .temoignages-grid::-webkit-scrollbar { display: none; }
+  .temoignage {
+    flex: 0 0 88vw;
+    scroll-snap-align: center;
+    margin: 0 6px;
+  }
+  .temoignages-arrow {
+    display: flex;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--black-card);
+    border: 1px solid var(--black-border);
+    color: var(--white);
+    font-size: 1.6rem;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .temoignages-arrow:hover { border-color: var(--gold); color: var(--gold); }
+  .temoignages-arrow-prev { left: 4px; }
+  .temoignages-arrow-next { right: 4px; }
+  .temoignages-arrow.hidden { opacity: 0; pointer-events: none; }
+  .temoignages-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
   .newsletter-box { padding: 40px 24px; }
   .newsletter-form { flex-direction: column; }
   .newsletter-form .btn { width: 100%; justify-content: center; }

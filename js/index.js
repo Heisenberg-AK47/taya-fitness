@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initBillingToggle();
   initNewsletter();
   initOffresSlider();
+  initTemoignagesSlider();
 });
 
 /* ── Slider offres (dots + scroll snap) ─────────────────── */
@@ -200,6 +201,56 @@ function programmCard(p) {
       </div>
     </div>
   </div>`;
+}
+
+/* ── Slider témoignages (dots + arrows) ─────────────────── */
+function initTemoignagesSlider() {
+  const grid = document.getElementById('temoignages-grid');
+  const dots = document.querySelectorAll('#temoignages-dots .offre-dot');
+  const prevBtn = document.getElementById('temo-prev');
+  const nextBtn = document.getElementById('temo-next');
+  if (!grid) return;
+
+  const getClosest = () => {
+    const cards = grid.querySelectorAll('.temoignage');
+    let closest = 0;
+    let minDist = Infinity;
+    const center = grid.scrollLeft + grid.offsetWidth / 2;
+    cards.forEach((card, i) => {
+      const dist = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
+      if (dist < minDist) { minDist = dist; closest = i; }
+    });
+    return { closest, total: cards.length, cards };
+  };
+
+  const scrollToIdx = (idx) => {
+    const { cards } = getClosest();
+    if (cards[idx]) {
+      grid.scrollTo({ left: cards[idx].offsetLeft - grid.offsetLeft - (grid.offsetWidth - cards[idx].offsetWidth) / 2, behavior: 'smooth' });
+    }
+  };
+
+  const updateDots = () => {
+    const { closest, total } = getClosest();
+    dots.forEach((d, i) => d.classList.toggle('active', i === closest));
+    if (prevBtn) prevBtn.classList.toggle('hidden', closest === 0);
+    if (nextBtn) nextBtn.classList.toggle('hidden', closest === total - 1);
+  };
+
+  prevBtn?.addEventListener('click', () => {
+    const { closest } = getClosest();
+    if (closest > 0) scrollToIdx(closest - 1);
+  });
+  nextBtn?.addEventListener('click', () => {
+    const { closest, total } = getClosest();
+    if (closest < total - 1) scrollToIdx(closest + 1);
+  });
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => scrollToIdx(parseInt(dot.dataset.idx)));
+  });
+
+  grid.addEventListener('scroll', updateDots, { passive: true });
+  updateDots();
 }
 
 /* ── Newsletter ──────────────────────────────────────────── */
