@@ -390,7 +390,7 @@
 
 @media (max-width: 480px) {
   /* Hero encore plus compact */
-  .hero-content { padding: 70px 0 50px; }
+  .hero-content { padding: 0 0 32px; }
   .hero-label { font-size: 0.68rem; }
   .hero-subtitle { font-size: 0.95rem; }
   .hero-stats { flex-wrap: wrap; gap: 16px; }
