@@ -12,6 +12,22 @@ export function initFooter() {
         <div class="footer-brand">
           <a href="/" class="footer-logo"><img src="/assets/logo.png" alt="Taya Fitness" style="height:36px;width:auto;display:block"></a>
           <p>Coach sportive certifiée, spécialisée en coaching personnalisé, nutrition et développement personnel. Transforme ton corps et ton esprit.</p>
+          <!-- Grille liens mobile uniquement (cachée sur desktop) -->
+          <nav class="footer-mobile-links" aria-label="Liens rapides">
+            <a href="/">Accueil</a>
+            <a href="/programmes">Programmes</a>
+            <a href="/offres">Nos offres</a>
+            <a href="/ebook">Le Guide</a>
+            <a href="/reservation">Réserver</a>
+            <a href="/contact">À propos</a>
+            <a href="/auth">Connexion</a>
+            <a href="/programmes?categorie=perte-de-poids">Perte de poids</a>
+          </nav>
+          <div class="footer-mobile-contact">
+            <a href="mailto:contact@tayafitness.com">📧 contact@tayafitness.com</a>
+            <a href="tel:+33749071781">📞 07 49 07 17 81</a>
+          </div>
+
           <div class="footer-socials">
             <a href="https://www.instagram.com/taya_fitness_/" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -77,6 +93,7 @@ export function initFooter() {
             <p><strong>Zone</strong>Région parisienne</p>
           </div>
         </div>
+
 
       </div>
     </div>
