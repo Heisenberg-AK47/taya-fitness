@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initNewsletter();
   initOffresSlider();
   initTemoignagesSlider();
+  initProgrammesSlider();
 });
 
 /* ── Slider offres (dots + scroll snap) ─────────────────── */
@@ -201,6 +202,54 @@ function programmCard(p) {
       </div>
     </div>
   </div>`;
+}
+
+/* ── Slider programmes vedettes (arrows uniquement) ─────── */
+function initProgrammesSlider() {
+  const grid = document.getElementById('programmes-grid');
+  const prevBtn = document.getElementById('prog-prev');
+  const nextBtn = document.getElementById('prog-next');
+  if (!grid || !prevBtn || !nextBtn) return;
+
+  const getClosest = () => {
+    const cards = grid.querySelectorAll('.programme-card');
+    let closest = 0;
+    let minDist = Infinity;
+    const center = grid.scrollLeft + grid.offsetWidth / 2;
+    cards.forEach((card, i) => {
+      const dist = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
+      if (dist < minDist) { minDist = dist; closest = i; }
+    });
+    return { closest, total: cards.length, cards };
+  };
+
+  const scrollToIdx = (idx) => {
+    const { cards } = getClosest();
+    if (cards[idx]) {
+      grid.scrollTo({ left: cards[idx].offsetLeft - grid.offsetLeft - (grid.offsetWidth - cards[idx].offsetWidth) / 2, behavior: 'smooth' });
+    }
+  };
+
+  const updateArrows = () => {
+    const { closest, total } = getClosest();
+    prevBtn.classList.toggle('hidden', closest === 0);
+    nextBtn.classList.toggle('hidden', closest === total - 1);
+  };
+
+  prevBtn.addEventListener('click', () => {
+    const { closest } = getClosest();
+    if (closest > 0) scrollToIdx(closest - 1);
+  });
+  nextBtn.addEventListener('click', () => {
+    const { closest, total } = getClosest();
+    if (closest < total - 1) scrollToIdx(closest + 1);
+  });
+
+  grid.addEventListener('scroll', updateArrows, { passive: true });
+  // Attendre que les cards soient chargées depuis Supabase
+  const observer = new MutationObserver(() => updateArrows());
+  observer.observe(grid, { childList: true });
+  updateArrows();
 }
 
 /* ── Slider témoignages (dots + arrows) ─────────────────── */

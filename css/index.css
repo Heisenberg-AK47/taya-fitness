@@ -94,6 +94,7 @@
 /* Slider programmes */
 .programmes-slider-wrap { position: relative; }
 .programmes-grid-inner { }  /* override sur mobile via media query */
+.programmes-arrow { display: none; }
 
 .coach-section { background: var(--black); }
 .coach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
@@ -233,6 +234,28 @@
 
   /* Programmes — slider horizontal */
   .programmes-slider-wrap { margin: 0 -16px; }
+  .programmes-arrow {
+    display: flex;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--black-card);
+    border: 1px solid var(--black-border);
+    color: var(--white);
+    font-size: 1.6rem;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .programmes-arrow:hover { border-color: var(--gold); color: var(--gold); }
+  .programmes-arrow-prev { left: 20px; }
+  .programmes-arrow-next { right: 20px; }
+  .programmes-arrow.hidden { opacity: 0; pointer-events: none; }
   .programmes-grid-inner {
     display: flex !important;
     flex-direction: row !important;
