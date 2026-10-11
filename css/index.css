@@ -95,7 +95,6 @@
 .programmes-grid-inner { }  /* override sur mobile via media query */
 
 .coach-section { background: var(--black); }
-.coach-mobile { display: none; }
 .coach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
 .coach-image-wrap { position: relative; }
 .coach-badge-float { position: absolute; bottom: -20px; right: -20px; background: var(--black-card); border: 1px solid var(--gold); border-radius: var(--radius); padding: 16px 20px; display: flex; align-items: center; gap: 12px; font-size: 1.5rem; box-shadow: var(--shadow-gold); }
@@ -215,54 +214,34 @@
     margin-right: 12px;
   }
 
-  /* Coach — masquer la version desktop, afficher la mobile */
-  .coach-grid { display: none !important; }
-  .coach-mobile { display: block; }
+  /* Coach mobile — même grid, juste adaptée */
+  .coach-grid { grid-template-columns: 1fr; gap: 0; }
 
-  .coach-mobile-header {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    margin-bottom: 20px;
+  /* Photo : format paysage 4/3 pleine largeur, pas portrait */
+  .coach-image-wrap img {
+    aspect-ratio: 4/3 !important;
+    object-position: center 20% !important;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+    border-bottom: none !important;
   }
 
-  .coach-mobile-photo {
-    width: 100px;
-    height: 100px;
-    border-radius: var(--radius-lg);
-    object-fit: cover;
-    object-position: center top;
+  .coach-image-wrap {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  /* Contenu coach dans une carte qui prolonge la photo */
+  .coach-content {
+    background: var(--black-card);
     border: 1px solid var(--black-border);
-    flex-shrink: 0;
+    border-top: none;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    padding: 24px 20px 28px;
   }
 
-  .coach-mobile-identity {
-    flex: 1;
-    padding-top: 2px;
-  }
+  .coach-content .gold-divider { margin: 14px 0 !important; }
 
-  .coach-mobile-identity h3 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--white);
-    margin: 0 0 4px;
-    line-height: 1.2;
-  }
-
-  .coach-mobile-sub {
-    font-size: 0.8rem;
-    color: var(--gold);
-    font-weight: 500;
-    margin-bottom: 8px;
-  }
-
-  .coach-mobile-bio {
-    font-size: 0.82rem;
-    color: var(--white-muted);
-    line-height: 1.5;
-  }
-
-  .coach-certifs-mobile {
+  /* Certifs en grille 2×2 */
+  .coach-certifs {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1px;
@@ -270,15 +249,15 @@
     border: 1px solid var(--black-border);
     border-radius: var(--radius-lg);
     overflow: hidden;
+    margin-top: 20px;
   }
 
-  .coach-certifs-mobile .certif {
+  .certif {
     border-radius: 0;
     border: none;
     background: var(--black-card);
     font-size: 0.8rem;
-    padding: 12px 14px;
-    color: var(--white-muted);
+    padding: 11px 12px;
   }
 
   /* Temoignages */
