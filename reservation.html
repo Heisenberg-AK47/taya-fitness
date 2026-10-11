@@ -35,8 +35,8 @@
 
         <div class="reservation-grid">
 
-          <!-- Étape 1 : Lieu de séance -->
-          <div class="resa-col">
+          <!-- Étape 1 : Lieu de séance (grid-area: lieu) -->
+          <div class="resa-lieu">
             <div class="resa-step">
               <div class="step-num">1</div>
               <h3>Lieu de la séance</h3>
@@ -59,8 +59,8 @@
             </div>
           </div>
 
-          <!-- Étape 2 : Calendrier -->
-          <div class="resa-col">
+          <!-- Étape 2+3 : Calendrier + créneaux (grid-area: cal) -->
+          <div class="resa-cal">
             <div class="resa-step">
               <div class="step-num">2</div>
               <h3>Choisir une date</h3>
@@ -77,7 +77,6 @@
               <div class="cal-grid" id="cal-grid"></div>
             </div>
 
-            <!-- Créneaux horaires -->
             <div id="creneaux-section" style="display:none;margin-top:28px;">
               <div class="resa-step">
                 <div class="step-num">3</div>
@@ -87,9 +86,7 @@
             </div>
           </div>
 
-        </div>
-
-          <!-- Résumé sélection — après les étapes sur mobile, colonne gauche sur desktop -->
+          <!-- Récapitulatif (grid-area: recap — colonne gauche ligne 2 desktop, en bas mobile) -->
           <div class="resa-summary" id="resa-summary">
             <h4>Récapitulatif</h4>
             <div class="summary-line"><span>Lieu</span><strong id="summary-type">Fitness Park Aubervilliers</strong></div>
@@ -101,6 +98,8 @@
               Continuer vers le paiement →
             </button>
           </div>
+
+        </div>
 
       </div>
     </section>

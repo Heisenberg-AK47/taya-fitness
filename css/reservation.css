@@ -23,16 +23,18 @@
 .reservation-grid {
   display: grid;
   grid-template-columns: 360px 1fr;
+  grid-template-rows: auto 1fr;
   grid-template-areas:
     "lieu  cal"
     "recap cal";
-  gap: 32px;
+  column-gap: 48px;
+  row-gap: 32px;
   align-items: start;
 }
 
-.resa-col:first-child { grid-area: lieu; }
-.resa-col:last-child  { grid-area: cal; }
-#resa-summary         { grid-area: recap; }
+.resa-lieu  { grid-area: lieu; }
+.resa-cal   { grid-area: cal; }
+#resa-summary { grid-area: recap; align-self: start; }
 
 /* ── Étapes ──────────────────────────────────────────────── */
 .resa-step {
@@ -353,9 +355,15 @@
       "lieu"
       "cal"
       "recap";
+    row-gap: 28px;
   }
   .creneaux-horaires { grid-template-columns: repeat(3, 1fr); }
   .cal-day { max-height: none; }
+  #resa-summary { margin-top: 0; }
+}
+
+@media (max-width: 480px) {
+  .creneaux-horaires { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 480px) {
