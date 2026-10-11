@@ -14,6 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initContactForm() {
+  // Pré-sélection du sujet via ?sujet=domicile (depuis la page réservation)
+  const sujetParam = new URLSearchParams(window.location.search).get('sujet');
+  if (sujetParam) {
+    const sel = document.getElementById('contact-sujet');
+    if (sel) sel.value = sujetParam;
+  }
+
   document.getElementById('contact-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn   = document.getElementById('btn-contact');
