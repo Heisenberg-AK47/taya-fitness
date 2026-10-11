@@ -23,8 +23,21 @@
 .reservation-grid {
   display: grid;
   grid-template-columns: 360px 1fr;
+  grid-template-rows: auto auto;
   gap: 48px;
   align-items: start;
+}
+
+/* Sur desktop : récap en colonne 1, ligne 2 (sous le lieu) */
+#resa-summary {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+/* La colonne calendrier occupe les 2 lignes */
+.resa-col:last-child {
+  grid-column: 2;
+  grid-row: 1 / 3;
 }
 
 /* ── Étapes ──────────────────────────────────────────────── */
@@ -153,6 +166,8 @@
 .duree-btn.active { border-color: var(--gold); background: rgba(201,168,76,0.08); color: var(--gold); }
 
 /* ── Résumé ──────────────────────────────────────────────── */
+#resa-summary { margin-top: 0; }
+
 .resa-summary {
   background: var(--black-card);
   border: 1px solid var(--black-border);
@@ -339,6 +354,9 @@
 @media (max-width: 900px) {
   .reservation-grid { grid-template-columns: 1fr; }
   .creneaux-horaires { grid-template-columns: repeat(3, 1fr); }
+  /* Récap en dernier sur mobile */
+  #resa-summary { grid-column: auto; grid-row: auto; }
+  .resa-col:last-child { grid-column: auto; grid-row: auto; }
 }
 
 @media (max-width: 480px) {
