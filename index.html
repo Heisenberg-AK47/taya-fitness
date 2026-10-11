@@ -255,8 +255,10 @@
           <div class="gold-divider"></div>
           <p>Des programmes pensés pour tous les niveaux et toutes les situations de vie.</p>
         </div>
-        <div id="programmes-grid" class="grid-3">
-          <div class="loader"><div class="spinner"></div></div>
+        <div class="programmes-slider-wrap">
+          <div id="programmes-grid" class="grid-3 programmes-grid-inner">
+            <div class="loader"><div class="spinner"></div></div>
+          </div>
         </div>
         <div class="section-footer fade-in">
           <a href="/programmes" class="btn btn-gold-outline btn-lg">Voir tous les programmes →</a>
@@ -281,71 +283,74 @@
           </label>
           <span class="toggle-label" id="home-label-annuel">Annuel <span class="save-badge">-20%</span></span>
         </div>
-        <div class="offres-grid">
-          <div class="offre-card fade-in">
-            <div class="offre-header">
-              <span class="offre-badge">ESSENTIEL</span>
-              <div class="offre-price">
-                <span class="price-amount home-price" data-mensuel="239.99" data-annuel="191.99">239,99€</span>
-                <span class="price-period">/mois</span>
+        <div class="offres-slider-wrap">
+          <div class="offres-grid" id="offres-grid">
+            <div class="offre-card fade-in">
+              <div class="offre-header">
+                <span class="offre-badge">ESSENTIEL</span>
+                <div class="offre-price">
+                  <span class="price-amount home-price" data-mensuel="239.99" data-annuel="191.99">239,99€</span>
+                  <span class="price-period">/mois</span>
+                </div>
+                <p class="offre-desc">Le coaching en salle pour démarrer ta transformation.</p>
               </div>
-              <p class="offre-desc">Le coaching en salle pour démarrer ta transformation.</p>
+              <ul class="offre-features">
+                <li>1 séance/semaine · Fitness Park Aubervilliers</li>
+                <li>Programme sur mesure</li>
+                <li>Suivi de progression</li>
+                <li>Crédit d'impôt 50%</li>
+              </ul>
+              <button class="btn btn-gold-outline" style="width:100%;justify-content:center;" onclick="window.checkoutPlan('essentiel', event)">Commencer</button>
             </div>
-            <ul class="offre-features">
-              <li>✓ 1 séance/semaine à Fitness Park Aubervilliers</li>
-              <li>✓ Programme sur mesure</li>
-              <li>✓ Suivi de progression</li>
-              <li>✓ Crédit d'impôt 50%</li>
-              <li class="disabled">✗ Suivi personnalisé par Sarah</li>
-              <li class="disabled">✗ Messagerie directe</li>
-            </ul>
-            <button class="btn btn-gold-outline" style="width:100%;justify-content:center;" onclick="window.checkoutPlan('essentiel', event)">Commencer</button>
+            <div class="offre-card featured fade-in">
+              <div class="offre-popular">Le plus choisi</div>
+              <div class="offre-header">
+                <span class="offre-badge">PROGRESSION</span>
+                <div class="offre-price">
+                  <span class="price-amount home-price" data-mensuel="439.99" data-annuel="351.99">439,99€</span>
+                  <span class="price-period">/mois</span>
+                </div>
+                <p class="offre-desc">L'accompagnement complet pour progresser rapidement.</p>
+              </div>
+              <ul class="offre-features">
+                <li>2 séances/semaine · Fitness Park Aubervilliers</li>
+                <li>Programme sur mesure</li>
+                <li>Suivi hebdomadaire par Sarah</li>
+                <li>Messagerie directe</li>
+                <li>Plan nutrition de base</li>
+                <li>Crédit d'impôt 50%</li>
+              </ul>
+              <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="window.checkoutPlan('progression', event)">Choisir Progression</button>
+            </div>
+            <div class="offre-card fade-in">
+              <div class="offre-header">
+                <span class="offre-badge gold">TRANSFORMATION</span>
+                <div class="offre-price">
+                  <span class="price-amount home-price" data-mensuel="599.99" data-annuel="479.99">599,99€</span>
+                  <span class="price-period">/mois</span>
+                </div>
+                <p class="offre-desc">Le suivi le plus complet pour une transformation totale.</p>
+              </div>
+              <ul class="offre-features">
+                <li>3 séances/semaine · Fitness Park Aubervilliers</li>
+                <li>Programme sur mesure</li>
+                <li>Suivi quotidien par Sarah</li>
+                <li>Messagerie prioritaire</li>
+                <li>Plan nutrition personnalisé</li>
+                <li>Bilan mensuel + Visio coaching</li>
+                <li>Crédit d'impôt 50%</li>
+              </ul>
+              <button class="btn btn-gold-outline" style="width:100%;justify-content:center;" onclick="window.checkoutPlan('transformation', event)">Choisir Transformation</button>
+            </div>
           </div>
-          <div class="offre-card featured fade-in">
-            <div class="offre-popular">Le plus choisi</div>
-            <div class="offre-header">
-              <span class="offre-badge">PROGRESSION</span>
-              <div class="offre-price">
-                <span class="price-amount home-price" data-mensuel="439.99" data-annuel="351.99">439,99€</span>
-                <span class="price-period">/mois</span>
-              </div>
-              <p class="offre-desc">L'accompagnement complet pour progresser rapidement.</p>
-            </div>
-            <ul class="offre-features">
-              <li>✓ 2 séances/semaine à Fitness Park Aubervilliers</li>
-              <li>✓ Programme sur mesure</li>
-              <li>✓ Suivi hebdomadaire par Sarah</li>
-              <li>✓ Messagerie directe</li>
-              <li>✓ Plan nutrition de base</li>
-              <li>✓ Crédit d'impôt 50%</li>
-              <li class="disabled">✗ Suivi quotidien</li>
-            </ul>
-            <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="window.checkoutPlan('progression', event)">Choisir Progression</button>
-          </div>
-          <div class="offre-card fade-in">
-            <div class="offre-header">
-              <span class="offre-badge gold">TRANSFORMATION</span>
-              <div class="offre-price">
-                <span class="price-amount home-price" data-mensuel="599.99" data-annuel="479.99">599,99€</span>
-                <span class="price-period">/mois</span>
-              </div>
-              <p class="offre-desc">Le suivi le plus complet pour une transformation totale.</p>
-            </div>
-            <ul class="offre-features">
-              <li>✓ 3 séances/semaine à Fitness Park Aubervilliers</li>
-              <li>✓ Programme sur mesure</li>
-              <li>✓ Suivi quotidien par Sarah</li>
-              <li>✓ Messagerie prioritaire</li>
-              <li>✓ Plan nutrition personnalisé</li>
-              <li>✓ Bilan mensuel</li>
-              <li>✓ Visio coaching 1/mois</li>
-              <li>✓ Crédit d'impôt 50%</li>
-            </ul>
-            <button class="btn btn-gold-outline" style="width:100%;justify-content:center;" onclick="window.checkoutPlan('transformation', event)">Choisir Transformation</button>
+          <div class="offres-dots" id="offres-dots">
+            <span class="offre-dot" data-idx="0"></span>
+            <span class="offre-dot" data-idx="1"></span>
+            <span class="offre-dot" data-idx="2"></span>
           </div>
         </div>
         <p class="offres-note fade-in">
-          💳 Paiement sécurisé · Engagement 3 mois minimum · Crédit d'impôt 50% éligible pour les séances à Fitness Park Aubervilliers
+          Paiement sécurisé · Engagement 3 mois minimum · Crédit d'impôt 50% éligible
         </p>
       </div>
     </section>

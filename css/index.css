@@ -64,6 +64,7 @@
 .section-footer { text-align: center; margin-top: 48px; }
 
 .offres-section { background: var(--black-soft); position: relative; overflow: hidden; }
+.offres-slider-wrap { position: relative; }
 .offres-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: stretch; }
 .offre-card { background: var(--black-card); border: 1px solid var(--black-border); border-radius: var(--radius-lg); padding: 28px 24px; position: relative; transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s; display: flex; flex-direction: column; }
 .offre-card:hover { border-color: rgba(255,107,74,0.3); transform: translateY(-4px); }
@@ -78,10 +79,20 @@
 .price-period { font-size: 0.9rem; color: var(--white-muted); }
 .offre-desc { font-size: 0.88rem; color: var(--white-muted); }
 .offre-features { list-style: none; margin-bottom: 20px; flex: 1; }
-.offre-features li { font-size: 0.88rem; color: var(--white-muted); padding: 10px 0; border-bottom: 1px solid var(--black-border); display: flex; align-items: center; gap: 8px; }
+.offre-features li { font-size: 0.88rem; color: var(--white-muted); padding: 10px 0; border-bottom: 1px solid var(--black-border); display: flex; align-items: flex-start; gap: 8px; }
+.offre-features li::before { content: '✓'; color: var(--gold); font-weight: 700; flex-shrink: 0; }
 .offre-features li:first-child { border-top: 1px solid var(--black-border); }
 .offre-features li.disabled { opacity: 0.3; }
-.offres-note { text-align: center; margin-top: 32px; font-size: 0.85rem; color: var(--white-muted); }
+.offres-note { text-align: center; margin-top: 32px; font-size: 0.82rem; color: var(--white-muted); }
+
+/* Dots pagination (mobile only) */
+.offres-dots { display: none; justify-content: center; gap: 8px; margin-top: 20px; }
+.offre-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--black-border); transition: all 0.2s; cursor: pointer; }
+.offre-dot.active { background: var(--gold); width: 24px; border-radius: 4px; }
+
+/* Slider programmes */
+.programmes-slider-wrap { position: relative; }
+.programmes-grid-inner { }  /* override sur mobile via media query */
 
 .coach-section { background: var(--black); }
 .coach-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
@@ -156,12 +167,52 @@
   .why-item-icon { width: 30px; height: 30px; border-radius: 8px; }
   .why-item-icon svg { width: 16px; height: 16px; }
 
-  /* Offres sur la home */
-  .offres-grid { max-width: 100%; gap: 16px; }
-  .offre-card { padding: 24px 20px; }
-  .price-amount { font-size: 2.2rem; }
-  .offre-header { margin-bottom: 16px; }
+  /* Offres sur la home — slider horizontal */
+  .offres-slider-wrap { margin: 0 -16px; }
+  .offres-grid {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    padding: 20px 16px 8px;
+    scrollbar-width: none;
+  }
+  .offres-grid::-webkit-scrollbar { display: none; }
+  .offre-card {
+    flex: 0 0 88vw;
+    max-width: 360px;
+    scroll-snap-align: center;
+    margin-right: 12px;
+    padding: 28px 20px;
+    transform: none !important;
+  }
+  .offre-card.featured { transform: none !important; border-color: var(--gold); }
+  .offres-dots { display: flex; }
+  .price-amount { font-size: 2.4rem; }
+  .offre-header { margin-bottom: 14px; }
   .offre-features li { font-size: 0.84rem; padding: 8px 0; }
+
+  /* Programmes — slider horizontal */
+  .programmes-slider-wrap { margin: 0 -16px; }
+  .programmes-grid-inner {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 0 !important;
+    padding: 8px 16px 16px;
+    scrollbar-width: none;
+  }
+  .programmes-grid-inner::-webkit-scrollbar { display: none; }
+  .programmes-grid-inner .programme-card {
+    flex: 0 0 80vw;
+    max-width: 300px;
+    scroll-snap-align: start;
+    margin-right: 12px;
+  }
 
   /* Coach */
   .temoignages-grid { grid-template-columns: 1fr; }

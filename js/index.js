@@ -15,7 +15,52 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadProgrammesVedettes();
   initBillingToggle();
   initNewsletter();
+  initOffresSlider();
 });
+
+/* ── Slider offres (dots + scroll snap) ─────────────────── */
+function initOffresSlider() {
+  const grid = document.getElementById('offres-grid');
+  const dots = document.querySelectorAll('.offre-dot');
+  if (!grid || !dots.length) return;
+
+  // Scroll vers "Progression" (index 1) par défaut sur mobile
+  if (window.innerWidth <= 768) {
+    setTimeout(() => {
+      const cards = grid.querySelectorAll('.offre-card');
+      if (cards[1]) {
+        grid.scrollLeft = cards[1].offsetLeft - grid.offsetLeft - (grid.offsetWidth - cards[1].offsetWidth) / 2;
+      }
+    }, 100);
+  }
+
+  // Dot cliquable
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      const idx = parseInt(dot.dataset.idx);
+      const cards = grid.querySelectorAll('.offre-card');
+      if (cards[idx]) {
+        grid.scrollTo({ left: cards[idx].offsetLeft - grid.offsetLeft - (grid.offsetWidth - cards[idx].offsetWidth) / 2, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // Mise à jour des dots au scroll
+  const updateDots = () => {
+    const cards = grid.querySelectorAll('.offre-card');
+    let closest = 0;
+    let minDist = Infinity;
+    const center = grid.scrollLeft + grid.offsetWidth / 2;
+    cards.forEach((card, i) => {
+      const dist = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
+      if (dist < minDist) { minDist = dist; closest = i; }
+    });
+    dots.forEach((d, i) => d.classList.toggle('active', i === closest));
+  };
+
+  grid.addEventListener('scroll', updateDots, { passive: true });
+  updateDots();
+}
 
 /* ── Toggle mensuel / annuel ────────────────────────────── */
 function initBillingToggle() {
