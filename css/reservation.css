@@ -23,22 +23,16 @@
 .reservation-grid {
   display: grid;
   grid-template-columns: 360px 1fr;
-  grid-template-rows: auto auto;
-  gap: 48px;
+  grid-template-areas:
+    "lieu  cal"
+    "recap cal";
+  gap: 32px;
   align-items: start;
 }
 
-/* Sur desktop : récap en colonne 1, ligne 2 (sous le lieu) */
-#resa-summary {
-  grid-column: 1;
-  grid-row: 2;
-}
-
-/* La colonne calendrier occupe les 2 lignes */
-.resa-col:last-child {
-  grid-column: 2;
-  grid-row: 1 / 3;
-}
+.resa-col:first-child { grid-area: lieu; }
+.resa-col:last-child  { grid-area: cal; }
+#resa-summary         { grid-area: recap; }
 
 /* ── Étapes ──────────────────────────────────────────────── */
 .resa-step {
@@ -255,6 +249,7 @@
 
 .cal-day {
   aspect-ratio: 1;
+  max-height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -352,11 +347,15 @@
 
 /* ── Responsive ──────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .reservation-grid { grid-template-columns: 1fr; }
+  .reservation-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "lieu"
+      "cal"
+      "recap";
+  }
   .creneaux-horaires { grid-template-columns: repeat(3, 1fr); }
-  /* Récap en dernier sur mobile */
-  #resa-summary { grid-column: auto; grid-row: auto; }
-  .resa-col:last-child { grid-column: auto; grid-row: auto; }
+  .cal-day { max-height: none; }
 }
 
 @media (max-width: 480px) {
