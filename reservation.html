@@ -19,13 +19,13 @@
 
     <section class="page-hero res-hero">
       <div class="container">
-        <span class="label">Séance découverte</span>
-        <h1>Réserver un créneau</h1>
-        <p>Coaching individuel · 1h · 69€ · Paiement sécurisé par Stripe</p>
+        <span class="label">Séance découverte · Coaching individuel · 1h · 69€</span>
+        <h1>Réserver un créneau<br><span class="hero-lieu">Fitness Park Aubervilliers</span></h1>
+        <p class="hero-addr">174 Av. Jean Jaurès, 93300 Aubervilliers · Paiement sécurisé par Stripe</p>
       </div>
     </section>
 
-    <section class="section">
+    <section class="section res-section">
       <div class="container">
 
         <!-- Alerte non connecté -->
@@ -35,29 +35,10 @@
 
         <div class="reservation-grid">
 
-          <!-- Étape 1 : Lieu de séance (grid-area: lieu) -->
-          <div class="resa-lieu">
-            <div class="resa-step">
-              <div class="step-num">1</div>
-              <h3>Lieu de la séance</h3>
-            </div>
-            <div class="resa-lieu-info">
-              <span class="resa-lieu-name">Fitness Park Aubervilliers</span>
-              <span class="resa-lieu-addr">174 Av. Jean Jaurès, 93300 Aubervilliers · 1h</span>
-            </div>
-            <a href="/contact?sujet=domicile#contact-form-section" class="type-card-domicile-sm">
-              <div>
-                <strong>À domicile <span class="type-badge-femme">Femmes uniquement</span></strong>
-                <small>Nous contacter pour les modalités</small>
-              </div>
-              <span class="type-arrow">→</span>
-            </a>
-          </div>
-
-          <!-- Étape 2+3 : Calendrier + créneaux (grid-area: cal) -->
+          <!-- Étape 1 : Calendrier + créneaux (grid-area: cal) -->
           <div class="resa-cal">
             <div class="resa-step">
-              <div class="step-num">2</div>
+              <div class="step-num">1</div>
               <h3>Choisir une date</h3>
             </div>
             <div class="calendrier" id="calendrier">
@@ -74,7 +55,7 @@
 
             <div id="creneaux-section" style="display:none;margin-top:28px;">
               <div class="resa-step">
-                <div class="step-num">3</div>
+                <div class="step-num">2</div>
                 <h3>Choisir un horaire</h3>
               </div>
               <div class="creneaux-horaires" id="creneaux-horaires"></div>
@@ -84,7 +65,6 @@
           <!-- Récapitulatif (grid-area: recap — colonne gauche ligne 2 desktop, en bas mobile) -->
           <div class="resa-summary" id="resa-summary">
             <h4>Récapitulatif</h4>
-            <div class="summary-line"><span>Lieu</span><strong id="summary-type">Fitness Park Aubervilliers</strong></div>
             <div class="summary-line"><span>Durée</span><strong>60 min</strong></div>
             <div class="summary-line"><span>Date</span><strong id="summary-date">—</strong></div>
             <div class="summary-line"><span>Heure</span><strong id="summary-heure">—</strong></div>

@@ -7,7 +7,6 @@ import { initFooter } from './footer.js';
 import { getCurrentUser } from './auth.js';
 import { supabase } from './supabase.js';
 
-let selectedType  = 'aubervilliers';
 let selectedDate  = null;
 let selectedHeure = null;
 let currentYear   = new Date().getFullYear();
@@ -29,13 +28,6 @@ function revealMobile(el, scrollTo = true) {
 
 const CRENEAUX = ['08:00','09:00','10:00','11:00','14:00','15:00','16:00','17:00','18:00','19:00'];
 
-const TYPE_LABELS = {
-  'aubervilliers': 'Fitness Park Aubervilliers',
-};
-
-const TYPE_ADDRESSES = {
-  'aubervilliers': '174 Av. Jean Jaurès, 93300 Aubervilliers',
-};
 
 document.addEventListener('DOMContentLoaded', async () => {
   initNavbar();
@@ -46,7 +38,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('alert-auth').style.display = 'block';
   }
 
-  initTypeCards();
   renderCalendrier();
   initBtnReserver();
 
@@ -63,18 +54,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
 });
-
-/* ── Types de séance ─────────────────────────────────────── */
-function initTypeCards() {
-  document.getElementById('type-cards')?.addEventListener('click', e => {
-    const card = e.target.closest('.type-card');
-    if (!card) return;
-    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('active'));
-    card.classList.add('active');
-    selectedType = card.dataset.type;
-    updateSummary();
-  });
-}
 
 /* ── Calendrier ──────────────────────────────────────────── */
 function renderCalendrier() {
@@ -183,7 +162,6 @@ async function renderCreneaux(dateStr) {
 
 /* ── Résumé ──────────────────────────────────────────────── */
 function updateSummary() {
-  document.getElementById('summary-type').textContent = TYPE_LABELS[selectedType] || selectedType;
   document.getElementById('summary-date').textContent = selectedDate
     ? new Date(selectedDate + 'T12:00:00').toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' })
     : '—';
@@ -202,9 +180,9 @@ function initBtnReserver() {
     if (!selectedDate || !selectedHeure) return;
 
     const booking = {
-      type:       selectedType,
-      label:      TYPE_LABELS[selectedType],
-      address:    TYPE_ADDRESSES[selectedType],
+      type:       'aubervilliers',
+      label:      'Fitness Park Aubervilliers',
+      address:    '174 Av. Jean Jaurès, 93300 Aubervilliers',
       date:       selectedDate,
       heure:      selectedHeure,
       date_heure: new Date(`${selectedDate}T${selectedHeure}:00`).toISOString(),

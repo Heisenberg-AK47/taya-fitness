@@ -16,23 +16,42 @@
   margin-bottom: 12px;
 }
 
-.res-hero h1 { margin-bottom: 16px; }
+.res-hero h1 { margin-bottom: 8px; line-height: 1.2; }
 .res-hero p  { color: var(--white-muted); max-width: 520px; margin: 0 auto; }
+
+.hero-lieu {
+  display: block;
+  font-size: 0.55em;
+  font-weight: 500;
+  color: var(--white-muted);
+  letter-spacing: 0.01em;
+  margin-top: 4px;
+}
+
+.hero-addr {
+  font-size: 0.8rem;
+  color: var(--white-muted);
+  margin-top: 6px;
+}
+
+/* Section reservation : moins de padding vertical sur mobile */
+.res-section {
+  padding-top: 16px !important;
+  padding-bottom: 24px !important;
+}
 
 /* ── Layout ──────────────────────────────────────────────── */
 .reservation-grid {
   display: grid;
   grid-template-columns: 360px 1fr;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 1fr;
   grid-template-areas:
-    "lieu  cal"
     "recap cal";
   column-gap: 48px;
   row-gap: 32px;
   align-items: start;
 }
 
-.resa-lieu  { grid-area: lieu; }
 .resa-cal   { grid-area: cal; }
 #resa-summary { grid-area: recap; align-self: start; }
 
@@ -350,13 +369,28 @@
   .reservation-grid {
     grid-template-columns: 1fr;
     grid-template-areas:
-      "lieu"
       "cal"
       "recap";
     row-gap: 0;
   }
+
+  /* Calendrier compact sur mobile pour tenir sans scroll */
+  .calendrier {
+    padding: 16px;
+  }
+  .cal-header { margin-bottom: 12px; }
+  #cal-month-label { font-size: 1rem; }
+  .cal-days-header { gap: 2px; margin-bottom: 4px; }
+  .cal-days-header span { font-size: 0.65rem; padding: 2px 0; }
+  .cal-grid { gap: 3px; }
+  .cal-day {
+    font-size: 0.8rem;
+    max-height: none;
+    min-height: 36px;
+    aspect-ratio: 1;
+  }
+
   .creneaux-horaires { grid-template-columns: repeat(3, 1fr); }
-  .cal-day { max-height: none; }
   #resa-summary { margin-top: 0; }
 
   /* ── Apparition progressive sur mobile ─────────────────── */
@@ -381,9 +415,6 @@
     pointer-events: auto;
   }
 
-  /* Séparateurs entre étapes */
-  .resa-lieu  { padding-bottom: 28px; }
-  .resa-cal   { padding-top: 28px; border-top: 1px solid var(--black-border); }
   #resa-summary { padding-top: 28px; border-top: 1px solid var(--black-border); }
 }
 
