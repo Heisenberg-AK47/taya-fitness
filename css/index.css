@@ -483,12 +483,12 @@
   gap: 8px;
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--white-muted);
+  color: #baf76e;
   text-decoration: none;
   margin-top: 4px;
   transition: color 0.2s;
 }
-.insta-handle:hover { color: var(--white); }
+.insta-handle:hover { color: #d4ff8f; }
 .insta-handle svg { flex-shrink: 0; }
 
 /* Desktop grid: 4 colonnes carrées */
