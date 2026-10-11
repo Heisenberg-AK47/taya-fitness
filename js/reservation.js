@@ -21,7 +21,7 @@ function revealMobile(el, scrollTo = true) {
   if (scrollTo) {
     setTimeout(() => {
       const rect = el.getBoundingClientRect();
-      const offset = window.scrollY + rect.top - 16;
+      const offset = window.scrollY + rect.top - 80;
       window.scrollTo({ top: offset, behavior: 'smooth' });
     }, 80);
   }
