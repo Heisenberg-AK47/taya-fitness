@@ -197,9 +197,18 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  .offres-arrow {
+    color: #baf76e;
+    border-color: rgba(186,247,110,0.3);
+  }
+  .offres-arrow:hover {
+    border-color: #baf76e;
+    background: rgba(186,247,110,0.08);
+    color: #baf76e;
+  }
   .offres-arrow:active {
-    background: rgba(201,168,76,0.15);
-    border-color: var(--gold);
+    background: rgba(186,247,110,0.15);
+    border-color: #baf76e;
     color: var(--gold);
   }
 
@@ -252,7 +261,8 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  .programmes-arrow:hover { border-color: var(--gold); color: var(--gold); }
+  .programmes-arrow { color: #baf76e; border-color: rgba(186,247,110,0.3); }
+  .programmes-arrow:hover { border-color: #baf76e; background: rgba(186,247,110,0.08); color: #baf76e; }
   .programmes-arrow-prev { left: 20px; }
   .programmes-arrow-next { right: 20px; }
   .programmes-arrow.hidden { opacity: 0; pointer-events: none; }
@@ -355,7 +365,8 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  .temoignages-arrow:hover { border-color: var(--gold); color: var(--gold); }
+  .temoignages-arrow { color: #baf76e; border-color: rgba(186,247,110,0.3); }
+  .temoignages-arrow:hover { border-color: #baf76e; background: rgba(186,247,110,0.08); color: #baf76e; }
   .temoignages-arrow-prev { left: 4px; }
   .temoignages-arrow-next { right: 4px; }
   .temoignages-arrow.hidden { opacity: 0; pointer-events: none; }
