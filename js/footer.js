@@ -120,10 +120,21 @@ export function initFooter() {
         && !location.pathname.startsWith('/merci-ebook')
         && sessionStorage.getItem('ebookBarClosed') !== '1') {
       document.body.insertAdjacentHTML('beforeend', `
-  <div id="taya-ebook-bar" style="position:fixed;bottom:0;left:0;right:0;z-index:90;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#B31757,#D6246E);padding:10px 44px 10px 16px;box-shadow:0 -6px 24px rgba(0,0,0,.35);">
+  <div id="taya-ebook-bar" style="position:fixed;bottom:0;left:0;right:0;z-index:90;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,#B31757,#D6246E);padding:10px 44px 10px 16px;box-shadow:0 -6px 24px rgba(0,0,0,.35);opacity:0;transform:translateY(100%);transition:opacity 0.4s ease,transform 0.4s ease;pointer-events:none;">
     <a href="/ebook?utm_source=site&utm_medium=bandeau" style="color:#fff;font-size:13px;font-weight:600;letter-spacing:.3px;text-decoration:none;text-align:center;line-height:1.4;">Nouveau — Le guide « De femme débordée à femme alignée » : 29 € au lieu de 47 € pendant le lancement →</a>
     <button onclick="this.parentElement.remove();sessionStorage.setItem('ebookBarClosed','1');" aria-label="Fermer" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,.75);font-size:18px;cursor:pointer;padding:4px 8px;">×</button>
   </div>`);
+      const bar = document.getElementById('taya-ebook-bar');
+      let shown = false;
+      window.addEventListener('scroll', function showBar() {
+        if (!shown && window.scrollY > 80) {
+          shown = true;
+          bar.style.opacity = '1';
+          bar.style.transform = 'translateY(0)';
+          bar.style.pointerEvents = 'auto';
+          window.removeEventListener('scroll', showBar);
+        }
+      }, { passive: true });
     }
   } catch (e) { /* le bandeau ne doit jamais casser le footer */ }
 
