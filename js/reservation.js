@@ -50,6 +50,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderCalendrier();
   initBtnReserver();
 
+  document.getElementById('cal-prev')?.addEventListener('click', () => {
+    currentMonth--;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    renderCalendrier();
+  });
+
+  document.getElementById('cal-next')?.addEventListener('click', () => {
+    currentMonth++;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendrier();
+  });
+
 });
 
 /* ── Types de séance ─────────────────────────────────────── */
@@ -107,17 +119,6 @@ function renderCalendrier() {
     day.addEventListener('click', () => selectDate(day.dataset.date));
   });
 
-  document.getElementById('cal-prev')?.addEventListener('click', () => {
-    currentMonth--;
-    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-    renderCalendrier();
-  });
-
-  document.getElementById('cal-next')?.addEventListener('click', () => {
-    currentMonth++;
-    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-    renderCalendrier();
-  });
 }
 
 function selectDate(dateStr) {
