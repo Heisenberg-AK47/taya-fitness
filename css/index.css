@@ -157,6 +157,7 @@
 
 @media (max-width: 768px) {
   /* Hero */
+  .hero { align-items: flex-start; min-height: auto; }
   .hero-content { padding: 32px 0 40px; }
   .hero-cta { flex-direction: column; gap: 10px; }
   .hero-cta .btn { width: 100%; text-align: center; justify-content: center; }
