@@ -197,15 +197,15 @@ p {
 .btn-lg  { padding: 18px 44px; font-size: 1.05rem; }
 
 .btn-green {
-  background: var(--green);
+  background: #baf76e;
   color: #0d1b2a;
   font-weight: 700;
-  box-shadow: 0 4px 16px rgba(62,207,142,0.35);
+  box-shadow: 0 4px 16px rgba(186,247,110,0.35);
 }
 .btn-green:hover {
-  background: #52dba0;
+  background: #caff85;
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(62,207,142,0.5);
+  box-shadow: 0 8px 24px rgba(186,247,110,0.5);
 }
 
 .btn:disabled {
