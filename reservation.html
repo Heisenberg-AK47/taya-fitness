@@ -29,8 +29,8 @@
       <div class="container">
 
         <!-- Alerte non connecté -->
-        <div class="alert alert-info" id="alert-auth" style="display:none; margin-bottom:32px;">
-          💡 <a href="/auth?redirect=/reservation" style="color:var(--gold);text-decoration:underline">Connecte-toi</a> pour retrouver ta réservation dans ton espace.
+        <div class="alert-auth-compact" id="alert-auth" style="display:none;">
+          <a href="/auth?redirect=/reservation">Connecte-toi</a> pour retrouver ta réservation dans ton espace.
         </div>
 
         <div class="reservation-grid">
@@ -41,22 +41,17 @@
               <div class="step-num">1</div>
               <h3>Lieu de la séance</h3>
             </div>
-            <div class="type-cards" id="type-cards">
-              <div class="type-card active" data-type="aubervilliers">
-                <div>
-                  <strong>Fitness Park Aubervilliers</strong>
-                  <small>174 Av. Jean Jaurès, 93300 Aubervilliers · 1h de coaching individuel</small>
-                </div>
-                <div class="type-check">✓</div>
-              </div>
-              <a href="/contact?sujet=domicile#contact-form-section" class="type-card type-card-domicile" data-type="domicile">
-                <div>
-                  <strong>À domicile <span class="type-badge-femme">Femmes uniquement</span></strong>
-                  <small>Coaching chez vous · Faisabilité vérifiée au préalable · Nous contacter pour les modalités</small>
-                </div>
-                <div class="type-arrow">→</div>
-              </a>
+            <div class="resa-lieu-info">
+              <span class="resa-lieu-name">Fitness Park Aubervilliers</span>
+              <span class="resa-lieu-addr">174 Av. Jean Jaurès, 93300 Aubervilliers · 1h</span>
             </div>
+            <a href="/contact?sujet=domicile#contact-form-section" class="type-card-domicile-sm">
+              <div>
+                <strong>À domicile <span class="type-badge-femme">Femmes uniquement</span></strong>
+                <small>Nous contacter pour les modalités</small>
+              </div>
+              <span class="type-arrow">→</span>
+            </a>
           </div>
 
           <!-- Étape 2+3 : Calendrier + créneaux (grid-area: cal) -->

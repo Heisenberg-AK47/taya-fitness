@@ -60,60 +60,58 @@
 
 .resa-step h3 { font-size: 1rem; margin: 0; }
 
-/* ── Type de séance ──────────────────────────────────────── */
-.type-cards {
+/* ── Alerte auth compacte ────────────────────────────────── */
+.alert-auth-compact {
+  font-size: 0.78rem;
+  color: var(--white-muted);
+  margin-bottom: 24px;
+  padding: 8px 14px;
+  background: var(--black-card);
+  border: 1px solid var(--black-border);
+  border-radius: var(--radius);
+}
+.alert-auth-compact a { color: var(--gold); text-decoration: underline; }
+
+/* ── Lieu de séance (info texte) ─────────────────────────── */
+.resa-lieu-info {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 3px;
+  margin-bottom: 12px;
+}
+.resa-lieu-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--white);
+}
+.resa-lieu-addr {
+  font-size: 0.78rem;
+  color: var(--white-muted);
 }
 
-.type-card {
+/* ── Carte "À domicile" compacte ─────────────────────────── */
+.type-card-domicile-sm {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px 18px;
+  gap: 12px;
+  padding: 10px 14px;
   background: var(--black-card);
-  border: 1.5px solid var(--black-border);
+  border: 1px dashed var(--black-border);
   border-radius: var(--radius);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.type-card:hover { border-color: rgba(201,168,76,0.4); }
-
-.type-card.active {
-  border-color: var(--gold);
-  background: rgba(201,168,76,0.06);
-}
-
-.type-icon { font-size: 1.5rem; flex-shrink: 0; }
-
-.type-card > div:nth-child(2) { flex: 1; }
-.type-card strong { display: block; font-size: 0.9rem; color: var(--white); }
-.type-card small  { font-size: 0.78rem; color: var(--white-muted); }
-
-.type-check {
-  color: var(--gold);
-  font-weight: 700;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.type-card.active .type-check { opacity: 1; }
-
-/* ── Carte "À domicile" ──────────────────────────────────── */
-.type-card-domicile {
   text-decoration: none;
   color: inherit;
-  border-style: dashed;
-  opacity: 0.82;
+  opacity: 0.8;
   transition: all 0.2s;
+  font-size: 0.82rem;
 }
-
-.type-card-domicile:hover {
+.type-card-domicile-sm:hover {
   border-color: rgba(255, 107, 74, 0.5);
   background: rgba(255, 107, 74, 0.04);
   opacity: 1;
 }
+.type-card-domicile-sm > div { flex: 1; }
+.type-card-domicile-sm strong { display: block; font-size: 0.82rem; color: var(--white); }
+.type-card-domicile-sm small  { font-size: 0.74rem; color: var(--white-muted); }
 
 .type-badge-femme {
   display: inline-block;
@@ -362,7 +360,6 @@
   #resa-summary { margin-top: 0; }
 
   /* ── Apparition progressive sur mobile ─────────────────── */
-  .resa-cal,
   #creneaux-section,
   #resa-summary {
     opacity: 0;
@@ -371,7 +368,12 @@
     pointer-events: none;
   }
 
-  .resa-cal.mobile-visible,
+  .resa-cal {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
   #creneaux-section.mobile-visible,
   #resa-summary.mobile-visible {
     opacity: 1;

@@ -20,7 +20,9 @@ function revealMobile(el, scrollTo = true) {
   el.classList.add('mobile-visible');
   if (scrollTo) {
     setTimeout(() => {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const rect = el.getBoundingClientRect();
+      const offset = window.scrollY + rect.top - 16;
+      window.scrollTo({ top: offset, behavior: 'smooth' });
     }, 80);
   }
 }
@@ -48,11 +50,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   renderCalendrier();
   initBtnReserver();
 
-  // Sur mobile : révéler le calendrier d'entrée (étape 1 = lieu déjà visible)
-  // Le calendrier s'affiche immédiatement car le lieu est pré-sélectionné
-  if (isMobile()) {
-    setTimeout(() => revealMobile(document.querySelector('.resa-cal'), false), 200);
-  }
 });
 
 /* ── Types de séance ─────────────────────────────────────── */
@@ -136,10 +133,8 @@ async function renderCreneaux(dateStr) {
   const section = document.getElementById('creneaux-section');
   const grid    = document.getElementById('creneaux-horaires');
   section.style.display = 'block';
-  // Sur mobile : retirer mobile-visible pour re-animer si changement de date
-  if (isMobile()) {
-    section.classList.remove('mobile-visible');
-  }
+  // Sur mobile : reset pour re-animer si changement de date
+  section.classList.remove('mobile-visible');
 
   let indispo = [];
   try {
