@@ -465,9 +465,15 @@
 
         <!-- Widget Behold — feed Instagram temps réel -->
         <div class="behold-wrap fade-in">
-          <behold-widget feed-id="uoJLiSEegELYcMjhzYR8"></behold-widget>
+          <behold-widget feed-id="9mdUiyoJXUZRIaI09fEn"></behold-widget>
         </div>
-        <script src="https://w.behold.so/widget.js" type="module"></script>
+        <script>
+          (() => {
+            if(window.__bhldScript)return;window.__bhldScript=true;
+            const d=document,s=d.createElement("script");s.type="module";
+            s.src="https://w.behold.so/widget.js";setTimeout(()=>{d.head.append(s);},0);
+          })();
+        </script>
 
         <div class="insta-cta fade-in">
           <a href="https://www.instagram.com/taya_fitness_/" target="_blank" rel="noopener" class="btn btn-outline">
