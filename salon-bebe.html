@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guide offert Taya Fitness — Grossesse et post-partum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,700;1,800;1,900&family=Barlow+Semi+Condensed:wght@400;500;600&family=Kaushan+Script&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#16273A; --navy-deep:#0A1420; --navy-light:#2A4A6E;
+  --coral:#FB6644; --lime:#C1FF71; --violet:#7B5CFF;
+  --ink:#F4F7FA; --muted:#AEBBCB; --line:rgba(255,255,255,.12);
+  --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;
+  --body:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --script:"Kaushan Script","Brush Script MT",cursive;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --ink:#F4F7FA; --muted:#AEBBCB; } }
+:root[data-theme="dark"]{ --ink:#F4F7FA; --muted:#AEBBCB; }
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{
+  margin:0; color:var(--ink); background:var(--navy-deep);
+  font-family:var(--body); font-size:18px; line-height:1.5;
+}
+body::before{
+  content:""; position:fixed; inset:0; z-index:-1;
+  background:
+    radial-gradient(120% 70% at 100% 0%, rgba(123,92,255,.22), transparent 60%),
+    linear-gradient(45deg, var(--navy-deep) 0%, var(--navy) 55%, var(--navy-light) 100%);
+}
+img{max-width:100%}
+a{color:inherit}
+.wrap{max-width:620px;margin:0 auto;padding:0 22px}
+
+/* Logo */
+.logo{display:inline-flex;align-items:flex-end;position:relative;line-height:1;margin-top:28px}
+.logo .taya{
+  font-family:var(--display);font-style:italic;font-weight:900;font-size:56px;letter-spacing:.01em;
+  color:var(--coral);-webkit-text-stroke:2px var(--navy);paint-order:stroke fill;
+  text-shadow:3px 3px 0 var(--navy);
+}
+.logo .fit{
+  font-family:var(--script);font-size:38px;color:var(--lime);
+  -webkit-text-stroke:5px var(--navy);paint-order:stroke fill;
+  margin-left:-14px;margin-bottom:-6px;transform:rotate(-7deg);
+}
+
+/* Hero */
+.hero{padding:10px 0 34px}
+.hero h1{
+  font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;
+  font-size:clamp(46px,13vw,76px);line-height:.9;margin:30px 0 18px;letter-spacing:.005em;
+}
+.hero h1 span{display:block}
+.brush{
+  display:inline-block;position:relative;padding:8px 22px 9px 18px;margin:0 0 20px -6px;
+  font-family:var(--display);font-style:italic;font-weight:800;font-size:22px;text-transform:uppercase;
+  color:var(--navy);
+}
+.brush::before{
+  content:"";position:absolute;inset:0;z-index:-1;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 60' preserveAspectRatio='none'%3E%3Cpath fill='%23FB6644' d='M6 14 C40 4 90 9 140 6 C190 3 240 8 292 5 C297 14 293 22 298 30 C294 40 299 48 290 55 C230 58 170 52 110 56 C70 58 35 54 4 57 C9 47 2 38 7 30 C3 23 8 20 6 14Z'/%3E%3C/svg%3E") center/100% 100% no-repeat;
+}
+.hero{position:relative;z-index:0}
+.lede{font-size:20px;color:var(--muted);max-width:34em;margin:0}
+
+/* Switch */
+.choice{padding:8px 0 6px}
+.choice h2{font-family:var(--display);font-style:italic;font-weight:800;font-size:30px;text-transform:uppercase;margin:0 0 14px}
+.toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.toggle button{
+  font:inherit;font-family:var(--display);font-style:italic;font-weight:800;font-size:22px;text-transform:uppercase;
+  line-height:1.05;text-align:left;cursor:pointer;
+  padding:18px 16px 16px;border-radius:14px;border:2px solid var(--line);
+  background:rgba(255,255,255,.04);color:var(--ink);
+  transition:background .2s,border-color .2s,color .2s;
+}
+.toggle button small{display:block;font-family:var(--body);font-style:normal;font-weight:500;font-size:15px;text-transform:none;color:var(--muted);margin-top:6px}
+.toggle button[aria-selected="true"]{background:var(--lime);border-color:var(--lime);color:var(--navy)}
+.toggle button[aria-selected="true"] small{color:var(--navy)}
+.toggle button:focus-visible,.btn:focus-visible{outline:3px solid var(--coral);outline-offset:3px}
+
+/* Panel */
+.panel[hidden]{display:none}
+.panel{padding:28px 0 8px;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.notice{
+  display:flex;gap:12px;align-items:flex-start;
+  border-left:4px solid var(--lime);padding:12px 14px;margin:0 0 30px;
+  background:rgba(193,255,113,.07);border-radius:0 10px 10px 0;font-size:17px;
+}
+.notice b{color:var(--lime)}
+h3.sec{
+  font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;
+  font-size:clamp(32px,9vw,44px);line-height:.95;margin:0 0 20px;
+}
+.keys{list-style:none;margin:0 0 40px;padding:0}
+.keys li{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:16px 0;border-top:1px solid var(--line)}
+.keys li:last-child{border-bottom:1px solid var(--line)}
+.pill{
+  width:30px;height:30px;border-radius:50%;background:var(--lime);margin-top:2px;
+  display:grid;place-items:center;
+}
+.pill svg{width:16px;height:16px}
+.keys h4{font-family:var(--display);font-style:italic;font-weight:800;font-size:25px;text-transform:uppercase;line-height:1;margin:2px 0 6px}
+.keys p{margin:0;color:var(--muted)}
+
+.moves{margin:0 0 40px;display:grid;gap:12px}
+.move{padding:16px 18px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--line)}
+.move h4{margin:0 0 4px;font-family:var(--display);font-style:italic;font-weight:800;font-size:23px;text-transform:uppercase;line-height:1.05;display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.move h4 em{font-style:normal;font-family:var(--body);font-weight:600;font-size:15px;color:var(--lime);text-transform:none;white-space:nowrap}
+.move p{margin:0;color:var(--muted);font-size:17px}
+
+.stop{border:2px solid var(--coral);border-radius:16px;padding:20px 20px 18px;margin:0 0 44px}
+.stop h3{font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:28px;color:var(--coral);margin:0 0 10px;line-height:1}
+.stop ul{margin:0 0 12px;padding-left:20px}
+.stop li{margin:3px 0}
+.stop p{margin:0;font-weight:600}
+
+/* CTA */
+.cta{
+  background:var(--coral);color:var(--navy);border-radius:20px;padding:26px 22px 24px;margin:8px 0 34px;
+  position:relative;overflow:hidden;
+}
+.cta h3{font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(34px,10vw,48px);line-height:.92;margin:0 0 12px}
+.cta p{margin:0 0 14px;font-weight:500}
+.cta .addr{font-weight:600}
+.btn{
+  display:block;text-align:center;text-decoration:none;
+  font-family:var(--display);font-style:italic;font-weight:800;font-size:22px;text-transform:uppercase;
+  padding:15px 18px;border-radius:12px;margin-top:10px;
+}
+.lieux{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:8px}
+.lieux li{border:2px solid var(--navy);border-radius:12px;padding:10px 14px;font-family:var(--display);font-style:italic;font-weight:800;font-size:21px;text-transform:uppercase;line-height:1.1}
+.lieux small{display:block;font-family:var(--body);font-style:normal;font-weight:500;font-size:15px;text-transform:none;margin-top:2px}
+.btn.main{background:var(--navy);color:var(--lime)}
+.btn.alt{border:2px solid var(--navy);color:var(--navy)}
+
+footer{padding:6px 0 40px;color:var(--muted);font-size:15px}
+footer .base{font-family:var(--display);font-style:italic;font-weight:800;text-transform:uppercase;font-size:20px;color:var(--ink);margin:0 0 12px;line-height:1.1}
+footer p{margin:0 0 8px}
+
+
+/* Formulaire */
+.gate{padding:6px 0 40px}
+.gate h2{font-family:var(--display);font-style:italic;font-weight:900;text-transform:uppercase;font-size:clamp(32px,9vw,44px);line-height:.95;margin:0 0 8px}
+.gate .intro{color:var(--muted);margin:0 0 22px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{margin:0 0 14px}
+.field label{display:block;font-weight:600;font-size:16px;margin:0 0 6px}
+.field input{
+  width:100%;font:inherit;font-size:18px;color:var(--ink);
+  background:rgba(255,255,255,.06);border:2px solid var(--line);border-radius:12px;padding:13px 14px;
+}
+.field input:focus{outline:none;border-color:var(--lime)}
+.field input[aria-invalid="true"]{border-color:var(--coral)}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px}
+.seg label{
+  display:block;cursor:pointer;text-align:center;padding:13px 10px;border-radius:12px;border:2px solid var(--line);
+  font-family:var(--display);font-style:italic;font-weight:800;font-size:20px;text-transform:uppercase;
+}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg input:checked + span{color:var(--navy)}
+.seg label:has(input:checked){background:var(--lime);border-color:var(--lime);color:var(--navy)}
+.seg label:has(input:focus-visible){outline:3px solid var(--coral);outline-offset:3px}
+.consent{display:grid;grid-template-columns:24px 1fr;gap:12px;align-items:start;font-size:16px;margin:4px 0 18px;cursor:pointer}
+.consent input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--lime)}
+.submit{
+  width:100%;cursor:pointer;border:0;font-family:var(--display);font-style:italic;font-weight:900;font-size:26px;text-transform:uppercase;
+  background:var(--coral);color:var(--navy);padding:17px;border-radius:14px;
+}
+.submit:disabled{opacity:.6;cursor:wait}
+.submit:focus-visible{outline:3px solid var(--lime);outline-offset:3px}
+.err{color:var(--coral);font-weight:600;font-size:16px;margin:10px 0 0;min-height:1em}
+.legal{color:var(--muted);font-size:14px;margin:16px 0 0}
+.thanks{font-family:var(--display);font-style:italic;font-weight:800;font-size:24px;text-transform:uppercase;color:var(--lime);margin:0 0 4px}
+#guide[hidden],#gate[hidden]{display:none}
+
+@media (min-width:640px){ body{font-size:19px} .logo .taya{font-size:64px} }
+@media (prefers-reduced-motion:reduce){ .panel{animation:none} .toggle button{transition:none} }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <header class="hero">
+    <div class="logo" aria-label="Taya Fitness"><span class="taya">TAYA</span><span class="fit">Fitness</span></div>
+    <h1><span>Ton corps change.</span><span>Ta force reste.</span></h1>
+    <div class="brush">Guide offert — Salon du bébé</div>
+    <p class="lede">Les bons réflexes pour bouger en sécurité pendant la grossesse et après l'accouchement. Sans régime, sans culpabilité, à ton rythme.</p>
+  </header>
+
+
+  <section class="gate" id="gate" aria-labelledby="gate-t">
+    <h2 id="gate-t">Reçois ton guide</h2>
+    <p class="intro">Laisse tes coordonnées, le guide s'ouvre tout de suite sur ton téléphone.</p>
+    <form id="lead" novalidate>
+      <div class="grid2">
+        <div class="field"><label for="prenom">Prénom</label><input id="prenom" name="prenom" autocomplete="given-name" required maxlength="80"></div>
+        <div class="field"><label for="nom">Nom</label><input id="nom" name="nom" autocomplete="family-name" required maxlength="80"></div>
+      </div>
+      <div class="field"><label for="email">E-mail</label><input id="email" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="254"></div>
+      <div class="field"><label for="telephone">Téléphone</label><input id="telephone" name="telephone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="25"></div>
+      <div class="field"><label id="sit-l">Tu es…</label></div>
+      <div class="seg" role="radiogroup" aria-labelledby="sit-l">
+        <label><input type="radio" name="situation" value="enceinte" checked><span>Enceinte</span></label>
+        <label><input type="radio" name="situation" value="maman"><span>Jeune maman</span></label>
+      </div>
+      <label class="consent"><input type="checkbox" id="consent" required><span>J'accepte que Taya Fitness me recontacte par e-mail, SMS ou téléphone pour me proposer ses services de coaching.</span></label>
+      <button class="submit" type="submit" id="go">Ouvrir mon guide</button>
+      <p class="err" id="err" role="alert"></p>
+      <p class="legal">Tes coordonnées sont utilisées uniquement par Taya Fitness pour te recontacter, ne sont jamais revendues et sont conservées 3 ans maximum. Tu peux demander à tout moment leur consultation ou leur suppression via TayaFitness.com.</p>
+    </form>
+  </section>
+
+  <div id="guide" hidden>
+  <section class="choice" aria-label="Choisis ton guide">
+    <h2>Où en es-tu ?</h2>
+    <div class="toggle" role="tablist">
+      <button role="tab" id="tab-enceinte" aria-controls="p-enceinte" aria-selected="true" data-mode="enceinte">Je suis enceinte<small>Bouger pendant la grossesse</small></button>
+      <button role="tab" id="tab-maman" aria-controls="p-maman" aria-selected="false" data-mode="maman">J'ai accouché<small>Reprendre après bébé</small></button>
+    </div>
+  </section>
+
+  <!-- ENCEINTE -->
+  <section class="panel" id="p-enceinte" role="tabpanel" aria-labelledby="tab-enceinte">
+    <div class="notice"><span><b>Avant tout :</b> demande le feu vert de ta sage-femme ou de ton médecin, surtout si ta grossesse est suivie de près.</span></div>
+
+    <h3 class="sec">5 clés pour bouger enceinte</h3>
+    <ul class="keys">
+      <li><span class="pill"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#16273A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h4>Un peu, mais souvent</h4><p>Vise environ 150 minutes d'activité modérée par semaine, réparties en plusieurs séances : marche rapide, natation, vélo d'appartement, renfo doux. Si tu débutes, commence par 10 à 15 minutes.</p></div></li>
+      <li><span class="pill"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#16273A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h4>Le test de la parole</h4><p>Pendant l'effort, tu dois pouvoir tenir une conversation. Si tu ne peux plus parler, ralentis.</p></div></li>
+      <li><span class="pill"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#16273A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h4>Expire sur l'effort</h4><p>Ne bloque jamais ta respiration quand tu forces : souffle en te relevant, en poussant, en tirant. Ton périnée et tes abdos profonds te remercieront.</p></div></li>
+      <li><span class="pill"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#16273A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h4>Adapte tes positions</h4><p>Au fil des mois, préfère les exercices debout, assise, à quatre pattes ou sur le côté plutôt que de rester longtemps allongée sur le dos. Mets de côté les sports de contact, ceux à risque de chute et la plongée.</p></div></li>
+      <li><span class="pill"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#16273A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h4>Bois et reste au frais</h4><p>Une gourde à portée de main, une pièce aérée, et pas d'effort intense en pleine chaleur.</p></div></li>
+    </ul>
+
+    <h3 class="sec">3 mouvements doux</h3>
+    <div class="moves">
+      <div class="move"><h4>Squat sur chaise <em>2 × 10</em></h4><p>Pieds largeur de hanches, assieds-toi puis relève-toi en soufflant. La chaise est ton filet de sécurité.</p></div>
+      <div class="move"><h4>Chat-vache <em>8 respirations</em></h4><p>À quatre pattes, arrondis le dos en expirant, relâche en inspirant. Idéal pour soulager le bas du dos.</p></div>
+      <div class="move"><h4>Tirage élastique assise <em>2 × 12</em></h4><p>Tire l'élastique vers toi en expirant, omoplates serrées. Ta posture tient mieux quand le ventre grandit.</p></div>
+    </div>
+
+    <div class="stop">
+      <h3>Stop, on arrête si…</h3>
+      <ul>
+        <li>saignements ou écoulement de liquide</li>
+        <li>contractions douloureuses et régulières</li>
+        <li>vertiges, malaise ou maux de tête intenses</li>
+        <li>douleur dans la poitrine, essoufflement avant même l'effort</li>
+        <li>douleur ou gonflement d'un mollet</li>
+        <li>bébé qui bouge moins que d'habitude</li>
+      </ul>
+      <p>Arrête-toi et contacte ta sage-femme, ton médecin ou ta maternité.</p>
+    </div>
+  </section>
+
+  <!-- MAMAN -->
+  <section class="panel" id="p-maman" role="tabpanel" aria-labelledby="tab-maman" hidden>
+    <div class="notice"><span><b>Avant tout :</b> attends ta visite postnatale (6 à 8 semaines après l'accouchement) et l'avis de ta sage-femme ou de ton médecin. Valable aussi après une césarienne.</span></div>
+
+    <h3 class="sec">5 clés pour revenir en douceur</h3>
+    <ul class="keys">
+      <li><span class="pill"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#16273A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h4>Ton périnée d'abord</h4><p>La rééducation du périnée passe avant la course, les sauts et les abdos classiques. C'est la base de tout le reste.</p></div></li>
+      <li><span class="pill"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#16273A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h4>Respire, recentre</h4><p>Quand tu te sens prête : respiration profonde, ventre qui se rentre doucement à l'expiration, petites marches avec bébé.</p></div></li>
+      <li><span class="pill"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#16273A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h4>Pas de crunchs pour l'instant</h4><p>Si ton ventre forme un dôme quand tu forces, adapte l'exercice. Ta sage-femme ou ton kiné peut vérifier un éventuel écart des abdominaux (diastasis).</p></div></li>
+      <li><span class="pill"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#16273A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h4>Reprends par étapes</h4><p>Marche, puis renfo léger, puis cardio. Pour la course et les sauts, compte en général au moins 3 mois et un feu vert de ton professionnel de santé.</p></div></li>
+      <li><span class="pill"><svg viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="#16273A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><h4>Pas de régime</h4><p>Mange à ta faim, surtout si tu allaites, et dors dès que tu peux. La confiance revient avec la force, pas avec la restriction.</p></div></li>
+    </ul>
+
+    <h3 class="sec">3 mouvements doux</h3>
+    <div class="moves">
+      <div class="move"><h4>Respiration transverse <em>10 respirations</em></h4><p>Assise ou allongée, inspire en laissant le ventre se gonfler, expire en rentrant doucement le nombril.</p></div>
+      <div class="move"><h4>Bascule du bassin <em>2 × 8</em></h4><p>Allongée, genoux pliés, colle doucement le bas du dos au sol en expirant, puis relâche.</p></div>
+      <div class="move"><h4>Soulever bébé <em>à chaque fois</em></h4><p>Plie les jambes, garde bébé contre toi, expire en te relevant. C'est ton meilleur squat de la journée.</p></div>
+    </div>
+
+    <div class="stop">
+      <h3>Stop, on fait une pause si…</h3>
+      <ul>
+        <li>saignements qui reprennent ou augmentent</li>
+        <li>fuites urinaires pendant l'effort</li>
+        <li>sensation de pesanteur dans le bas-ventre</li>
+        <li>douleur de cicatrice (épisiotomie ou césarienne)</li>
+        <li>douleur pendant ou après l'exercice</li>
+      </ul>
+      <p>Ce ne sont pas des fatalités : parles-en à ta sage-femme, ton médecin ou ton kiné.</p>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-t">
+    <h3 id="cta-t">Ton bilan offert</h3>
+    <p>Un rendez-vous avec une coach Taya Fitness pour faire le point et repartir avec un programme adapté à ta grossesse ou à ton post-partum. Tous niveaux bienvenus.</p>
+    <p class="addr">Où ? C'est toi qui choisis :</p>
+    <ul class="lieux">
+      <li>Fitness Park Aubervilliers<small>174 avenue Jean Jaurès</small></li>
+      <li>À domicile<small>Chez toi, bébé à côté</small></li>
+      <li>À définir ensemble<small>On trouve ce qui t'arrange</small></li>
+    </ul>
+    <p>Réserve ton créneau et ton lieu en ligne, sur TayaFitness.com.</p>
+    <a class="btn main" href="/reservation">Réserver mon bilan offert</a>
+    <a class="btn alt" href="https://www.instagram.com/taya_fitness_/" target="_blank" rel="noopener">Suivre @taya_fitness_</a>
+  </section>
+
+  </div>
+
+  <footer>
+    <p class="base">Ton corps. Ta force. Ta transformation.</p>
+    <p>Ce guide donne des repères généraux et ne remplace pas l'avis de ta sage-femme, de ton médecin ou de ton kiné.</p>
+    <p>TayaFitness.com</p>
+  </footer>
+</main>
+
+<script>
+(function(){
+  var SB_URL = "https://esylzsacjkimcqxllhwd.supabase.co/rest/v1/salon_leads";
+  var SB_KEY = "sb_publishable_BwFcaEtnSEZovSIOYiVM3w_CAwp-gpc";
+  var SOURCE = "salon-du-bebe-2026";
+  var gate = document.getElementById('gate'), guide = document.getElementById('guide');
+  var form = document.getElementById('lead'), err = document.getElementById('err'), go = document.getElementById('go');
+  var tabs = document.querySelectorAll('.toggle button');
+
+  function store(k,v){ try{ v===null ? localStorage.removeItem(k) : localStorage.setItem(k,v); }catch(e){} }
+  function read(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+
+  function setMode(mode, save){
+    tabs.forEach(function(b){
+      var on = b.dataset.mode === mode;
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+      document.getElementById(b.getAttribute('aria-controls')).hidden = !on;
+    });
+    if(save) store('taya-mode', mode);
+  }
+  tabs.forEach(function(b){ b.addEventListener('click', function(){ setMode(b.dataset.mode, true); }); });
+
+  function unlock(mode){
+    gate.hidden = true; guide.hidden = false;
+    setMode(mode || read('taya-mode') || 'enceinte', true);
+    guide.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function send(payload){
+    return fetch(SB_URL, {
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify(payload)
+    }).then(function(r){ if(!r.ok) throw new Error('http '+r.status); });
+  }
+
+  // Lead mis en attente (réseau instable au salon) : on réessaie à l'ouverture
+  var pending = read('taya-lead-pending');
+  if(pending){ try{ send(JSON.parse(pending)).then(function(){ store('taya-lead-pending', null); }).catch(function(){}); }catch(e){ store('taya-lead-pending', null); } }
+
+  if(read('taya-unlocked') === '1'){ gate.hidden = true; guide.hidden = false; setMode(read('taya-mode') || 'enceinte', false); }
+
+  function val(id){ return document.getElementById(id).value.trim(); }
+  function mark(id, bad){ document.getElementById(id).setAttribute('aria-invalid', bad ? 'true' : 'false'); }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault(); err.textContent = '';
+    var p = {
+      prenom: val('prenom'), nom: val('nom'), email: val('email').toLowerCase(),
+      telephone: val('telephone').replace(/[^\d+]/g,''),
+      situation: (form.querySelector('input[name=situation]:checked')||{}).value || null,
+      consentement_contact: document.getElementById('consent').checked,
+      source: SOURCE
+    };
+    var bad = [];
+    mark('prenom', !p.prenom); if(!p.prenom) bad.push('ton prénom');
+    mark('nom', !p.nom); if(!p.nom) bad.push('ton nom');
+    var okMail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(p.email); mark('email', !okMail); if(!okMail) bad.push('un e-mail valide');
+    var okTel = p.telephone.replace(/\D/g,'').length >= 9; mark('telephone', !okTel); if(!okTel) bad.push('un numéro de téléphone valide');
+    if(bad.length){ err.textContent = 'Il manque ' + bad.join(', ') + '.'; return; }
+    if(!p.consentement_contact){ err.textContent = 'Coche la case d\u2019accord pour recevoir ton guide.'; return; }
+
+    go.disabled = true; go.textContent = 'Envoi…';
+    send(p).catch(function(){
+      return send(p);
+    }).then(function(){
+      store('taya-unlocked','1'); unlock(p.situation);
+    }).catch(function(){
+      // Réseau du salon défaillant : on garde le contact et on renverra plus tard
+      store('taya-lead-pending', JSON.stringify(p));
+      store('taya-unlocked','1'); unlock(p.situation);
+    });
+  });
+})();
+</script>
+</body>
+</html>
